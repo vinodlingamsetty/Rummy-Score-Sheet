@@ -2,38 +2,53 @@
 //  DesignSystem.swift
 //  Rummy Scorekeeper
 //
-//  Liquid Glass design system — dark mode, premium aesthetics
+//  Liquid Glass design system — dark mode, purple-centric premium aesthetics
 //
 
 import SwiftUI
 
-/// Central theme for the app: dark radial background, glass materials, neon accents
+/// Central theme for the app: dark purple radial background, glass materials, neon purple accents
 struct AppTheme {
-    
+
     // MARK: - Background
-    
-    /// Radial gradient from dark blue to black (Liquid Glass foundation)
+
+    /// Radial gradient from rich dark purple (center) to deep purple-black (edges)
     static let background: RadialGradient = RadialGradient(
-        colors: [Color.darkBlue, Color.black],
+        colors: [Color.backgroundCenter, Color.backgroundEdge],
         center: .center,
         startRadius: 0,
         endRadius: 600
     )
-    
+
     // MARK: - Materials
-    
-    /// Ultra-thin glass material for frosted overlays
+
+    /// Ultra-thin glass material for frosted overlays (cards, tab bar, inputs)
     static var glassMaterial: Material { .ultraThin }
-    
-    // MARK: - Colors
-    
-    /// Primary neon blue accent
-    static let primaryColor: Color = Color.neonBlue
+
+    // MARK: - Primary Accent
+
+    /// Neon purple — selected tabs, icons, highlights, toggles
+    static let primaryColor: Color = Color.neonPurple
+
+    // MARK: - Semantic Colors
+
+    /// Positive / winners / "they owe you" / success
+    static let positiveColor: Color = Color.accentGreen
+
+    /// Negative / "you owe" / destructive / logout
+    static let destructiveColor: Color = Color.accentRed
+
+    /// Muted text, placeholders, descriptions
+    static let textSecondary: Color = Color.textMuted
 }
 
 // MARK: - Theme Colors
 
 private extension Color {
-    static let darkBlue = Color(red: 0.05, green: 0.08, blue: 0.18)
-    static let neonBlue = Color(red: 0.0, green: 0.75, blue: 1.0)
+    static let backgroundCenter = Color(red: 0.29, green: 0.18, blue: 0.48)   // #4A2E7A
+    static let backgroundEdge = Color(red: 0.10, green: 0.10, blue: 0.18)     // #1A1A2E
+    static let neonPurple = Color(red: 0.70, green: 0.57, blue: 0.94)         // #B392F0
+    static let accentGreen = Color(red: 0.40, green: 0.85, blue: 0.50)        // ~#66D980
+    static let accentRed = Color(red: 1.0, green: 0.25, blue: 0.51)           // #FF4081
+    static let textMuted = Color(red: 0.65, green: 0.63, blue: 0.70)          // light gray
 }

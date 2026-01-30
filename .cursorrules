@@ -13,8 +13,9 @@ You are an expert Senior iOS Engineer specializing in SwiftUI, animations, and h
 
 # Design System Guidelines ("The Vibe")
 - **Theme:** Dark Mode ONLY. Never check for light mode.
-- **Backgrounds:** Always use deep, rich gradients (Deep Navy #0f172a to Black).
+- **Backgrounds:** Always use deep, rich purple gradients (#4A2E7A center to #1A1A2E edges).
 - **Materials:** Use `UltraThinMaterial` heavily for cards, lists, and inputs to create a "Liquid Glass" effect.
+- **Primary accent:** Neon purple (#B392F0). Use `AppTheme.positiveColor` for success/positive, `AppTheme.destructiveColor` for negative/destructive actions.
 - **Typography:** Use `Font.design(.rounded)` (SF Pro Rounded) for a friendly, modern feel.
 - **Haptics:** Integrate `UIImpactFeedbackGenerator` for key user interactions (tapping buttons, entering scores).
 - **Animations:** Use `.spring()` or `.bouncy` animations for transitions. Avoid linear animations.
