@@ -39,9 +39,22 @@ You are an expert Senior iOS Engineer specializing in SwiftUI, animations, and h
 - Follow Apple’s Human Interface Guidelines for layout and interactions.
 
 ## Project Structure
-- Main app: `Rummy_Score_SheetApp.swift`
-- Views: `ContentView.swift` and new view files under `Rummy Score Sheet/`
-- Assets: `Assets.xcassets` for colors, icons, images
+- **App/** — Main entry point (`Rummy_Score_SheetApp.swift`).
+- **Core/** — Design system, colors, extensions.
+- **Features/** — Feature modules. Each feature has its own subfolder:
+  - `Home/` — Home screen
+  - `Game/` — Active game / scorekeeping
+  - `Friends/` — Friends / players
+  - `Profile/` — User profile / settings
+- **Services/** — Firebase, SwiftData managers, external integrations.
+- **Models/** — Data structs and types.
+- **Assets.xcassets/** — Colors, icons, images.
+
+## MVVM Expectations
+- **Views** — SwiftUI views live in their feature folder (e.g., `Features/Home/HomeView.swift`).
+- **ViewModels** — One ViewModel per screen, colocated in the same feature folder (e.g., `HomeViewModel.swift`). Use `@Observable` (Swift 5.9+) for state; views observe via `@State` or `@StateObject`.
+- **Models** — Data structs in `Models/`. Views/ViewModels depend on Models, not the reverse.
+- Views bind to ViewModel properties; ViewModels own business logic and state. No business logic in Views.
 
 ## Code Style
 - Use meaningful variable and type names.
