@@ -1,0 +1,28 @@
+# Rummy Score Sheet - Project Rules
+
+## Tech Stack
+- SwiftUI
+- iOS / Xcode
+- Swift 5+
+
+## Swift & SwiftUI Guidelines
+- Use SwiftUI declarative patterns; prefer `@State`, `@Binding`, `@ObservableObject` as appropriate.
+- Keep views small; extract subviews and view models when logic grows.
+- Use `#Preview` for SwiftUI previews.
+- Prefer system fonts and SF Symbols for consistency.
+- Follow Apple’s Human Interface Guidelines for layout and interactions.
+
+## Project Structure
+- Main app: `Rummy_Score_SheetApp.swift`
+- Views: `ContentView.swift` and new view files under `Rummy Score Sheet/`
+- Assets: `Assets.xcassets` for colors, icons, images
+
+## Code Style
+- Use meaningful variable and type names.
+- Add brief comments for non-obvious logic.
+- Keep the score sheet UI clear and readable on different screen sizes.
+
+## Rummy Context
+- Rummy scoring typically tracks points per round and cumulative totals per player.
+- Support common Rummy variants (e.g., points for sets/runs, knock bonuses, etc.).
+- Design for quick score entry during play.
