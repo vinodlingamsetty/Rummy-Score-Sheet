@@ -79,13 +79,21 @@ private struct TabBarButton: View {
 
     var body: some View {
         Button(action: action) {
-            Image(systemName: tab.icon)
-                .font(.system(size: 22))
-                .foregroundStyle(isSelected ? AppTheme.primaryColor : .secondary)
-                .shadow(color: isSelected ? AppTheme.primaryColor.opacity(0.6) : .clear, radius: 8)
+            ZStack {
+                if isSelected {
+                    Capsule()
+                        .fill(AppTheme.glassMaterial)
+                        .padding(.horizontal, 4)
+                        .padding(.vertical, 4)
+                }
+                Image(systemName: tab.icon)
+                    .font(.system(size: 22))
+                    .foregroundStyle(isSelected ? AppTheme.primaryColor : .white)
+                    .shadow(color: isSelected ? AppTheme.primaryColor.opacity(0.5) : .clear, radius: 6)
+            }
+            .frame(maxWidth: .infinity)
         }
         .buttonStyle(.plain)
-        .frame(maxWidth: .infinity)
     }
 }
 
