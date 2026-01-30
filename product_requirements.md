@@ -1,91 +1,91 @@
-# Rummy Scorekeeper — Product Requirements
+# Product Requirements: Rummy Scorekeeper
 
-## 1. Product Overview
+## 1. App Overview
+A premium, offline-first iOS scorekeeping app for Indian Rummy.
+**Design Aesthetic:** "Liquid Glass" (Dark Mode, Blur Effects, Neon Accents).
+**Tech Stack:** Native iOS (SwiftUI), SwiftData (Local DB), Firebase (Cloud Sync).
 
-**Rummy Scorekeeper** is a premium iOS app for tracking scores during Indian Rummy games. It offers a dark-mode-first, "Liquid Glass" visual style and is designed for quick, fluid score entry during play.
+## 2. Terminology (Strict Compliance)
+- **Point Value:** The value assigned to each point (e.g., $0.10). Never use "Bet".
+- **Settlement:** The final calculation of who owes whom. Never use "Debt".
+- **Game Pot:** The total value of the game.
+- **Moderator:** The player who created the room and controls settings.
 
----
+## 3. Navigation Structure (5 Tabs)
+1.  **Home:** Dashboard, Create/Join, History.
+2.  **Current Game:** The active scoreboard (Disabled if no game active).
+3.  **Friends:** Ledger of settlements.
+4.  **Rules:** Static guide for gameplay.
+5.  **Profile:** User settings and account management.
 
-## 2. Target Users
+## 4. Core Features Detailed
 
-- Casual to regular Indian Rummy players
-- Players who want a polished, distraction-free scorekeeping experience
-- Users who prefer dark mode and modern aesthetics
+### A. Authentication & Onboarding
+- **Sign in with Apple** (Primary) & Google (Secondary).
+- **Profile Setup:**
+    - **Display Name:** Public "Player Alias".
+    - **Avatar:** Selection from 12 pre-loaded 3D Memoji-style avatars.
+    - **Privacy:** Email/Phone hidden from other players.
 
----
+### B. Home Tab & History
+- **Actions:**
+    - **Host Game:** Opens setup modal.
+    - **Join Game:** QR Code scanner or 6-digit PIN entry.
+- **Game History:**
+    - List of all completed games (Date, Winner, My Final Score).
+    - **Filters:** By Date, By Player Name, By Room Code.
+    - **Action:** Tap a past game to view the full readonly scoreboard.
 
-## 3. Core Features
+### C. Game Setup (Host Only)
+- **Inputs:**
+    - Point Limit (range from 100 to 900). this should be a slider bar 
+    - Point Value (e.g., 0.10).
+    - Player Count (Max 10).
+- **Lobby:**
+    - **QR Code:** Generated locally for others to join.
+    - **Roster:** List of joined players with "Ready" status indicators.
+    - **Mod Action:** "Start Game" (only enabled when all players are ready).
 
-### 3.1 Home
-- Primary entry point and navigation hub
-- Quick access to start a new game or resume an existing one
-- Overview of recent games and statistics
+### D. The Scoreboard (Active Game)
+- **View:** Vertical scrolling list (Chat style, not pagination).
+- **Sticky Header:** Live Leaderboard (Top 3) & Current Round Number.
+- **Score Entry:**
+    - Tap player row -> Expands large numeric keypad.
+    - **Haptics:** `Light` impact on keypress.
+    - **Auto-Advance:** "Next Player" button on keyboard.
+- **Game Logic:**
+    - **Elimination:** If Score >= Point Limit, row turns Red (Opacity 0.5), input disabled.
+    - **Winning Condition:** The last player remaining (or lowest score if game ended manually) wins the "Game Pot".
+    - **Re-Buy:** Moderator can "Revive" a player (Score = Highest Active Score + 1).
+- **Real-Time Updates:**
+    - Scores sync instantly via Firebase Firestore listeners.
+    - **Toasts:** Show in-app notification when a new score is submitted by another player.
 
-### 3.2 Game
-- Active game / scorekeeping flow
-- Per-round score entry for multiple players
-- Cumulative totals per player
-- Support for common Rummy variants (sets, runs, knock bonuses, etc.)
-- Fast, low-friction input optimized for gameplay
+### E. Friends & Settlements Tab
+- **View:** Split into two sections:
+    - **"To Collect" (Green):** Positive balance.
+    - **"To Settle" (Orange):** Negative balance.
+- **Search:** Filter friends by name.
+- **Actions:**
+    - **Nudge:** Sends a push notification ("Reminder to check score").
+    - **Settle:** "Mark as Settled" button (Clear balance to $0).
+- **Logic:** Players from the same room are auto-added to Friends list.
 
-### 3.3 Friends
-- Manage friends / players
-- Reuse saved players across games
-- Invite or share results (future)
+### F. Rules Tab
+- Static text/graphical display of Indian Rummy rules.
+- **Decks Guide:**
+    - 2 Players: 1-2 Decks.
+    - 2-6 Players: 2 Decks.
+    - 7+ Players: 3 Decks.
 
-### 3.4 Profile
-- User account and preferences
-- Settings and customization
-- App information and support
+### G. Profile & Settings
+- **User Info:** Edit Display Name, Change Avatar.
+- **App Settings:**
+    - **Notifications:** Toggle On/Off.
+    - **Haptics:** Toggle Sound/Vibration.
+    - **Theme:** (Locked to Dark Mode, but maybe Accessibility High Contrast option).
+- **Account:** Logout button.
 
----
-
-## 4. Technical Requirements
-
-| Area | Requirement |
-|------|-------------|
-| Platform | iOS 17+ |
-| Framework | SwiftUI |
-| Architecture | MVVM |
-| Local persistence | SwiftData (Local-First) |
-| Backend | Firebase (Auth, Firestore) |
-| Dependencies | Swift Package Manager |
-
----
-
-## 5. Design Requirements
-
-- **Theme:** Dark mode only
-- **Backgrounds:** Deep gradients (Deep Navy #0f172a to Black)
-- **Materials:** Heavy use of `UltraThinMaterial` ("Liquid Glass")
-- **Typography:** SF Pro Rounded (`Font.design(.rounded)`)
-- **Haptics:** Feedback on key actions (e.g., score entry, button taps)
-- **Animations:** `.spring()` or `.bouncy`; avoid linear
-- **Layout:** Responsive across iPhone and iPad
-
----
-
-## 6. Non-Functional Requirements
-
-- **Performance:** Smooth, responsive UI during gameplay
-- **Offline:** Local-first; core scorekeeping works without connectivity
-- **Data:** Sync via Firebase when online (optional)
-- **Accessibility:** Clear, readable UI; support VoiceOver where relevant
-
----
-
-## 7. Out of Scope (Current Version)
-
-- Light mode
-- Other card games
-- In-app purchases or subscriptions
-- Real-time multiplayer scoring
-
----
-
-## 8. Success Criteria
-
-- Score entry is fast enough for live play
-- UI feels premium (animations, haptics, visual polish)
-- Offline functionality for all core scorekeeping flows
-- Intuitive flow for new and returning players
+## 5. Technical Constraints
+- **Offline First:** All game logic saves to `SwiftData` (local) first. Syncs to Firebase when online.
+- **Permissions:** Camera (for QR), Notifications (for Nudges).
