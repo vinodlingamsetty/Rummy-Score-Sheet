@@ -40,13 +40,12 @@ struct MainTabView: View {
     @State private var selectedTab: AppTab = .home
 
     var body: some View {
-        ZStack(alignment: .bottom) {
-            selectedTab.content
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-
-            FloatingTabBar(selectedTab: $selectedTab)
-        }
-        .ignoresSafeArea(edges: .bottom)
+        selectedTab.content
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay(alignment: .bottom) {
+                FloatingTabBar(selectedTab: $selectedTab)
+            }
+            .ignoresSafeArea(edges: .bottom)
     }
 }
 
@@ -69,6 +68,7 @@ private struct FloatingTabBar: View {
         .background(AppTheme.glassMaterial, in: Capsule())
         .padding(.horizontal, 24)
         .padding(.bottom, 24)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
 
