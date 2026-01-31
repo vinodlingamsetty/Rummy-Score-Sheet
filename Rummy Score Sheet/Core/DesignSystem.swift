@@ -32,14 +32,17 @@ struct AppTheme {
 
     // MARK: - Semantic Colors
 
+    /// Primary text — white for strong contrast on purple
+    static let textPrimary: Color = .white
+
+    /// Muted text, placeholders, descriptions
+    static let textSecondary: Color = Color.textMuted
+
     /// Positive / winners / "they owe you" / success
     static let positiveColor: Color = Color.accentGreen
 
     /// Negative / "you owe" / destructive / logout
     static let destructiveColor: Color = Color.accentRed
-
-    /// Muted text, placeholders, descriptions
-    static let textSecondary: Color = Color.textMuted
 }
 
 // MARK: - Theme Colors
@@ -50,5 +53,5 @@ private extension Color {
     static let neonPurple = Color(red: 0.70, green: 0.57, blue: 0.94)         // #B392F0
     static let accentGreen = Color(red: 0.40, green: 0.85, blue: 0.50)        // ~#66D980
     static let accentRed = Color(red: 1.0, green: 0.25, blue: 0.51)           // #FF4081
-    static let textMuted = Color(red: 0.65, green: 0.63, blue: 0.70)          // light gray
+    static let textMuted = Color(red: 0.80, green: 0.78, blue: 0.85)          // light gray, high contrast on purple
 }

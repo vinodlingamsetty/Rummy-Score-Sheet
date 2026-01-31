@@ -107,7 +107,7 @@ private struct TabPlaceholderView: View {
                 .ignoresSafeArea()
             Text(title)
                 .font(.system(.body, design: .rounded))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(AppTheme.textSecondary)
         }
     }
 }

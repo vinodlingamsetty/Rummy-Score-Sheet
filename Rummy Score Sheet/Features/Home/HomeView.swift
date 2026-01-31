@@ -8,6 +8,8 @@
 import SwiftUI
 
 struct HomeView: View {
+    @State private var isGameSetupPresented = false
+
     var body: some View {
         ZStack {
             Rectangle()
@@ -23,6 +25,9 @@ struct HomeView: View {
                 .padding(.bottom, 120)
             }
         }
+        .sheet(isPresented: $isGameSetupPresented) {
+            GameSetupView()
+        }
     }
 
     private var actionCards: some View {
@@ -30,7 +35,7 @@ struct HomeView: View {
             ActionCard(
                 title: "Host Game",
                 icon: "antenna.radiowaves.left.and.right",
-                action: {}
+                action: { isGameSetupPresented = true }
             )
             ActionCard(
                 title: "Join Game",
@@ -45,12 +50,12 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Recent History")
                 .font(.system(size: 22, weight: .semibold, design: .rounded))
-                .foregroundStyle(.primary)
+                .foregroundStyle(AppTheme.textPrimary)
                 .padding(.horizontal, 24)
 
             Text("No recent games")
                 .font(.system(size: 15, weight: .regular, design: .rounded))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(AppTheme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 24)
         }
@@ -76,13 +81,13 @@ private struct ActionCard: View {
 
                 Text(title)
                     .font(.system(size: 22, weight: .semibold, design: .rounded))
-                    .foregroundStyle(.primary)
+                    .foregroundStyle(AppTheme.textPrimary)
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
                     .font(.body.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(AppTheme.textSecondary)
             }
             .padding(24)
             .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: 20))
