@@ -19,12 +19,12 @@ struct GameSetupView: View {
                 .fill(AppTheme.background)
                 .ignoresSafeArea()
 
-            VStack(spacing: 32) {
+            VStack(spacing: AppSpacing._8) {
                 header
                 controlPanel
                 Spacer(minLength: 0)
             }
-            .padding(.top, 24)
+            .padding(.top, AppSpacing._6)
 
             VStack {
                 Spacer()
@@ -34,34 +34,34 @@ struct GameSetupView: View {
     }
 
     private var header: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: AppSpacing._2) {
             Text("Create Room")
-                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .font(AppTypography.title1())
                 .foregroundStyle(AppTheme.textPrimary)
             Text("Set your game parameters")
-                .font(.system(size: 15, weight: .regular, design: .rounded))
+                .font(AppTypography.subheadline())
                 .foregroundStyle(AppTheme.textSecondary)
         }
     }
 
     private var controlPanel: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: AppSpacing._6) {
             pointLimitSelector
             pointValueInput
             playerCountControl
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, AppSpacing._6)
     }
 
     private var pointLimitSelector: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: AppSpacing._3) {
             Text("Point Limit")
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(AppTypography.headline())
                 .foregroundStyle(AppTheme.textPrimary)
 
-            HStack(spacing: 16) {
+            HStack(spacing: AppSpacing._4) {
                 Text("\(pointLimit)")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(AppTypography.title1())
                     .foregroundStyle(AppTheme.primaryColor)
                     .frame(minWidth: 52, alignment: .center)
 
@@ -77,15 +77,15 @@ struct GameSetupView: View {
                 ), in: 100...900, step: 1)
                 .tint(AppTheme.primaryColor)
             }
-            .padding(20)
-            .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: 16))
+            .padding(AppSpacing._5)
+            .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         }
     }
 
     private var pointValueInput: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: AppSpacing._3) {
             Text("Point Value ($)")
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(AppTypography.headline())
                 .foregroundStyle(AppTheme.textPrimary)
 
             TextField("10", text: $pointValueText)
@@ -93,22 +93,23 @@ struct GameSetupView: View {
                 .foregroundStyle(AppTheme.primaryColor)
                 .multilineTextAlignment(.center)
                 .keyboardType(.decimalPad)
-                .padding(20)
-                .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: 16))
+                .padding(AppSpacing._5)
+                .frame(height: AppComponent.Input.height)
+                .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosDefault))
         }
     }
 
     private var playerCountControl: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: AppSpacing._3) {
             Text("Players")
-                .font(.system(size: 17, weight: .semibold, design: .rounded))
+                .font(AppTypography.headline())
                 .foregroundStyle(AppTheme.textPrimary)
 
-            HStack(spacing: 16) {
+            HStack(spacing: AppSpacing._4) {
                 Text("\(playerCount)")
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
+                    .font(AppTypography.title1())
                     .foregroundStyle(AppTheme.primaryColor)
-                    .frame(minWidth: 44, alignment: .center)
+                    .frame(minWidth: AppComponent.Avatar.sizeMd, alignment: .center)
 
                 Slider(value: Binding(
                     get: { Double(playerCount) },
