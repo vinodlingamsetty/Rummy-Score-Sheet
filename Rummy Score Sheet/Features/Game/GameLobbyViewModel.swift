@@ -2,7 +2,7 @@
 //  GameLobbyViewModel.swift
 //  Rummy Scorekeeper
 //
-//  Manages lobby state, player list, and ready states
+//  Manages lobby state, player list, and ready states — routes through AppGameState
 //
 
 import Foundation
@@ -12,7 +12,12 @@ final class GameLobbyViewModel {
     var room: GameRoom
     var currentUserId: UUID?
     var isQRCodePresented = false
+
+    /// Callback to update room in AppGameState
     var onRoomChange: ((GameRoom) -> Void)?
+
+    /// Callback to set ready via AppGameState (which calls RoomService)
+    var onSetReady: ((Bool) -> Void)?
 
     var isModerator: Bool {
         currentUserId.map { id in room.players.contains { $0.id == id && $0.isModerator } } ?? false
@@ -22,27 +27,29 @@ final class GameLobbyViewModel {
         room.players.count >= 2 && room.players.allSatisfy { $0.isReady }
     }
 
-    init(room: GameRoom, currentUserId: UUID? = nil, onRoomChange: ((GameRoom) -> Void)? = nil) {
+    init(
+        room: GameRoom,
+        currentUserId: UUID? = nil,
+        onRoomChange: ((GameRoom) -> Void)? = nil,
+        onSetReady: ((Bool) -> Void)? = nil
+    ) {
         self.room = room
         self.currentUserId = currentUserId
         self.onRoomChange = onRoomChange
+        self.onSetReady = onSetReady
     }
 
     func toggleReady(for playerId: UUID) {
         guard let index = room.players.firstIndex(where: { $0.id == playerId }) else { return }
-        room.players[index].isReady.toggle()
-        onRoomChange?(room)
-    }
+        let newReady = !room.players[index].isReady
 
-    func startGame() {
-        var updated = room
-        updated.isStarted = true
-        updated.players = updated.players.map { p in
-            var copy = p
-            copy.scores = [Int](repeating: 0, count: 6)
-            return copy
+        // Update local state immediately for responsiveness
+        room.players[index].isReady = newReady
+        onRoomChange?(room)
+
+        // Route through AppGameState -> RoomService
+        if playerId == currentUserId {
+            onSetReady?(newReady)
         }
-        room = updated
-        onRoomChange?(updated)
     }
 }

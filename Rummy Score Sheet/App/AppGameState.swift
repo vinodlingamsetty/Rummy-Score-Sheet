@@ -2,7 +2,7 @@
 //  AppGameState.swift
 //  Rummy Scorekeeper
 //
-//  App-level game session state — current room, tab selection
+//  App-level game session state — thin coordinator that delegates to RoomService
 //
 
 import Foundation
@@ -10,77 +10,115 @@ import SwiftUI
 
 @Observable
 final class AppGameState {
+
+    // MARK: - State
+
     var currentRoom: GameRoom?
     var selectedTab: AppTab = .home
     var currentUserId: UUID?
+    var isLoading = false
+    var errorMessage: String?
+
+    // MARK: - Service
+
+    private let roomService: RoomService
+
+    // MARK: - Init
+
+    init(roomService: RoomService) {
+        self.roomService = roomService
+    }
+
+    // MARK: - Room Actions
 
     func createRoom(pointLimit: Int, pointValue: Int, playerCount: Int) {
-        let code = generateRoomCode()
-        let moderatorId = UUID()
-        currentUserId = moderatorId
-        let moderator = Player(
-            id: moderatorId,
-            name: "You",
-            isReady: true,
-            isModerator: true,
-            scores: []
-        )
-        currentRoom = GameRoom(
-            id: code,
-            pointLimit: pointLimit,
-            pointValue: pointValue,
-            players: [moderator],
-            currentRound: 1,
-            isStarted: false
-        )
-        selectedTab = .game
+        Task { @MainActor in
+            isLoading = true
+            errorMessage = nil
+            do {
+                let result = try await roomService.createRoom(
+                    pointLimit: pointLimit,
+                    pointValue: pointValue,
+                    playerCount: playerCount
+                )
+                currentRoom = result.room
+                currentUserId = result.currentUserId
+                selectedTab = .game
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
     }
 
     func joinRoom(code: String, playerName: String = "Player") {
-        let playerId = UUID()
-        currentUserId = playerId
-        let player = Player(
-            id: playerId,
-            name: playerName,
-            isReady: false,
-            isModerator: false,
-            scores: []
-        )
-        // TODO: Integrate with backend — for now create room with joiner
-        currentRoom = GameRoom(
-            id: code.uppercased(),
-            pointLimit: 500,
-            pointValue: 10,
-            players: [player],
-            currentRound: 1,
-            isStarted: false
-        )
-        selectedTab = .game
+        Task { @MainActor in
+            isLoading = true
+            errorMessage = nil
+            do {
+                let result = try await roomService.joinRoom(code: code, playerName: playerName)
+                currentRoom = result.room
+                currentUserId = result.currentUserId
+                selectedTab = .game
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+        }
+    }
+
+    func setReady(_ ready: Bool) {
+        guard let roomCode = currentRoom?.id, let playerId = currentUserId else { return }
+        Task { @MainActor in
+            do {
+                let updatedRoom = try await roomService.setReady(roomCode: roomCode, playerId: playerId, ready: ready)
+                currentRoom = updatedRoom
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+        }
     }
 
     func startGame() {
-        guard var room = currentRoom else { return }
-        room.isStarted = true
-        room.players = room.players.map { p in
-            var copy = p
-            copy.scores = [Int](repeating: 0, count: 6)
-            return copy
+        guard let roomCode = currentRoom?.id else { return }
+        Task { @MainActor in
+            isLoading = true
+            do {
+                let updatedRoom = try await roomService.startGame(roomCode: roomCode)
+                currentRoom = updatedRoom
+            } catch {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
         }
-        currentRoom = room
     }
 
     func leaveGame() {
-        currentRoom = nil
-        selectedTab = .home
+        guard let roomCode = currentRoom?.id, let playerId = currentUserId else {
+            currentRoom = nil
+            selectedTab = .home
+            return
+        }
+        Task { @MainActor in
+            do {
+                try await roomService.leaveRoom(roomCode: roomCode, playerId: playerId)
+            } catch {
+                // Ignore error on leave — clear local state anyway
+            }
+            currentRoom = nil
+            currentUserId = nil
+            selectedTab = .home
+        }
     }
 
     func endGame() {
-        currentRoom = nil
-        selectedTab = .home
+        leaveGame()
     }
 
-    private func generateRoomCode() -> String {
-        let chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        return String((0..<6).map { _ in chars.randomElement()! })
+    // MARK: - Room Updates
+
+    /// Update room from external source (e.g. GameLobbyViewModel)
+    func updateRoom(_ room: GameRoom) {
+        currentRoom = room
     }
 }

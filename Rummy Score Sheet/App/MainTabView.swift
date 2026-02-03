@@ -75,7 +75,8 @@ private struct GameTabContent: View {
                     viewModel: GameLobbyViewModel(
                         room: room,
                         currentUserId: gameState.currentUserId,
-                        onRoomChange: { gameState.currentRoom = $0 }
+                        onRoomChange: { gameState.updateRoom($0) },
+                        onSetReady: { gameState.setReady($0) }
                     )
                 ) {
                     gameState.startGame()
@@ -151,5 +152,5 @@ private struct TabPlaceholderView: View {
 }
 
 #Preview {
-    MainTabView(gameState: AppGameState())
+    MainTabView(gameState: AppGameState(roomService: MockRoomService()))
 }

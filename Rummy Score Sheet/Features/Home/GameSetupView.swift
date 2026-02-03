@@ -149,5 +149,5 @@ struct GameSetupView: View {
 }
 
 #Preview {
-    GameSetupView(gameState: AppGameState())
+    GameSetupView(gameState: AppGameState(roomService: MockRoomService()))
 }
