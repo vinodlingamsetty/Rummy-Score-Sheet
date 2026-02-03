@@ -33,6 +33,7 @@ A premium, offline-first iOS scorekeeping app for Indian Rummy.
     - **Join Game:** QR Code scanner or 6-digit PIN entry.
 - **Game History:**
     - List of all completed games (Date, Winner, My Final Score).
+    - recent games show list of players particiapated and higlights the winner name in green color 
     - **Filters:** By Date, By Player Name, By Room Code.
     - **Action:** Tap a past game to view the full readonly scoreboard.
 
