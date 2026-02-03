@@ -17,12 +17,12 @@ struct HomeView: View {
                 .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: 32) {
+                VStack(spacing: AppSpacing._8) {
                     actionCards
                     recentHistorySection
                 }
-                .padding(.top, 48)
-                .padding(.bottom, 120)
+                .padding(.top, AppSpacing._12)
+                .padding(.bottom, AppSpacing._16 + 56)
             }
         }
         .sheet(isPresented: $isGameSetupPresented) {
@@ -31,7 +31,7 @@ struct HomeView: View {
     }
 
     private var actionCards: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: AppSpacing._5) {
             ActionCard(
                 title: "Host Game",
                 icon: "antenna.radiowaves.left.and.right",
@@ -43,23 +43,23 @@ struct HomeView: View {
                 action: {}
             )
         }
-        .padding(.horizontal, 24)
+        .padding(.horizontal, AppSpacing._6)
     }
 
     private var recentHistorySection: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: AppSpacing._3) {
             Text("Recent History")
-                .font(.system(size: 22, weight: .semibold, design: .rounded))
+                .font(AppTypography.title2())
                 .foregroundStyle(AppTheme.textPrimary)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, AppSpacing._6)
 
             Text("No recent games")
-                .font(.system(size: 15, weight: .regular, design: .rounded))
+                .font(AppTypography.subheadline())
                 .foregroundStyle(AppTheme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 24)
+                .padding(.horizontal, AppSpacing._6)
         }
-        .padding(.top, 16)
+        .padding(.top, AppSpacing._4)
     }
 }
 
@@ -73,24 +73,24 @@ private struct ActionCard: View {
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
             action()
         }) {
-            HStack(spacing: 20) {
+            HStack(spacing: AppSpacing._5) {
                 Image(systemName: icon)
                     .font(.system(size: 36))
                     .foregroundStyle(AppTheme.primaryColor)
-                    .frame(width: 56, height: 56)
+                    .frame(width: AppComponent.Avatar.sizeLg, height: AppComponent.Avatar.sizeLg)
 
                 Text(title)
-                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .font(AppTypography.title2())
                     .foregroundStyle(AppTheme.textPrimary)
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(.body.weight(.semibold))
+                    .font(AppTypography.headline())
                     .foregroundStyle(AppTheme.textSecondary)
             }
-            .padding(24)
-            .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: 20))
+            .padding(AppSpacing._6)
+            .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: AppRadius.xl))
         }
         .buttonStyle(.plain)
     }
