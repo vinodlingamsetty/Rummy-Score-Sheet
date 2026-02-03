@@ -23,29 +23,67 @@ enum AppTab: Int, CaseIterable {
         case .profile: return "person.crop.circle"
         }
     }
+}
+
+struct MainTabView: View {
+    @Bindable var gameState: AppGameState
+
+    var body: some View {
+        tabContent(for: gameState.selectedTab)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .overlay(alignment: .bottom) {
+                FloatingTabBar(selectedTab: Binding(
+                    get: { gameState.selectedTab },
+                    set: { gameState.selectedTab = $0 }
+                ))
+            }
+            .ignoresSafeArea(edges: .bottom)
+    }
 
     @ViewBuilder
-    var content: some View {
-        switch self {
-        case .home: HomeView()
-        case .game: TabPlaceholderView(title: "Game")
-        case .friends: TabPlaceholderView(title: "Friends")
-        case .rules: TabPlaceholderView(title: "Rules")
-        case .profile: TabPlaceholderView(title: "Profile")
+    private func tabContent(for tab: AppTab) -> some View {
+        switch tab {
+        case .home:
+            HomeView(gameState: gameState)
+        case .game:
+            GameTabContent(gameState: gameState)
+        case .friends:
+            TabPlaceholderView(title: "Friends")
+        case .rules:
+            TabPlaceholderView(title: "Rules")
+        case .profile:
+            TabPlaceholderView(title: "Profile")
         }
     }
 }
 
-struct MainTabView: View {
-    @State private var selectedTab: AppTab = .home
+private struct GameTabContent: View {
+    @Bindable var gameState: AppGameState
 
     var body: some View {
-        selectedTab.content
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .overlay(alignment: .bottom) {
-                FloatingTabBar(selectedTab: $selectedTab)
+        if let room = gameState.currentRoom {
+            if room.isStarted {
+                GameView(
+                    viewModel: GameViewModel(room: room, currentUserId: gameState.currentUserId)
+                ) {
+                    gameState.endGame()
+                } onLeaveGame: {
+                    gameState.leaveGame()
+                }
+            } else {
+                GameLobbyView(
+                    viewModel: GameLobbyViewModel(
+                        room: room,
+                        currentUserId: gameState.currentUserId,
+                        onRoomChange: { gameState.currentRoom = $0 }
+                    )
+                ) {
+                    gameState.startGame()
+                }
             }
-            .ignoresSafeArea(edges: .bottom)
+        } else {
+            TabPlaceholderView(title: "Game")
+        }
     }
 }
 
@@ -113,5 +151,5 @@ private struct TabPlaceholderView: View {
 }
 
 #Preview {
-    MainTabView()
+    MainTabView(gameState: AppGameState())
 }

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct GameSetupView: View {
     @Environment(\.dismiss) private var dismiss
+    @Bindable var gameState: AppGameState
     @State private var pointLimit: Int = 500
     @State private var pointValueText: String = "10"
     @State private var playerCount: Int = 4
@@ -130,6 +131,8 @@ struct GameSetupView: View {
     private var createRoomButton: some View {
         Button {
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            let pointValue = Int(pointValueText) ?? 10
+            gameState.createRoom(pointLimit: pointLimit, pointValue: pointValue, playerCount: playerCount)
             dismiss()
         } label: {
             Text("Create Room")
@@ -146,5 +149,5 @@ struct GameSetupView: View {
 }
 
 #Preview {
-    GameSetupView()
+    GameSetupView(gameState: AppGameState())
 }

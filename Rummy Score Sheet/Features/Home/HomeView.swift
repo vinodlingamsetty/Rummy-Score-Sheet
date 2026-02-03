@@ -21,8 +21,10 @@ struct GameHistoryItem: Identifiable {
 // MARK: - HomeView
 
 struct HomeView: View {
+    @Bindable var gameState: AppGameState
     @State private var isGameSetupPresented = false
-    
+    @State private var isJoinRoomPresented = false
+
     // Sample data for preview
     private let sampleGames: [GameHistoryItem] = [
         GameHistoryItem(
@@ -60,7 +62,10 @@ struct HomeView: View {
             }
         }
         .sheet(isPresented: $isGameSetupPresented) {
-            GameSetupView()
+            GameSetupView(gameState: gameState)
+        }
+        .sheet(isPresented: $isJoinRoomPresented) {
+            JoinRoomView(gameState: gameState)
         }
     }
 
@@ -95,7 +100,7 @@ struct HomeView: View {
                 subtitle: "Enter a room code",
                 icon: "qrcode",
                 style: .glass,
-                action: {}
+                action: { isJoinRoomPresented = true }
             )
         }
         .padding(.horizontal, AppSpacing._4)
@@ -297,5 +302,5 @@ private struct PlayerChip: View {
 // MARK: - Preview
 
 #Preview {
-    HomeView()
+    HomeView(gameState: AppGameState())
 }
