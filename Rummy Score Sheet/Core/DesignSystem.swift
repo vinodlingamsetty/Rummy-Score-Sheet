@@ -15,16 +15,8 @@ struct AppTheme {
 
     // MARK: - Background
 
-    /// Radial gradient from rich dark purple (center) to deep purple-black (edges) — default
-    static let background: RadialGradient = RadialGradient(
-        colors: [Color.backgroundCenter, Color.backgroundEdge],
-        center: .center,
-        startRadius: 0,
-        endRadius: 600
-    )
-
-    /// Figma cosmic gradient — linear, deep space theme
-    static let backgroundCosmic: LinearGradient = LinearGradient(
+    /// Figma cosmic gradient — linear, deep space theme (default)
+    static let background: LinearGradient = LinearGradient(
         colors: [
             Color(hex: "0a0015"),
             Color(hex: "1a0b2e"),
@@ -63,6 +55,9 @@ struct AppTheme {
 
     /// Thick material
     static var glassMaterialThick: Material { .thick }
+    
+    /// Glass card background color — matches Figma rgba(44, 44, 46, 0.75)
+    static let glassBackground: Color = Color(hex: "2C2C2E").opacity(0.75)
 
     // MARK: - Primary Accent
 
@@ -102,15 +97,18 @@ struct AppTheme {
     static let textQuaternary: Color = Color.white.opacity(0.3)
 }
 
-// MARK: - Theme Colors
+// MARK: - Theme Colors (Figma design-tokens.json)
 
 private extension Color {
-    static let backgroundCenter = Color(red: 0.29, green: 0.18, blue: 0.48)   // #4A2E7A
-    static let backgroundEdge = Color(red: 0.10, green: 0.10, blue: 0.18)     // #1A1A2E
-    static let neonPurple = Color(red: 0.70, green: 0.57, blue: 0.94)         // #B392F0
-    static let accentGreen = Color(red: 0.40, green: 0.85, blue: 0.50)        // ~#66D980
-    static let accentRed = Color(red: 1.0, green: 0.25, blue: 0.51)           // #FF4081
-    static let textMuted = Color(red: 0.80, green: 0.78, blue: 0.85)          // light gray
+    // Primary accent — iOS purple (vibrant)
+    static let neonPurple = Color(hex: "BF5AF2")         // Figma: color.ios.system.purple.dark
+    
+    // Semantic colors
+    static let accentGreen = Color(hex: "30D158")        // Figma: color.semantic.success.dark
+    static let accentRed = Color(hex: "FF453A")          // Figma: color.semantic.error.dark
+    
+    // Text colors
+    static let textMuted = Color(hex: "EBEBF5")          // Figma: color.text.secondary.dark
 }
 
 extension Color {

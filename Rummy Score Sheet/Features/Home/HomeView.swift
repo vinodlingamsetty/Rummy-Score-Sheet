@@ -184,7 +184,7 @@ private struct ActionCard: View {
                         .fill(AppTheme.gradientPrimary)
                 } else {
                     RoundedRectangle(cornerRadius: AppRadius.iosCard)
-                        .fill(AppTheme.glassMaterial)
+                        .fill(AppTheme.glassBackground)
                 }
             }
             .overlay(
@@ -210,7 +210,7 @@ private struct ActionCard: View {
                         .fill(Color.white.opacity(0.2))
                 } else {
                     RoundedRectangle(cornerRadius: AppRadius.md)
-                        .fill(AppTheme.glassMaterial)
+                        .fill(AppTheme.glassBackground)
                 }
             }
     }
@@ -263,7 +263,7 @@ private struct GameHistoryCard: View {
             }
         }
         .padding(AppComponent.Card.padding)
-        .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+        .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         .overlay(
             RoundedRectangle(cornerRadius: AppRadius.iosCard)
                 .stroke(Color.white.opacity(0.1), lineWidth: 1)
@@ -285,7 +285,7 @@ private struct PlayerChip: View {
             .padding(.vertical, AppSpacing._1 + 2)
             .background(
                 Capsule()
-                    .fill(isHighlighted ? AnyShapeStyle(AppTheme.iosBlue) : AnyShapeStyle(AppTheme.glassMaterial))
+                    .fill(isHighlighted ? AnyShapeStyle(AppTheme.iosBlue) : AnyShapeStyle(AppTheme.glassBackground))
             )
             .overlay(
                 Capsule()

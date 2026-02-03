@@ -78,7 +78,7 @@ struct GameSetupView: View {
                 .tint(AppTheme.primaryColor)
             }
             .padding(AppSpacing._5)
-            .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+            .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         }
     }
 
@@ -94,7 +94,7 @@ struct GameSetupView: View {
                 .multilineTextAlignment(.center)
                 .keyboardType(.decimalPad)
                 .padding(AppSpacing._5)
-                .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosDefault))
+                .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosDefault))
         }
     }
 
@@ -123,7 +123,7 @@ struct GameSetupView: View {
                 .tint(AppTheme.primaryColor)
             }
             .padding(AppSpacing._5)
-            .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+            .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         }
     }
 
