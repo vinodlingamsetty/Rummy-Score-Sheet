@@ -94,7 +94,6 @@ struct GameSetupView: View {
                 .multilineTextAlignment(.center)
                 .keyboardType(.decimalPad)
                 .padding(AppSpacing._5)
-                .frame(height: AppComponent.Input.height)
                 .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosDefault))
         }
     }
@@ -123,8 +122,8 @@ struct GameSetupView: View {
                 ), in: 2...10, step: 1)
                 .tint(AppTheme.primaryColor)
             }
-            .padding(20)
-            .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: 16))
+            .padding(AppSpacing._5)
+            .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         }
     }
 
@@ -134,22 +133,15 @@ struct GameSetupView: View {
             dismiss()
         } label: {
             Text("Create Room")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(AppTypography.headline())
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 18)
-                .background(
-                    LinearGradient(
-                        colors: [AppTheme.primaryColor, AppTheme.primaryColor.opacity(0.8)],
-                        startPoint: .leading,
-                        endPoint: .trailing
-                    ),
-                    in: Capsule()
-                )
+                .frame(height: AppComponent.Button.heightLg)
+                .background(AppTheme.gradientPrimary, in: Capsule())
         }
         .buttonStyle(.plain)
-        .padding(.horizontal, 24)
-        .padding(.bottom, 34)
+        .padding(.horizontal, AppSpacing._6)
+        .padding(.bottom, AppSpacing._6 + 10)
     }
 }
 

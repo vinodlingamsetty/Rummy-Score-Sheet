@@ -56,18 +56,18 @@ private struct FloatingTabBar: View {
         HStack(spacing: 0) {
             ForEach(AppTab.allCases, id: \.rawValue) { tab in
                 TabBarButton(tab: tab, isSelected: selectedTab == tab) {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+                    withAnimation(AppAnimation.springBouncy) {
                         selectedTab = tab
                     }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 }
             }
         }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 8)
+        .padding(.horizontal, AppSpacing._2)
+        .padding(.vertical, AppSpacing._2)
         .background(AppTheme.glassMaterial, in: Capsule())
-        .padding(.horizontal, 24)
-        .padding(.bottom, 24)
+        .padding(.horizontal, AppSpacing._6)
+        .padding(.bottom, AppSpacing._6)
         .fixedSize(horizontal: false, vertical: true)
     }
 }
@@ -106,7 +106,7 @@ private struct TabPlaceholderView: View {
                 .fill(AppTheme.background)
                 .ignoresSafeArea()
             Text(title)
-                .font(.system(.body, design: .rounded))
+                .font(AppTypography.body())
                 .foregroundStyle(AppTheme.textSecondary)
         }
     }
