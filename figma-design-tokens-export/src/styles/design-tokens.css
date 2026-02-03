@@ -1,0 +1,484 @@
+/**
+ * Design Tokens - CSS Custom Properties
+ * Auto-generated from design-tokens.json
+ * Use these variables in your components for consistent styling
+ */
+
+:root {
+  /* ========================================
+     COLORS - iOS System Colors (Light)
+     ======================================== */
+  --ios-blue-light: #007AFF;
+  --ios-purple-light: #AF52DE;
+  --ios-indigo-light: #5856D6;
+  --ios-teal-light: #5AC8FA;
+  --ios-green-light: #34C759;
+  --ios-yellow-light: #FFCC00;
+  --ios-orange-light: #FF9500;
+  --ios-pink-light: #FF2D55;
+  --ios-red-light: #FF3B30;
+
+  /* Current theme colors (default to light) */
+  --ios-blue: var(--ios-blue-light);
+  --ios-purple: var(--ios-purple-light);
+  --ios-indigo: var(--ios-indigo-light);
+  --ios-teal: var(--ios-teal-light);
+  --ios-green: var(--ios-green-light);
+  --ios-yellow: var(--ios-yellow-light);
+  --ios-orange: var(--ios-orange-light);
+  --ios-pink: var(--ios-pink-light);
+  --ios-red: var(--ios-red-light);
+
+  /* ========================================
+     GRADIENTS
+     ======================================== */
+  --gradient-cosmic-start: #0a0015;
+  --gradient-cosmic-middle: #1a0b2e;
+  --gradient-cosmic-end: #0f0520;
+  
+  --gradient-purple-start: #8B5CF6;
+  --gradient-purple-end: #6366F1;
+  
+  --gradient-blue-start: #3B82F6;
+  --gradient-blue-end: #1D4ED8;
+
+  /* ========================================
+     BACKGROUNDS
+     ======================================== */
+  --bg-primary-light: rgba(242, 242, 247, 0.95);
+  --bg-secondary-light: rgba(255, 255, 255, 0.85);
+  --bg-tertiary-light: rgba(255, 255, 255, 0.6);
+
+  --bg-primary: var(--bg-primary-light);
+  --bg-secondary: var(--bg-secondary-light);
+  --bg-tertiary: var(--bg-tertiary-light);
+
+  /* ========================================
+     MATERIALS (Glassmorphism)
+     ======================================== */
+  --material-thick-light: rgba(255, 255, 255, 0.7);
+  --material-regular-light: rgba(255, 255, 255, 0.5);
+  --material-thin-light: rgba(255, 255, 255, 0.3);
+  --material-ultra-thin-light: rgba(255, 255, 255, 0.15);
+
+  --material-thick: var(--material-thick-light);
+  --material-regular: var(--material-regular-light);
+  --material-thin: var(--material-thin-light);
+  --material-ultra-thin: var(--material-ultra-thin-light);
+
+  /* ========================================
+     TEXT COLORS
+     ======================================== */
+  --text-primary-light: #000000;
+  --text-secondary-light: #3C3C43;
+  --text-tertiary-light: rgba(60, 60, 67, 0.6);
+  --text-quaternary-light: rgba(60, 60, 67, 0.3);
+
+  --text-primary: var(--text-primary-light);
+  --text-secondary: var(--text-secondary-light);
+  --text-tertiary: var(--text-tertiary-light);
+  --text-quaternary: var(--text-quaternary-light);
+
+  /* ========================================
+     BORDERS
+     ======================================== */
+  --border-primary-light: rgba(60, 60, 67, 0.18);
+  --border-secondary: rgba(255, 255, 255, 0.1);
+
+  --border-primary: var(--border-primary-light);
+
+  /* ========================================
+     SEMANTIC COLORS
+     ======================================== */
+  --color-success: #34C759;
+  --color-warning: #FF9500;
+  --color-error: #FF3B30;
+  --color-info: #007AFF;
+
+  /* ========================================
+     TYPOGRAPHY
+     ======================================== */
+  --font-family-system: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Inter", system-ui, sans-serif;
+  
+  /* Font Sizes */
+  --font-size-xs: 10px;
+  --font-size-sm: 13px;
+  --font-size-md: 15px;
+  --font-size-base: 17px;
+  --font-size-lg: 18px;
+  --font-size-xl: 20px;
+  --font-size-2xl: 24px;
+  --font-size-3xl: 28px;
+  --font-size-4xl: 32px;
+  --font-size-5xl: 34px;
+
+  /* iOS Typography Scale */
+  --font-size-large-title: 34px;
+  --font-size-title1: 28px;
+  --font-size-title2: 22px;
+  --font-size-title3: 20px;
+  --font-size-headline: 17px;
+  --font-size-body: 17px;
+  --font-size-callout: 16px;
+  --font-size-subheadline: 15px;
+  --font-size-footnote: 13px;
+  --font-size-caption1: 12px;
+  --font-size-caption2: 11px;
+
+  /* Font Weights */
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Line Heights */
+  --line-height-tight: 1.2;
+  --line-height-snug: 1.25;
+  --line-height-normal: 1.4;
+  --line-height-relaxed: 1.5;
+
+  /* Letter Spacing */
+  --letter-spacing-tighter: -0.02em;
+  --letter-spacing-tight: -0.01em;
+  --letter-spacing-normal: 0em;
+
+  /* ========================================
+     SPACING (8pt Grid)
+     ======================================== */
+  --spacing-0: 0px;
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-10: 40px;
+  --spacing-12: 48px;
+  --spacing-16: 64px;
+  --spacing-20: 80px;
+  --spacing-24: 96px;
+
+  /* ========================================
+     BORDER RADIUS
+     ======================================== */
+  --radius-none: 0px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* iOS Specific */
+  --radius-ios-default: 10px;
+  --radius-ios-large: 14px;
+  --radius-ios-card: 16px;
+
+  /* ========================================
+     BLUR EFFECTS
+     ======================================== */
+  --blur-thick: 40px;
+  --blur-regular: 30px;
+  --blur-thin: 20px;
+  --blur-ultra-thin: 10px;
+
+  --saturate-thick: 180%;
+  --saturate-regular: 160%;
+  --saturate-thin: 140%;
+  --saturate-ultra-thin: 120%;
+
+  /* ========================================
+     SHADOWS
+     ======================================== */
+  --shadow-sm: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0px 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0px 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0px 20px 25px -5px rgba(0, 0, 0, 0.1);
+  
+  --shadow-ios-card: 0px 2px 20px 0px rgba(0, 0, 0, 0.3);
+  --shadow-ios-modal: 0px 10px 40px 0px rgba(0, 0, 0, 0.5);
+
+  /* ========================================
+     ANIMATION
+     ======================================== */
+  /* Spring Physics */
+  --spring-bouncy-stiffness: 400;
+  --spring-bouncy-damping: 25;
+  --spring-smooth-stiffness: 300;
+  --spring-smooth-damping: 30;
+  --spring-snappy-stiffness: 500;
+  --spring-snappy-damping: 30;
+
+  /* Durations */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+
+  /* Easing */
+  --ease-in: cubic-bezier(0.42, 0, 1, 1);
+  --ease-out: cubic-bezier(0, 0, 0.58, 1);
+  --ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+
+  /* ========================================
+     LAYOUT
+     ======================================== */
+  --safe-area-top: env(safe-area-inset-top);
+  --safe-area-bottom: env(safe-area-inset-bottom);
+  --safe-area-left: env(safe-area-inset-left);
+  --safe-area-right: env(safe-area-inset-right);
+
+  --layout-status-bar-height: 44px;
+  --layout-tab-bar-height: 80px;
+  --layout-navbar-height: 44px;
+  --layout-max-width: 896px;
+
+  /* ========================================
+     COMPONENTS
+     ======================================== */
+  /* Button */
+  --button-height-sm: 32px;
+  --button-height-md: 44px;
+  --button-height-lg: 50px;
+  --button-padding-x: 16px;
+  --button-padding-y: 12px;
+
+  /* Input */
+  --input-height: 44px;
+  --input-padding-x: 16px;
+  --input-padding-y: 12px;
+
+  /* Card */
+  --card-padding: 16px;
+  --card-gap: 12px;
+
+  /* Avatar */
+  --avatar-size-sm: 32px;
+  --avatar-size-md: 40px;
+  --avatar-size-lg: 56px;
+  --avatar-size-xl: 80px;
+}
+
+/* ========================================
+   DARK MODE OVERRIDES
+   ======================================== */
+.dark {
+  /* iOS System Colors (Dark) */
+  --ios-blue: #0A84FF;
+  --ios-purple: #BF5AF2;
+  --ios-indigo: #5E5CE6;
+  --ios-teal: #64D2FF;
+  --ios-green: #30D158;
+  --ios-yellow: #FFD60A;
+  --ios-orange: #FF9F0A;
+  --ios-pink: #FF375F;
+  --ios-red: #FF453A;
+
+  /* Backgrounds */
+  --bg-primary: rgba(0, 0, 0, 0.95);
+  --bg-secondary: rgba(28, 28, 30, 0.95);
+  --bg-tertiary: rgba(44, 44, 46, 0.9);
+
+  /* Materials */
+  --material-thick: rgba(28, 28, 30, 0.85);
+  --material-regular: rgba(44, 44, 46, 0.75);
+  --material-thin: rgba(58, 58, 60, 0.6);
+  --material-ultra-thin: rgba(72, 72, 74, 0.4);
+
+  /* Text */
+  --text-primary: #FFFFFF;
+  --text-secondary: #EBEBF5;
+  --text-tertiary: rgba(235, 235, 245, 0.6);
+  --text-quaternary: rgba(235, 235, 245, 0.3);
+
+  /* Borders */
+  --border-primary: rgba(84, 84, 88, 0.48);
+
+  /* Semantic */
+  --color-success: #30D158;
+  --color-warning: #FF9F0A;
+  --color-error: #FF453A;
+  --color-info: #0A84FF;
+}
+
+/* ========================================
+   UTILITY CLASSES
+   ======================================== */
+
+/* Blur Effects */
+.blur-thick {
+  backdrop-filter: blur(var(--blur-thick)) saturate(var(--saturate-thick));
+  -webkit-backdrop-filter: blur(var(--blur-thick)) saturate(var(--saturate-thick));
+}
+
+.blur-regular {
+  backdrop-filter: blur(var(--blur-regular)) saturate(var(--saturate-regular));
+  -webkit-backdrop-filter: blur(var(--blur-regular)) saturate(var(--saturate-regular));
+}
+
+.blur-thin {
+  backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate-thin));
+  -webkit-backdrop-filter: blur(var(--blur-thin)) saturate(var(--saturate-thin));
+}
+
+.blur-ultra-thin {
+  backdrop-filter: blur(var(--blur-ultra-thin)) saturate(var(--saturate-ultra-thin));
+  -webkit-backdrop-filter: blur(var(--blur-ultra-thin)) saturate(var(--saturate-ultra-thin));
+}
+
+/* Material Backgrounds */
+.material-thick {
+  background: var(--material-thick);
+}
+
+.material-regular {
+  background: var(--material-regular);
+}
+
+.material-thin {
+  background: var(--material-thin);
+}
+
+.material-ultra-thin {
+  background: var(--material-ultra-thin);
+}
+
+/* Gradients */
+.gradient-cosmic {
+  background: linear-gradient(135deg, 
+    var(--gradient-cosmic-start), 
+    var(--gradient-cosmic-middle), 
+    var(--gradient-cosmic-end)
+  );
+}
+
+.gradient-purple {
+  background: linear-gradient(135deg, 
+    var(--gradient-purple-start), 
+    var(--gradient-purple-end)
+  );
+}
+
+.gradient-blue {
+  background: linear-gradient(135deg, 
+    var(--gradient-blue-start), 
+    var(--gradient-blue-end)
+  );
+}
+
+/* Typography Utilities */
+.text-large-title {
+  font-size: var(--font-size-large-title);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tighter);
+}
+
+.text-title1 {
+  font-size: var(--font-size-title1);
+  font-weight: var(--font-weight-bold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-tighter);
+}
+
+.text-title2 {
+  font-size: var(--font-size-title2);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-snug);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-title3 {
+  font-size: var(--font-size-title3);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+.text-headline {
+  font-size: var(--font-size-headline);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-normal);
+}
+
+.text-body {
+  font-size: var(--font-size-body);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+}
+
+.text-callout {
+  font-size: var(--font-size-callout);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+}
+
+.text-subheadline {
+  font-size: var(--font-size-subheadline);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+}
+
+.text-footnote {
+  font-size: var(--font-size-footnote);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+}
+
+.text-caption1 {
+  font-size: var(--font-size-caption1);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+}
+
+.text-caption2 {
+  font-size: var(--font-size-caption2);
+  font-weight: var(--font-weight-regular);
+  line-height: var(--line-height-normal);
+}
+
+/* Shadow Utilities */
+.shadow-ios-card {
+  box-shadow: var(--shadow-ios-card);
+}
+
+.shadow-ios-modal {
+  box-shadow: var(--shadow-ios-modal);
+}
+
+/* ========================================
+   USAGE EXAMPLES
+   ======================================== */
+
+/*
+EXAMPLE 1: Glassmorphism Card
+------------------------------
+<div class="material-regular blur-regular rounded-[var(--radius-ios-card)] p-[var(--spacing-4)] border border-[var(--border-secondary)]">
+  Content
+</div>
+
+
+EXAMPLE 2: Primary Button
+---------------------------
+<button class="gradient-purple rounded-[var(--radius-ios-large)] px-[var(--spacing-6)] py-[var(--spacing-3)] text-white font-semibold">
+  Click Me
+</button>
+
+
+EXAMPLE 3: Typography
+----------------------
+<h1 class="text-title1">Page Title</h1>
+<p class="text-body text-[var(--text-secondary)]">Body text</p>
+
+
+EXAMPLE 4: Custom Properties in Inline Styles
+-----------------------------------------------
+<div style="
+  background: var(--material-thick);
+  backdrop-filter: blur(var(--blur-thick)) saturate(var(--saturate-thick));
+  border-radius: var(--radius-ios-card);
+  padding: var(--spacing-4);
+">
+  Content
+</div>
+*/
