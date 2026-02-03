@@ -178,7 +178,15 @@ private struct ActionCard: View {
                     .foregroundStyle(style == .gradient ? .white.opacity(0.8) : AppTheme.textSecondary)
             }
             .padding(AppComponent.Card.padding)
-            .background(cardBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+            .background {
+                if style == .gradient {
+                    RoundedRectangle(cornerRadius: AppRadius.iosCard)
+                        .fill(AppTheme.gradientPrimary)
+                } else {
+                    RoundedRectangle(cornerRadius: AppRadius.iosCard)
+                        .fill(AppTheme.glassMaterial)
+                }
+            }
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.iosCard)
                     .stroke(Color.white.opacity(0.1), lineWidth: 1)
@@ -196,20 +204,15 @@ private struct ActionCard: View {
             .font(.system(size: iconFontSize, weight: .medium))
             .foregroundStyle(style == .gradient ? .white : AppTheme.primaryColor)
             .frame(width: iconSize, height: iconSize)
-            .background(
-                RoundedRectangle(cornerRadius: AppRadius.md)
-                    .fill(style == .gradient ? Color.white.opacity(0.2) : AppTheme.glassMaterial)
-            )
-    }
-    
-    @ViewBuilder
-    private var cardBackground: some ShapeStyle {
-        switch style {
-        case .gradient:
-            AppTheme.gradientPrimary
-        case .glass:
-            AppTheme.glassMaterial
-        }
+            .background {
+                if style == .gradient {
+                    RoundedRectangle(cornerRadius: AppRadius.md)
+                        .fill(Color.white.opacity(0.2))
+                } else {
+                    RoundedRectangle(cornerRadius: AppRadius.md)
+                        .fill(AppTheme.glassMaterial)
+                }
+            }
     }
 }
 
