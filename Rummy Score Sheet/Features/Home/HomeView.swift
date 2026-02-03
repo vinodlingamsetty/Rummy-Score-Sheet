@@ -2,13 +2,46 @@
 //  HomeView.swift
 //  Rummy Scorekeeper
 //
-//  Home tab — Host / Join / Recent History
+//  Home tab — Welcome, Create/Join Room, Recent Games
 //
 
 import SwiftUI
 
+// MARK: - Data Model
+
+struct GameHistoryItem: Identifiable {
+    let id: String
+    let date: Date
+    let pointValue: Int
+    let winnerName: String
+    let players: [String]
+    let currentUserName: String
+}
+
+// MARK: - HomeView
+
 struct HomeView: View {
     @State private var isGameSetupPresented = false
+    
+    // Sample data for preview
+    private let sampleGames: [GameHistoryItem] = [
+        GameHistoryItem(
+            id: "A7K3M9",
+            date: Calendar.current.date(from: DateComponents(year: 2026, month: 1, day: 29))!,
+            pointValue: 10,
+            winnerName: "John Doe",
+            players: ["John", "Jane", "Mike", "Sarah"],
+            currentUserName: "John"
+        ),
+        GameHistoryItem(
+            id: "B2M5N8",
+            date: Calendar.current.date(from: DateComponents(year: 2026, month: 1, day: 28))!,
+            pointValue: 5,
+            winnerName: "Alex Brown",
+            players: ["John", "Alex", "Emma"],
+            currentUserName: "John"
+        )
+    ]
 
     var body: some View {
         ZStack {
@@ -17,12 +50,13 @@ struct HomeView: View {
                 .ignoresSafeArea()
 
             ScrollView {
-                VStack(spacing: AppSpacing._8) {
+                VStack(spacing: AppSpacing._6) {
+                    welcomeHeader
                     actionCards
-                    recentHistorySection
+                    recentGamesSection
                 }
-                .padding(.top, AppSpacing._12)
-                .padding(.bottom, AppSpacing._16 + 56)
+                .padding(.top, AppSpacing._6)
+                .padding(.bottom, AppComponent.Layout.tabBarHeight + AppSpacing._4)
             }
         }
         .sheet(isPresented: $isGameSetupPresented) {
@@ -30,42 +64,92 @@ struct HomeView: View {
         }
     }
 
+    // MARK: - Welcome Header
+    
+    private var welcomeHeader: some View {
+        VStack(alignment: .leading, spacing: AppSpacing._1) {
+            Text("Welcome Back")
+                .font(AppTypography.largeTitle())
+                .foregroundStyle(AppTheme.textPrimary)
+            Text("John")
+                .font(AppTypography.body())
+                .foregroundStyle(AppTheme.textSecondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, AppSpacing._4)
+    }
+
+    // MARK: - Action Cards
+    
     private var actionCards: some View {
-        VStack(spacing: AppSpacing._5) {
+        VStack(spacing: AppSpacing._3) {
             ActionCard(
-                title: "Host Game",
-                icon: "antenna.radiowaves.left.and.right",
+                title: "Create Room",
+                subtitle: "Start a new game session",
+                icon: "plus",
+                style: .gradient,
                 action: { isGameSetupPresented = true }
             )
             ActionCard(
-                title: "Join Game",
-                icon: "qrcode.viewfinder",
+                title: "Join Room",
+                subtitle: "Enter a room code",
+                icon: "qrcode",
+                style: .glass,
                 action: {}
             )
         }
-        .padding(.horizontal, AppSpacing._6)
+        .padding(.horizontal, AppSpacing._4)
     }
 
-    private var recentHistorySection: some View {
-        VStack(alignment: .leading, spacing: AppSpacing._3) {
-            Text("Recent History")
-                .font(AppTypography.title2())
-                .foregroundStyle(AppTheme.textPrimary)
-                .padding(.horizontal, AppSpacing._6)
-
-            Text("No recent games")
-                .font(AppTypography.subheadline())
-                .foregroundStyle(AppTheme.textSecondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, AppSpacing._6)
+    // MARK: - Recent Games Section
+    
+    private var recentGamesSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing._4) {
+            // Section header
+            HStack {
+                Text("Recent Games")
+                    .font(AppTypography.title2())
+                    .foregroundStyle(AppTheme.textPrimary)
+                Spacer()
+                Button {
+                    // View all action
+                } label: {
+                    HStack(spacing: AppSpacing._1) {
+                        Text("View All")
+                            .font(AppTypography.subheadline())
+                        Image(systemName: "chevron.right")
+                            .font(.system(size: 12, weight: .semibold))
+                    }
+                    .foregroundStyle(AppTheme.iosBlue)
+                }
+            }
+            .padding(.horizontal, AppSpacing._4)
+            
+            // Game cards
+            VStack(spacing: AppSpacing._3) {
+                ForEach(sampleGames) { game in
+                    GameHistoryCard(game: game)
+                }
+            }
+            .padding(.horizontal, AppSpacing._4)
         }
-        .padding(.top, AppSpacing._4)
     }
 }
 
+// MARK: - Action Card Style
+
+private enum ActionCardStyle {
+    case gradient
+    case glass
+}
+
+// MARK: - ActionCard
+
 private struct ActionCard: View {
     let title: String
+    let subtitle: String
     let icon: String
+    let style: ActionCardStyle
     let action: () -> Void
 
     var body: some View {
@@ -73,28 +157,141 @@ private struct ActionCard: View {
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
             action()
         }) {
-            HStack(spacing: AppSpacing._5) {
-                Image(systemName: icon)
-                    .font(.system(size: 36))
-                    .foregroundStyle(AppTheme.primaryColor)
-                    .frame(width: AppComponent.Avatar.sizeLg, height: AppComponent.Avatar.sizeLg)
-
-                Text(title)
-                    .font(AppTypography.title2())
-                    .foregroundStyle(AppTheme.textPrimary)
+            HStack(spacing: AppSpacing._4) {
+                // Icon container
+                iconView
+                
+                // Text content
+                VStack(alignment: .leading, spacing: AppSpacing._1) {
+                    Text(title)
+                        .font(AppTypography.headline())
+                        .foregroundStyle(style == .gradient ? .white : AppTheme.textPrimary)
+                    Text(subtitle)
+                        .font(AppTypography.footnote())
+                        .foregroundStyle(style == .gradient ? .white.opacity(0.8) : AppTheme.textSecondary)
+                }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
-                    .font(AppTypography.headline())
-                    .foregroundStyle(AppTheme.textSecondary)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundStyle(style == .gradient ? .white.opacity(0.8) : AppTheme.textSecondary)
             }
-            .padding(AppSpacing._6)
-            .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: AppRadius.xl))
+            .padding(AppComponent.Card.padding)
+            .background(cardBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+            .overlay(
+                RoundedRectangle(cornerRadius: AppRadius.iosCard)
+                    .stroke(Color.white.opacity(0.1), lineWidth: 1)
+            )
         }
         .buttonStyle(.plain)
     }
+    
+    @ViewBuilder
+    private var iconView: some View {
+        let iconSize: CGFloat = 48
+        let iconFontSize: CGFloat = 24
+        
+        Image(systemName: icon)
+            .font(.system(size: iconFontSize, weight: .medium))
+            .foregroundStyle(style == .gradient ? .white : AppTheme.primaryColor)
+            .frame(width: iconSize, height: iconSize)
+            .background(
+                RoundedRectangle(cornerRadius: AppRadius.md)
+                    .fill(style == .gradient ? Color.white.opacity(0.2) : AppTheme.glassMaterial)
+            )
+    }
+    
+    @ViewBuilder
+    private var cardBackground: some ShapeStyle {
+        switch style {
+        case .gradient:
+            AppTheme.gradientPrimary
+        case .glass:
+            AppTheme.glassMaterial
+        }
+    }
 }
+
+// MARK: - GameHistoryCard
+
+private struct GameHistoryCard: View {
+    let game: GameHistoryItem
+    
+    private var formattedDate: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter.string(from: game.date)
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: AppSpacing._3) {
+            // Top row: Game code + Point value
+            HStack {
+                VStack(alignment: .leading, spacing: AppSpacing._1) {
+                    Text("#\(game.id)")
+                        .font(AppTypography.headline())
+                        .foregroundStyle(AppTheme.primaryColor)
+                    Text(formattedDate)
+                        .font(AppTypography.footnote())
+                        .foregroundStyle(AppTheme.textSecondary)
+                }
+                
+                Spacer()
+                
+                VStack(alignment: .trailing, spacing: AppSpacing._1) {
+                    Text("$\(game.pointValue)")
+                        .font(AppTypography.headline())
+                        .foregroundStyle(AppTheme.textPrimary)
+                    Text(game.winnerName)
+                        .font(AppTypography.footnote())
+                        .foregroundStyle(AppTheme.positiveColor)
+                }
+            }
+            
+            // Player chips row
+            HStack(spacing: AppSpacing._2) {
+                ForEach(game.players, id: \.self) { player in
+                    PlayerChip(
+                        name: player,
+                        isHighlighted: player == game.currentUserName
+                    )
+                }
+            }
+        }
+        .padding(AppComponent.Card.padding)
+        .background(AppTheme.glassMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+        .overlay(
+            RoundedRectangle(cornerRadius: AppRadius.iosCard)
+                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+        )
+    }
+}
+
+// MARK: - PlayerChip
+
+private struct PlayerChip: View {
+    let name: String
+    let isHighlighted: Bool
+    
+    var body: some View {
+        Text(name)
+            .font(AppTypography.caption1())
+            .foregroundStyle(.white)
+            .padding(.horizontal, AppSpacing._3)
+            .padding(.vertical, AppSpacing._1 + 2)
+            .background(
+                Capsule()
+                    .fill(isHighlighted ? AnyShapeStyle(AppTheme.iosBlue) : AnyShapeStyle(AppTheme.glassMaterial))
+            )
+            .overlay(
+                Capsule()
+                    .stroke(Color.white.opacity(isHighlighted ? 0 : 0.1), lineWidth: 1)
+            )
+    }
+}
+
+// MARK: - Preview
 
 #Preview {
     HomeView()
