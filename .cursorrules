@@ -16,9 +16,14 @@ You are an expert Senior iOS Engineer specializing in SwiftUI, animations, and h
 - **Backgrounds:** Always use deep, rich purple gradients (#4A2E7A center to #1A1A2E edges).
 - **Materials:** Use `UltraThinMaterial` heavily for cards, lists, and inputs to create a "Liquid Glass" effect.
 - **Primary accent:** Neon purple (#B392F0). Use `AppTheme.positiveColor` for success/positive, `AppTheme.destructiveColor` for negative/destructive actions.
-- **Typography:** Use `Font.design(.rounded)` (SF Pro Rounded) for a friendly, modern feel.
+- **Typography:** Use `AppTypography` scale (title1, title2, body, etc.) — SF Pro Rounded. See `Core/DesignSystem.swift`.
 - **Haptics:** Integrate `UIImpactFeedbackGenerator` for key user interactions (tapping buttons, entering scores).
-- **Animations:** Use `.spring()` or `.bouncy` animations for transitions. Avoid linear animations.
+- **Animations:** Use `AppAnimation.springBouncy`, `.springSmooth`, or `.springSnappy` for transitions.
+
+## Design Tokens
+- **Source:** `figma-design-tokens-export/design-tokens.json`, `tokens-reference.json`, `DESIGN_SYSTEM.md`
+- **Swift implementation:** `Core/DesignSystem.swift` — AppTheme, AppTypography, AppSpacing, AppRadius, AppAnimation, AppComponent
+- **Usage:** Prefer `AppSpacing._4`, `AppRadius.iosCard`, `AppTypography.title1()` over hardcoded values.
 
 # Coding Standards
 - **Conciseness:** Write clean, functional, and declarative code. Avoid verbose boilerplate.
