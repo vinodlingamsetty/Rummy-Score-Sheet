@@ -24,6 +24,7 @@ struct Rummy_Score_SheetApp: App {
     var body: some Scene {
         WindowGroup {
             MainTabView(gameState: gameState)
+                .preferredColorScheme(.dark)
         }
     }
 }
