@@ -119,14 +119,16 @@ struct HomeView: View {
                 Button {
                     // View all action
                 } label: {
-                    HStack(spacing: AppSpacing._1) {
+                    Label {
                         Text("View All")
                             .font(AppTypography.subheadline())
+                    } icon: {
                         Image(systemName: "chevron.right")
                             .font(.system(size: 12, weight: .semibold))
+                            .accessibilityHidden(true)
                     }
-                    .foregroundStyle(AppTheme.iosBlue)
                 }
+                .foregroundStyle(AppTheme.iosBlue)
             }
             .padding(.horizontal, AppSpacing._4)
             
@@ -181,6 +183,7 @@ private struct ActionCard: View {
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundStyle(style == .gradient ? .white.opacity(0.8) : AppTheme.textSecondary)
+                    .accessibilityHidden(true)
             }
             .padding(AppComponent.Card.padding)
             .background {
@@ -226,12 +229,6 @@ private struct ActionCard: View {
 private struct GameHistoryCard: View {
     let game: GameHistoryItem
     
-    private var formattedDate: String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.string(from: game.date)
-    }
-    
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing._3) {
             // Top row: Game code + Point value
@@ -240,7 +237,7 @@ private struct GameHistoryCard: View {
                     Text("#\(game.id)")
                         .font(AppTypography.headline())
                         .foregroundStyle(AppTheme.primaryColor)
-                    Text(formattedDate)
+                    Text(game.date, format: .dateTime.year().month().day())
                         .font(AppTypography.footnote())
                         .foregroundStyle(AppTheme.textSecondary)
                 }
@@ -304,3 +301,4 @@ private struct PlayerChip: View {
 #Preview {
     HomeView(gameState: AppGameState(roomService: MockRoomService()))
 }
+

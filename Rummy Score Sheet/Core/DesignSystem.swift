@@ -137,17 +137,17 @@ extension Color {
 
 /// iOS typography scale — SF Pro Rounded
 struct AppTypography {
-    static func largeTitle() -> Font { .system(size: 34, weight: .bold, design: .rounded) }
-    static func title1() -> Font { .system(size: 28, weight: .bold, design: .rounded) }
-    static func title2() -> Font { .system(size: 22, weight: .semibold, design: .rounded) }
-    static func title3() -> Font { .system(size: 20, weight: .semibold, design: .rounded) }
-    static func headline() -> Font { .system(size: 17, weight: .semibold, design: .rounded) }
-    static func body() -> Font { .system(size: 17, weight: .regular, design: .rounded) }
-    static func callout() -> Font { .system(size: 16, weight: .regular, design: .rounded) }
-    static func subheadline() -> Font { .system(size: 15, weight: .regular, design: .rounded) }
-    static func footnote() -> Font { .system(size: 13, weight: .regular, design: .rounded) }
-    static func caption1() -> Font { .system(size: 12, weight: .regular, design: .rounded) }
-    static func caption2() -> Font { .system(size: 11, weight: .regular, design: .rounded) }
+    static func largeTitle() -> Font { .system(.largeTitle, design: .rounded).weight(.bold) }
+    static func title1() -> Font { .system(.title, design: .rounded).weight(.bold) }
+    static func title2() -> Font { .system(.title2, design: .rounded).weight(.semibold) }
+    static func title3() -> Font { .system(.title3, design: .rounded).weight(.semibold) }
+    static func headline() -> Font { .system(.headline, design: .rounded).weight(.semibold) }
+    static func body() -> Font { .system(.body, design: .rounded) }
+    static func callout() -> Font { .system(.callout, design: .rounded) }
+    static func subheadline() -> Font { .system(.subheadline, design: .rounded) }
+    static func footnote() -> Font { .system(.footnote, design: .rounded) }
+    static func caption1() -> Font { .system(.caption, design: .rounded) }
+    static func caption2() -> Font { .system(.caption2, design: .rounded) }
 }
 
 // MARK: - AppSpacing (8pt grid)
@@ -238,3 +238,4 @@ struct AppComponent {
         static let maxContentWidth: CGFloat = 896
     }
 }
+

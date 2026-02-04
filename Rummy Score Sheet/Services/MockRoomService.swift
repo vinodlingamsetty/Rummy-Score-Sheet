@@ -8,12 +8,11 @@
 import Foundation
 
 /// In-memory mock implementation — no multi-device sync, data lives only on this device
-final class MockRoomService: RoomService, @unchecked Sendable {
+actor MockRoomService: @preconcurrency RoomService {
 
     // MARK: - Storage
 
     private var rooms: [String: GameRoom] = [:]
-    private let lock = NSLock()
 
     // MARK: - RoomService
 
@@ -35,9 +34,7 @@ final class MockRoomService: RoomService, @unchecked Sendable {
             currentRound: 1,
             isStarted: false
         )
-        lock.lock()
         rooms[code] = room
-        lock.unlock()
         return RoomServiceResult(room: room, currentUserId: moderatorId)
     }
 
@@ -52,11 +49,6 @@ final class MockRoomService: RoomService, @unchecked Sendable {
             scores: []
         )
 
-        lock.lock()
-        defer { lock.unlock() }
-
-        // In mock mode, if room doesn't exist, create it with the joiner
-        // (Real backend would throw .roomNotFound)
         if var existingRoom = rooms[normalizedCode] {
             existingRoom.players.append(player)
             rooms[normalizedCode] = existingRoom
@@ -77,9 +69,6 @@ final class MockRoomService: RoomService, @unchecked Sendable {
     }
 
     func leaveRoom(roomCode: String, playerId: UUID) async throws {
-        lock.lock()
-        defer { lock.unlock() }
-
         guard var room = rooms[roomCode] else {
             throw RoomServiceError.roomNotFound
         }
@@ -92,9 +81,6 @@ final class MockRoomService: RoomService, @unchecked Sendable {
     }
 
     func setReady(roomCode: String, playerId: UUID, ready: Bool) async throws -> GameRoom {
-        lock.lock()
-        defer { lock.unlock() }
-
         guard var room = rooms[roomCode] else {
             throw RoomServiceError.roomNotFound
         }
@@ -107,9 +93,6 @@ final class MockRoomService: RoomService, @unchecked Sendable {
     }
 
     func startGame(roomCode: String) async throws -> GameRoom {
-        lock.lock()
-        defer { lock.unlock() }
-
         guard var room = rooms[roomCode] else {
             throw RoomServiceError.roomNotFound
         }
@@ -123,20 +106,31 @@ final class MockRoomService: RoomService, @unchecked Sendable {
         return room
     }
 
-    func observeRoom(code: String) -> AsyncStream<GameRoom?> {
+    nonisolated func observeRoom(code: String) -> AsyncStream<GameRoom?> {
         AsyncStream { continuation in
-            lock.lock()
-            let room = rooms[code]
-            lock.unlock()
-            continuation.yield(room)
-            continuation.finish()
+            // Hop to the actor to read state safely
+            Task { [weak self] in
+                guard let self else {
+                    continuation.yield(nil)
+                    continuation.finish()
+                    return
+                }
+                let snapshot = await self.roomSnapshot(for: code)
+                continuation.yield(snapshot)
+                continuation.finish()
+            }
         }
     }
 
     // MARK: - Helpers
+
+    private func roomSnapshot(for code: String) async -> GameRoom? {
+        return rooms[code]
+    }
 
     private func generateRoomCode() -> String {
         let chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
         return String((0..<6).map { _ in chars.randomElement()! })
     }
 }
+

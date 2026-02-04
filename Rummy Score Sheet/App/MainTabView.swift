@@ -28,6 +28,9 @@ enum AppTab: Int, CaseIterable {
 struct MainTabView: View {
     @Bindable var gameState: AppGameState
 
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
+
     var body: some View {
         tabContent(for: gameState.selectedTab)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -38,6 +41,14 @@ struct MainTabView: View {
                 ))
             }
             .ignoresSafeArea(edges: .bottom)
+            .alert("Error", isPresented: Binding(
+                get: { gameState.errorMessage != nil },
+                set: { if !$0 { gameState.errorMessage = nil } }
+            )) {
+                Button("OK") { gameState.errorMessage = nil }
+            } message: {
+                Text(gameState.errorMessage ?? "")
+            }
     }
 
     @ViewBuilder
@@ -90,12 +101,14 @@ private struct GameTabContent: View {
 
 private struct FloatingTabBar: View {
     @Binding var selectedTab: AppTab
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(AppTab.allCases, id: \.rawValue) { tab in
                 TabBarButton(tab: tab, isSelected: selectedTab == tab) {
-                    withAnimation(AppAnimation.springBouncy) {
+                    withAnimation(reduceMotion ? .default : AppAnimation.springBouncy) {
                         selectedTab = tab
                     }
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -104,7 +117,7 @@ private struct FloatingTabBar: View {
         }
         .padding(.horizontal, AppSpacing._2)
         .padding(.vertical, AppSpacing._2)
-        .background(AppTheme.glassMaterial, in: Capsule())
+        .background(reduceTransparency ? AnyShapeStyle(Color.black.opacity(0.6)) : AnyShapeStyle(AppTheme.glassMaterial), in: Capsule())
         .padding(.horizontal, AppSpacing._6)
         .padding(.bottom, AppSpacing._6)
         .fixedSize(horizontal: false, vertical: true)
@@ -129,6 +142,7 @@ private struct TabBarButton: View {
                     .font(.system(size: 22))
                     .foregroundStyle(isSelected ? AppTheme.primaryColor : .white)
                     .shadow(color: isSelected ? AppTheme.primaryColor.opacity(0.5) : .clear, radius: 6)
+                    .accessibilityHidden(true)
             }
             .frame(maxWidth: .infinity)
         }
