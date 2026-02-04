@@ -6,7 +6,7 @@ Map from Figma `design-tokens.json` to Swift APIs in `Core/DesignSystem.swift`.
 
 | Figma Token Path | Swift |
 |------------------|-------|
-| `color.background.gradient.cosmic` | `AppTheme.backgroundCosmic` |
+| `color.background.gradient.cosmic` | `AppTheme.background` |
 | `color.background.gradient.purple` | `AppTheme.gradientPrimary` |
 | `color.background.gradient.blue` | `AppTheme.gradientSecondary` |
 | `color.ios.system.blue.dark` | `AppTheme.iosBlue` |

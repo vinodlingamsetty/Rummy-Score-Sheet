@@ -2,7 +2,7 @@
 
 ## 1. App Overview
 A premium, offline-first iOS scorekeeping app for Indian Rummy.
-**Design Aesthetic:** "Liquid Glass" (Dark Mode, Blur Effects, Neon Accents).
+**Design Aesthetic:** "Liquid Glass" (Dark Mode, Blur Effects, Subtle System Gradient Backdrop, Neon Accents).
 **Tech Stack:** Native iOS (SwiftUI), SwiftData (Local DB), Firebase (Cloud Sync).
 
 ## 2. Terminology (Strict Compliance)

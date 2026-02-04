@@ -49,16 +49,16 @@ struct JoinRoomView: View {
             Spacer()
             Text("Join Room")
                 .font(AppTypography.title2())
-                .foregroundStyle(AppTheme.textPrimary)
+                .foregroundStyle(.primary)
             Spacer()
             Button {
                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                 dismiss()
             } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(AppTheme.textSecondary)
-                    .frame(width: 44, height: 44)
+                    Image(systemName: "xmark")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(width: 44, height: 44)
             }
         }
     }
@@ -67,11 +67,11 @@ struct JoinRoomView: View {
         VStack(alignment: .leading, spacing: AppSpacing._3) {
             Text("Room Code")
                 .font(AppTypography.headline())
-                .foregroundStyle(AppTheme.textSecondary)
+                .foregroundStyle(.secondary)
 
             TextField("A 1 B 2 C 3", text: $roomCode)
                 .font(.system(size: 28, weight: .bold, design: .monospaced))
-                .foregroundStyle(AppTheme.textPrimary)
+                .foregroundStyle(.primary)
                 .multilineTextAlignment(.center)
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
@@ -80,7 +80,8 @@ struct JoinRoomView: View {
                     roomCode = String(filtered.prefix(maxCodeLength))
                 }
                 .padding(AppSpacing._5)
-                .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+                .background(AppTheme.controlMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+                .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
                 .overlay(
                     RoundedRectangle(cornerRadius: AppRadius.iosCard)
                         .stroke(Color.white.opacity(0.1), lineWidth: 1)
@@ -98,7 +99,8 @@ struct JoinRoomView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: AppComponent.Button.heightLg)
-                .background(canJoin ? AnyShapeStyle(AppTheme.gradientPrimary) : AnyShapeStyle(AppTheme.glassBackground), in: Capsule())
+                .background(AppTheme.controlMaterial, in: Capsule())
+                .glassEffect(in: .capsule)
         }
         .buttonStyle(.plain)
         .disabled(!canJoin)

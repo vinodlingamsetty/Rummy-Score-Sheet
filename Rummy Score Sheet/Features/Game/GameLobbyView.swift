@@ -12,23 +12,18 @@ struct GameLobbyView: View {
     let onStartGame: () -> Void
 
     var body: some View {
-        ZStack {
-            Rectangle()
-                .fill(AppTheme.background)
-                .ignoresSafeArea()
-
-            ScrollView {
-                VStack(spacing: AppSpacing._6) {
-                    header
-                    showQRCodeButton
-                    playersSection
-                    startGameButton
-                }
-                .padding(.top, AppSpacing._6)
-                .padding(.horizontal, AppSpacing._4)
-                .padding(.bottom, AppComponent.Layout.tabBarHeight + AppSpacing._6)
+        ScrollView {
+            VStack(spacing: AppSpacing._6) {
+                header
+                showQRCodeButton
+                playersSection
+                startGameButton
             }
+            .padding(.top, AppSpacing._6)
+            .padding(.horizontal, AppSpacing._4)
+            .padding(.bottom, AppComponent.Layout.tabBarHeight + AppSpacing._6)
         }
+        .background(AppTheme.background)
         .sheet(isPresented: $viewModel.isQRCodePresented) {
             QRCodeDisplayView(roomCode: viewModel.room.id)
         }
@@ -38,10 +33,10 @@ struct GameLobbyView: View {
         VStack(alignment: .leading, spacing: AppSpacing._1) {
             Text("Room \(viewModel.room.id)")
                 .font(AppTypography.title2())
-                .foregroundStyle(AppTheme.textPrimary)
+                .foregroundStyle(.primary)
             Text("Target: \(viewModel.room.pointLimit)")
                 .font(AppTypography.subheadline())
-                .foregroundStyle(AppTheme.textSecondary)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -57,10 +52,14 @@ struct GameLobbyView: View {
                 Text("Show QR Code")
                     .font(AppTypography.headline())
             }
-            .foregroundStyle(AppTheme.primaryColor)
+            .foregroundStyle(.tint)
             .frame(maxWidth: .infinity)
             .padding(AppComponent.Card.padding)
-            .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+            .background {
+                RoundedRectangle(cornerRadius: AppRadius.iosCard)
+                    .fill(AppTheme.cardMaterial)
+            }
+            .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.iosCard)
                     .stroke(Color.white.opacity(0.1), lineWidth: 1)
@@ -75,12 +74,14 @@ struct GameLobbyView: View {
                 .font(AppTypography.headline())
                 .foregroundStyle(AppTheme.textPrimary)
 
-            ForEach(viewModel.room.players) { player in
-                PlayerLobbyRow(
-                    player: player,
-                    isCurrentUser: player.id == viewModel.currentUserId,
-                    onReadyTapped: { viewModel.toggleReady(for: player.id) }
-                )
+            GlassEffectContainer(spacing: AppSpacing._3) {
+                ForEach(viewModel.room.players) { player in
+                    PlayerLobbyRow(
+                        player: player,
+                        isCurrentUser: player.id == viewModel.currentUserId,
+                        onReadyTapped: { viewModel.toggleReady(for: player.id) }
+                    )
+                }
             }
         }
     }
@@ -97,10 +98,11 @@ struct GameLobbyView: View {
                 .frame(height: AppComponent.Button.heightLg)
                 .background(
                     viewModel.allPlayersReady
-                        ? AnyShapeStyle(AppTheme.gradientPrimary)
-                        : AnyShapeStyle(AppTheme.glassBackground),
+                        ? AnyShapeStyle(AppTheme.controlMaterial)
+                        : AnyShapeStyle(.clear),
                     in: Capsule()
                 )
+                .glassEffect(in: .capsule)
         }
         .buttonStyle(.plain)
         .disabled(!viewModel.allPlayersReady)
@@ -114,61 +116,78 @@ private struct PlayerLobbyRow: View {
 
     var body: some View {
         HStack(spacing: AppSpacing._4) {
-            Circle()
-                .fill(AppTheme.primaryColor.opacity(0.3))
-                .frame(width: AppComponent.Avatar.sizeMd, height: AppComponent.Avatar.sizeMd)
-                .overlay(
-                    Text(String(player.name.prefix(1)).uppercased())
-                        .font(AppTypography.headline())
-                        .foregroundStyle(AppTheme.primaryColor)
-                )
-
-            VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: AppSpacing._1) {
-                    Text(player.name)
-                        .font(AppTypography.headline())
-                        .foregroundStyle(AppTheme.textPrimary)
-                    if player.isModerator {
-                        Text("Host")
-                            .font(AppTypography.caption2())
-                            .foregroundStyle(AppTheme.textTertiary)
-                            .padding(.horizontal, 6)
-                            .padding(.vertical, 2)
-                            .background(Capsule().fill(AppTheme.glassBackground))
-                    }
-                }
-            }
-
+            avatar
+            nameRow
             Spacer()
-
-            if isCurrentUser && !player.isModerator {
-                Button {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    onReadyTapped()
-                } label: {
-                    Text(player.isReady ? "Ready" : "Ready?")
-                        .font(AppTypography.subheadline())
-                        .fontWeight(.semibold)
-                        .foregroundStyle(player.isReady ? .white : AppTheme.primaryColor)
-                        .padding(.horizontal, AppSpacing._4)
-                        .padding(.vertical, AppSpacing._2)
-                        .background(
-                            Capsule()
-                                .fill(player.isReady ? AppTheme.positiveColor : Color.clear)
-                                .overlay(Capsule().stroke(AppTheme.primaryColor, lineWidth: 1))
-                        )
-                }
-                .buttonStyle(.plain)
-            } else if player.isReady {
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(AppTheme.positiveColor)
-            }
+            readinessControl
         }
         .padding(AppComponent.Card.padding)
-        .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+        .background {
+            RoundedRectangle(cornerRadius: AppRadius.iosCard)
+                .fill(AppTheme.cardMaterial)
+        }
+        .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         .overlay(
             RoundedRectangle(cornerRadius: AppRadius.iosCard)
                 .stroke(Color.white.opacity(0.1), lineWidth: 1)
         )
+    }
+
+    private var avatar: some View {
+        Circle()
+            .fill(AppTheme.primaryColor.opacity(0.3))
+            .frame(width: AppComponent.Avatar.sizeMd, height: AppComponent.Avatar.sizeMd)
+            .overlay(
+                Text(String(player.name.prefix(1)).uppercased())
+                    .font(AppTypography.headline())
+                    .foregroundStyle(AppTheme.primaryColor)
+            )
+    }
+
+    private var nameRow: some View {
+        HStack(spacing: AppSpacing._1) {
+            Text(player.name)
+                .font(AppTypography.headline())
+                .foregroundStyle(.primary)
+            if player.isModerator {
+                Text("Host")
+                    .font(AppTypography.caption2())
+                    .foregroundStyle(.secondary)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(AppTheme.controlMaterial, in: Capsule())
+                    .glassEffect(in: .capsule)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var readinessControl: some View {
+        if isCurrentUser && !player.isModerator {
+            Button {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                onReadyTapped()
+            } label: {
+                Text(player.isReady ? "Ready" : "Ready?")
+                    .font(AppTypography.subheadline())
+                    .fontWeight(.semibold)
+                    .foregroundStyle(player.isReady ? .white : AppTheme.primaryColor)
+                    .padding(.horizontal, AppSpacing._4)
+                    .padding(.vertical, AppSpacing._2)
+                    .background(
+                        Capsule()
+                            .fill(player.isReady
+                                  ? AnyShapeStyle(AppTheme.positiveColor)
+                                  : AnyShapeStyle(AppTheme.controlMaterial))
+                            .overlay(Capsule().stroke(AppTheme.primaryColor, lineWidth: 1))
+                    )
+            }
+            .buttonStyle(.plain)
+        } else if player.isReady {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(AppTheme.positiveColor)
+        } else {
+            EmptyView()
+        }
     }
 }

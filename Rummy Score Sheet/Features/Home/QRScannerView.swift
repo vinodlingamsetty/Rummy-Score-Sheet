@@ -58,7 +58,7 @@ struct QRScannerView: View {
                 .scaleEffect(1.5)
             Text("Requesting camera access...")
                 .font(AppTypography.body())
-                .foregroundStyle(AppTheme.textSecondary)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -66,13 +66,13 @@ struct QRScannerView: View {
         VStack(spacing: AppSpacing._6) {
             Image(systemName: "camera.fill")
                 .font(.system(size: 48))
-                .foregroundStyle(AppTheme.textTertiary)
+                .foregroundStyle(.secondary)
             Text("Camera Access Required")
                 .font(AppTypography.title2())
-                .foregroundStyle(AppTheme.textPrimary)
+                .foregroundStyle(.primary)
             Text("Please enable camera access in Settings to scan QR codes.")
                 .font(AppTypography.body())
-                .foregroundStyle(AppTheme.textSecondary)
+                .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
             Button("Open Settings") {

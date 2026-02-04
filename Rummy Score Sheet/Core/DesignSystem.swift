@@ -10,17 +10,17 @@ import SwiftUI
 
 // MARK: - AppTheme (Colors)
 
-/// Central theme for the app: dark purple radial background, glass materials, neon purple accents
+/// Central theme for the app: Liquid Glass-forward materials and system-driven surfaces
 struct AppTheme {
 
     // MARK: - Background
 
-    /// Figma cosmic gradient — linear, deep space theme (default)
+    /// Subtle system-gradient backdrop that preserves Liquid Glass readability
     static let background: LinearGradient = LinearGradient(
         colors: [
-            Color(hex: "0a0015"),
-            Color(hex: "1a0b2e"),
-            Color(hex: "0f0520")
+            Color(.systemBackground),
+            Color(.secondarySystemBackground).opacity(0.6),
+            Color(.systemBackground)
         ],
         startPoint: .topLeading,
         endPoint: .bottomTrailing
@@ -44,7 +44,7 @@ struct AppTheme {
 
     // MARK: - Materials
 
-    /// Ultra-thin glass material for frosted overlays (cards, tab bar, inputs)
+    /// Ultra-thin glass material for subtle overlays
     static var glassMaterial: Material { .ultraThin }
 
     /// Thin material
@@ -55,9 +55,10 @@ struct AppTheme {
 
     /// Thick material
     static var glassMaterialThick: Material { .thick }
-    
-    /// Glass card background color — matches Figma rgba(44, 44, 46, 0.75)
-    static let glassBackground: Color = Color(hex: "2C2C2E").opacity(0.75)
+
+    /// Standard surfaces tuned for Liquid Glass
+    static var cardMaterial: Material { .thin }
+    static var controlMaterial: Material { .ultraThin }
 
     // MARK: - Primary Accent
 
@@ -238,4 +239,3 @@ struct AppComponent {
         static let maxContentWidth: CGFloat = 896
     }
 }
-

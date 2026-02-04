@@ -28,14 +28,14 @@ struct QRCodeDisplayView: View {
                     } label: {
                         Image(systemName: "xmark")
                             .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(AppTheme.textSecondary)
+                            .foregroundStyle(.secondary)
                             .frame(width: 44, height: 44)
                     }
                 }
 
                 Text("Scan to Join")
                     .font(AppTypography.title2())
-                    .foregroundStyle(AppTheme.textPrimary)
+                    .foregroundStyle(.primary)
 
                 if let qrImage = QRCodeGenerator.generate(from: roomCode, size: qrSize) {
                     Image(uiImage: qrImage)

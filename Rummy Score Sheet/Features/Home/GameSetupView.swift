@@ -38,10 +38,10 @@ struct GameSetupView: View {
         VStack(spacing: AppSpacing._2) {
             Text("Create Room")
                 .font(AppTypography.title1())
-                .foregroundStyle(AppTheme.textPrimary)
+                .foregroundStyle(.primary)
             Text("Set your game parameters")
                 .font(AppTypography.subheadline())
-                .foregroundStyle(AppTheme.textSecondary)
+                .foregroundStyle(.secondary)
         }
     }
 
@@ -58,7 +58,7 @@ struct GameSetupView: View {
         VStack(alignment: .leading, spacing: AppSpacing._3) {
             Text("Point Limit")
                 .font(AppTypography.headline())
-                .foregroundStyle(AppTheme.textPrimary)
+                .foregroundStyle(.primary)
 
             HStack(spacing: AppSpacing._4) {
                 Text("\(pointLimit)")
@@ -79,7 +79,8 @@ struct GameSetupView: View {
                 .tint(AppTheme.primaryColor)
             }
             .padding(AppSpacing._5)
-            .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+            .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+            .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         }
     }
 
@@ -87,7 +88,7 @@ struct GameSetupView: View {
         VStack(alignment: .leading, spacing: AppSpacing._3) {
             Text("Point Value ($)")
                 .font(AppTypography.headline())
-                .foregroundStyle(AppTheme.textPrimary)
+                .foregroundStyle(.primary)
 
             TextField("10", text: $pointValueText)
                 .font(.system(size: 36, weight: .semibold, design: .rounded))
@@ -95,7 +96,8 @@ struct GameSetupView: View {
                 .multilineTextAlignment(.center)
                 .keyboardType(.decimalPad)
                 .padding(AppSpacing._5)
-                .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosDefault))
+                .background(AppTheme.controlMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosDefault))
+                .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosDefault))
         }
     }
 
@@ -103,7 +105,7 @@ struct GameSetupView: View {
         VStack(alignment: .leading, spacing: AppSpacing._3) {
             Text("Players")
                 .font(AppTypography.headline())
-                .foregroundStyle(AppTheme.textPrimary)
+                .foregroundStyle(.primary)
 
             HStack(spacing: AppSpacing._4) {
                 Text("\(playerCount)")
@@ -124,7 +126,8 @@ struct GameSetupView: View {
                 .tint(AppTheme.primaryColor)
             }
             .padding(AppSpacing._5)
-            .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+            .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+            .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         }
     }
 
@@ -140,7 +143,8 @@ struct GameSetupView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: AppComponent.Button.heightLg)
-                .background(AppTheme.gradientPrimary, in: Capsule())
+                .background(AppTheme.controlMaterial, in: Capsule())
+                .glassEffect(in: .capsule)
         }
         .buttonStyle(.plain)
         .padding(.horizontal, AppSpacing._6)

@@ -28,27 +28,37 @@ enum AppTab: Int, CaseIterable {
 struct MainTabView: View {
     @Bindable var gameState: AppGameState
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
     var body: some View {
-        tabContent(for: gameState.selectedTab)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .overlay(alignment: .bottom) {
-                FloatingTabBar(selectedTab: Binding(
-                    get: { gameState.selectedTab },
-                    set: { gameState.selectedTab = $0 }
-                ))
-            }
-            .ignoresSafeArea(edges: .bottom)
-            .alert("Error", isPresented: Binding(
-                get: { gameState.errorMessage != nil },
-                set: { if !$0 { gameState.errorMessage = nil } }
-            )) {
-                Button("OK") { gameState.errorMessage = nil }
-            } message: {
-                Text(gameState.errorMessage ?? "")
-            }
+        TabView(selection: $gameState.selectedTab) {
+            HomeView(gameState: gameState)
+                .tabItem { Label("Home", systemImage: AppTab.home.icon) }
+                .tag(AppTab.home)
+
+            GameTabContent(gameState: gameState)
+                .tabItem { Label("Game", systemImage: AppTab.game.icon) }
+                .tag(AppTab.game)
+
+            TabPlaceholderView(title: "Friends")
+                .tabItem { Label("Friends", systemImage: AppTab.friends.icon) }
+                .tag(AppTab.friends)
+
+            TabPlaceholderView(title: "Rules")
+                .tabItem { Label("Rules", systemImage: AppTab.rules.icon) }
+                .tag(AppTab.rules)
+
+            TabPlaceholderView(title: "Profile")
+                .tabItem { Label("Profile", systemImage: AppTab.profile.icon) }
+                .tag(AppTab.profile)
+        }
+        .tint(AppTheme.primaryColor)
+        .alert("Error", isPresented: Binding(
+            get: { gameState.errorMessage != nil },
+            set: { if !$0 { gameState.errorMessage = nil } }
+        )) {
+            Button("OK") { gameState.errorMessage = nil }
+        } message: {
+            Text(gameState.errorMessage ?? "")
+        }
     }
 
     @ViewBuilder
@@ -99,57 +109,6 @@ private struct GameTabContent: View {
     }
 }
 
-private struct FloatingTabBar: View {
-    @Binding var selectedTab: AppTab
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.accessibilityReduceTransparency) private var reduceTransparency
-
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(AppTab.allCases, id: \.rawValue) { tab in
-                TabBarButton(tab: tab, isSelected: selectedTab == tab) {
-                    withAnimation(reduceMotion ? .default : AppAnimation.springBouncy) {
-                        selectedTab = tab
-                    }
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                }
-            }
-        }
-        .padding(.horizontal, AppSpacing._2)
-        .padding(.vertical, AppSpacing._2)
-        .background(reduceTransparency ? AnyShapeStyle(Color.black.opacity(0.6)) : AnyShapeStyle(AppTheme.glassMaterial), in: Capsule())
-        .padding(.horizontal, AppSpacing._6)
-        .padding(.bottom, AppSpacing._6)
-        .fixedSize(horizontal: false, vertical: true)
-    }
-}
-
-private struct TabBarButton: View {
-    let tab: AppTab
-    let isSelected: Bool
-    let action: () -> Void
-
-    var body: some View {
-        Button(action: action) {
-            ZStack {
-                if isSelected {
-                    Capsule()
-                        .fill(AppTheme.glassMaterial)
-                        .padding(.horizontal, 4)
-                        .padding(.vertical, 4)
-                }
-                Image(systemName: tab.icon)
-                    .font(.system(size: 22))
-                    .foregroundStyle(isSelected ? AppTheme.primaryColor : .white)
-                    .shadow(color: isSelected ? AppTheme.primaryColor.opacity(0.5) : .clear, radius: 6)
-                    .accessibilityHidden(true)
-            }
-            .frame(maxWidth: .infinity)
-        }
-        .buttonStyle(.plain)
-    }
-}
-
 private struct TabPlaceholderView: View {
     let title: String
 
@@ -160,7 +119,7 @@ private struct TabPlaceholderView: View {
                 .ignoresSafeArea()
             Text(title)
                 .font(AppTypography.body())
-                .foregroundStyle(AppTheme.textSecondary)
+                .foregroundStyle(.secondary)
         }
     }
 }

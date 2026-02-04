@@ -13,23 +13,18 @@ struct GameView: View {
     let onLeaveGame: () -> Void
 
     var body: some View {
-        ZStack {
-            Rectangle()
-                .fill(AppTheme.background)
-                .ignoresSafeArea()
-
-            ScrollView {
-                VStack(spacing: AppSpacing._6) {
-                    header
-                    roundSelector
-                    playerCards
-                    actionButtons
-                }
-                .padding(.top, AppSpacing._4)
-                .padding(.horizontal, AppSpacing._4)
-                .padding(.bottom, AppComponent.Layout.tabBarHeight + AppSpacing._6)
+        ScrollView {
+            VStack(spacing: AppSpacing._6) {
+                header
+                roundSelector
+                playerCards
+                actionButtons
             }
+            .padding(.top, AppSpacing._4)
+            .padding(.horizontal, AppSpacing._4)
+            .padding(.bottom, AppComponent.Layout.tabBarHeight + AppSpacing._6)
         }
+        .background(AppTheme.background)
     }
 
     private var header: some View {
@@ -37,10 +32,10 @@ struct GameView: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Room \(viewModel.room.id)")
                     .font(AppTypography.headline())
-                    .foregroundStyle(AppTheme.textPrimary)
+                    .foregroundStyle(.primary)
                 Text("Target: \(viewModel.room.pointLimit)")
                     .font(AppTypography.footnote())
-                    .foregroundStyle(AppTheme.textSecondary)
+                    .foregroundStyle(.secondary)
             }
             Spacer()
             Button {
@@ -53,7 +48,8 @@ struct GameView: View {
                     .foregroundStyle(.white)
                     .padding(.horizontal, AppSpacing._4)
                     .padding(.vertical, AppSpacing._2)
-                    .background(AppTheme.destructiveColor, in: Capsule())
+                    .background(AppTheme.controlMaterial, in: Capsule())
+                    .glassEffect(in: .capsule)
             }
             .buttonStyle(.plain)
         }
@@ -123,7 +119,8 @@ struct GameView: View {
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, AppSpacing._4)
-                    .background(AppTheme.glassBackground, in: Capsule())
+                    .background(AppTheme.controlMaterial, in: Capsule())
+                    .glassEffect(in: .capsule)
                     .overlay(Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
@@ -137,7 +134,8 @@ struct GameView: View {
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, AppSpacing._4)
-                        .background(AppTheme.gradientPrimary, in: Capsule())
+                        .background(AppTheme.controlMaterial, in: Capsule())
+                        .glassEffect(in: .capsule)
                 }
                 .buttonStyle(.plain)
             }
@@ -154,7 +152,8 @@ struct GameView: View {
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, AppSpacing._4)
-                .background(AppTheme.destructiveColor.opacity(0.8), in: Capsule())
+                .background(AppTheme.controlMaterial, in: Capsule())
+                .glassEffect(in: .capsule)
             }
             .buttonStyle(.plain)
         }
@@ -179,23 +178,25 @@ private struct PlayerScoreCard: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(player.name)
                     .font(AppTypography.headline())
-                    .foregroundStyle(AppTheme.textPrimary)
+                    .foregroundStyle(.primary)
                 Text("Total: \(player.totalScore)")
                     .font(AppTypography.footnote())
-                    .foregroundStyle(AppTheme.textSecondary)
+                    .foregroundStyle(.secondary)
             }
 
             Spacer()
 
             Text("\(roundScore)")
                 .font(AppTypography.title2())
-                .foregroundStyle(.white)
+                .foregroundStyle(.primary)
                 .frame(minWidth: 48)
                 .padding(.vertical, AppSpacing._2)
-                .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.md))
+                .background(AppTheme.controlMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md))
+                .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.md))
         }
         .padding(AppComponent.Card.padding)
-        .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+        .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+        .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         .overlay(
             RoundedRectangle(cornerRadius: AppRadius.iosCard)
                 .stroke(Color.white.opacity(0.1), lineWidth: 1)

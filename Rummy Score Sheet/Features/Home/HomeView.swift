@@ -46,21 +46,16 @@ struct HomeView: View {
     ]
 
     var body: some View {
-        ZStack {
-            Rectangle()
-                .fill(AppTheme.background)
-                .ignoresSafeArea()
-
-            ScrollView {
-                VStack(spacing: AppSpacing._6) {
-                    welcomeHeader
-                    actionCards
-                    recentGamesSection
-                }
-                .padding(.top, AppSpacing._6)
-                .padding(.bottom, AppComponent.Layout.tabBarHeight + AppSpacing._4)
+        ScrollView {
+            VStack(spacing: AppSpacing._6) {
+                welcomeHeader
+                actionCards
+                recentGamesSection
             }
+            .padding(.top, AppSpacing._6)
+            .padding(.bottom, AppComponent.Layout.tabBarHeight + AppSpacing._4)
         }
+        .background(AppTheme.background)
         .sheet(isPresented: $isGameSetupPresented) {
             GameSetupView(gameState: gameState)
         }
@@ -75,10 +70,10 @@ struct HomeView: View {
         VStack(alignment: .leading, spacing: AppSpacing._1) {
             Text("Welcome Back")
                 .font(AppTypography.largeTitle())
-                .foregroundStyle(AppTheme.textPrimary)
+                .foregroundStyle(.primary)
             Text("John")
                 .font(AppTypography.body())
-                .foregroundStyle(AppTheme.textSecondary)
+                .foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, AppSpacing._4)
@@ -92,14 +87,14 @@ struct HomeView: View {
                 title: "Create Room",
                 subtitle: "Start a new game session",
                 icon: "plus",
-                style: .gradient,
+                style: .prominent,
                 action: { isGameSetupPresented = true }
             )
             ActionCard(
                 title: "Join Room",
                 subtitle: "Enter a room code",
                 icon: "qrcode",
-                style: .glass,
+                style: .standard,
                 action: { isJoinRoomPresented = true }
             )
         }
@@ -114,7 +109,7 @@ struct HomeView: View {
             HStack {
                 Text("Recent Games")
                     .font(AppTypography.title2())
-                    .foregroundStyle(AppTheme.textPrimary)
+                    .foregroundStyle(.primary)
                 Spacer()
                 Button {
                     // View all action
@@ -122,13 +117,13 @@ struct HomeView: View {
                     Label {
                         Text("View All")
                             .font(AppTypography.subheadline())
-                    } icon: {
-                        Image(systemName: "chevron.right")
-                            .font(.system(size: 12, weight: .semibold))
-                            .accessibilityHidden(true)
-                    }
+                } icon: {
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .accessibilityHidden(true)
                 }
-                .foregroundStyle(AppTheme.iosBlue)
+            }
+            .foregroundStyle(.tint)
             }
             .padding(.horizontal, AppSpacing._4)
             
@@ -146,8 +141,8 @@ struct HomeView: View {
 // MARK: - Action Card Style
 
 private enum ActionCardStyle {
-    case gradient
-    case glass
+    case prominent
+    case standard
 }
 
 // MARK: - ActionCard
@@ -172,29 +167,25 @@ private struct ActionCard: View {
                 VStack(alignment: .leading, spacing: AppSpacing._1) {
                     Text(title)
                         .font(AppTypography.headline())
-                        .foregroundStyle(style == .gradient ? .white : AppTheme.textPrimary)
+                        .foregroundStyle(.primary)
                     Text(subtitle)
                         .font(AppTypography.footnote())
-                        .foregroundStyle(style == .gradient ? .white.opacity(0.8) : AppTheme.textSecondary)
+                        .foregroundStyle(.secondary)
                 }
 
                 Spacer()
 
                 Image(systemName: "chevron.right")
                     .font(.system(size: 14, weight: .semibold))
-                    .foregroundStyle(style == .gradient ? .white.opacity(0.8) : AppTheme.textSecondary)
+                    .foregroundStyle(.secondary)
                     .accessibilityHidden(true)
             }
             .padding(AppComponent.Card.padding)
             .background {
-                if style == .gradient {
-                    RoundedRectangle(cornerRadius: AppRadius.iosCard)
-                        .fill(AppTheme.gradientPrimary)
-                } else {
-                    RoundedRectangle(cornerRadius: AppRadius.iosCard)
-                        .fill(AppTheme.glassBackground)
-                }
+                RoundedRectangle(cornerRadius: AppRadius.iosCard)
+                    .fill(AppTheme.cardMaterial)
             }
+            .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
             .overlay(
                 RoundedRectangle(cornerRadius: AppRadius.iosCard)
                     .stroke(Color.white.opacity(0.1), lineWidth: 1)
@@ -210,16 +201,11 @@ private struct ActionCard: View {
         
         Image(systemName: icon)
             .font(.system(size: iconFontSize, weight: .medium))
-            .foregroundStyle(style == .gradient ? .white : AppTheme.primaryColor)
+            .foregroundStyle(AppTheme.primaryColor)
             .frame(width: iconSize, height: iconSize)
             .background {
-                if style == .gradient {
-                    RoundedRectangle(cornerRadius: AppRadius.md)
-                        .fill(Color.white.opacity(0.2))
-                } else {
-                    RoundedRectangle(cornerRadius: AppRadius.md)
-                        .fill(AppTheme.glassBackground)
-                }
+                RoundedRectangle(cornerRadius: AppRadius.md)
+                    .fill(AppTheme.controlMaterial)
             }
     }
 }
@@ -239,15 +225,15 @@ private struct GameHistoryCard: View {
                         .foregroundStyle(AppTheme.primaryColor)
                     Text(game.date, format: .dateTime.year().month().day())
                         .font(AppTypography.footnote())
-                        .foregroundStyle(AppTheme.textSecondary)
+                        .foregroundStyle(.secondary)
                 }
-                
+
                 Spacer()
-                
+
                 VStack(alignment: .trailing, spacing: AppSpacing._1) {
                     Text("$\(game.pointValue)")
                         .font(AppTypography.headline())
-                        .foregroundStyle(AppTheme.textPrimary)
+                        .foregroundStyle(.primary)
                     Text(game.winnerName)
                         .font(AppTypography.footnote())
                         .foregroundStyle(AppTheme.positiveColor)
@@ -265,7 +251,8 @@ private struct GameHistoryCard: View {
             }
         }
         .padding(AppComponent.Card.padding)
-        .background(AppTheme.glassBackground, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+        .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+        .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         .overlay(
             RoundedRectangle(cornerRadius: AppRadius.iosCard)
                 .stroke(Color.white.opacity(0.1), lineWidth: 1)
@@ -282,12 +269,12 @@ private struct PlayerChip: View {
     var body: some View {
         Text(name)
             .font(AppTypography.caption1())
-            .foregroundStyle(.white)
+            .foregroundStyle(.primary)
             .padding(.horizontal, AppSpacing._3)
             .padding(.vertical, AppSpacing._1 + 2)
             .background(
                 Capsule()
-                    .fill(isHighlighted ? AnyShapeStyle(AppTheme.iosBlue) : AnyShapeStyle(AppTheme.glassBackground))
+                    .fill(isHighlighted ? AnyShapeStyle(AppTheme.iosBlue) : AnyShapeStyle(AppTheme.controlMaterial))
             )
             .overlay(
                 Capsule()
@@ -301,4 +288,3 @@ private struct PlayerChip: View {
 #Preview {
     HomeView(gameState: AppGameState(roomService: MockRoomService()))
 }
-
