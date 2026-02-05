@@ -75,6 +75,38 @@ struct FirebaseConfig {
         return Auth.auth().currentUser?.uid
     }
     
+    /// Get current user's display name (or generate guest name)
+    static func getUserDisplayName() -> String {
+        if let user = Auth.auth().currentUser {
+            // Check if user has a display name set
+            if let displayName = user.displayName, !displayName.isEmpty {
+                return displayName
+            }
+            
+            // For anonymous users, generate a guest name
+            let suffix = String(user.uid.suffix(4)).uppercased()
+            return "Guest \(suffix)"
+        }
+        
+        return "Guest"
+    }
+    
+    /// Update current user's display name
+    static func updateDisplayName(_ name: String) async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw NSError(domain: "FirebaseConfig", code: 401, userInfo: [
+                NSLocalizedDescriptionKey: "No authenticated user"
+            ])
+        }
+        
+        let changeRequest = user.createProfileChangeRequest()
+        changeRequest.displayName = name
+        try await changeRequest.commitChanges()
+        
+        print("✅ Display name updated to: \(name)")
+        Analytics.logEvent("profile_updated", parameters: ["field": "display_name"])
+    }
+    
     /// Log analytics event
     static func logEvent(_ name: String, parameters: [String: Any]? = nil) {
         Analytics.logEvent(name, parameters: parameters)

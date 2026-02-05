@@ -7,16 +7,6 @@
 
 import SwiftUI
 
-// MARK: - Data Model
-
-struct GameHistoryItem: Identifiable {
-    let id: String
-    let date: Date
-    let pointValue: Int
-    let winnerName: String
-    let players: [String]
-    let currentUserName: String
-}
 
 // MARK: - HomeView
 
@@ -24,43 +14,56 @@ struct HomeView: View {
     @Bindable var gameState: AppGameState
     @State private var isGameSetupPresented = false
     @State private var isJoinRoomPresented = false
-
-    // Sample data for preview
-    private let sampleGames: [GameHistoryItem] = [
-        GameHistoryItem(
-            id: "A7K3M9",
-            date: Calendar.current.date(from: DateComponents(year: 2026, month: 1, day: 29))!,
-            pointValue: 10,
-            winnerName: "John Doe",
-            players: ["John", "Jane", "Mike", "Sarah"],
-            currentUserName: "John"
-        ),
-        GameHistoryItem(
-            id: "B2M5N8",
-            date: Calendar.current.date(from: DateComponents(year: 2026, month: 1, day: 28))!,
-            pointValue: 5,
-            winnerName: "Alex Brown",
-            players: ["John", "Alex", "Emma"],
-            currentUserName: "John"
-        )
-    ]
+    
+    // Game history state
+    @State private var gameHistory: [GameRoom] = []
+    @State private var isLoadingHistory = false
+    @State private var historyError: String?
+    
+    private let historyService = GameHistoryService()
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: AppSpacing._6) {
-                welcomeHeader
-                actionCards
-                recentGamesSection
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: AppSpacing._6) {
+                    welcomeHeader
+                    actionCards
+                    recentGamesSection
+                }
+                .padding(.top, AppSpacing._6)
+                .padding(.bottom, AppComponent.Layout.tabBarHeight + AppSpacing._4)
             }
-            .padding(.top, AppSpacing._6)
-            .padding(.bottom, AppComponent.Layout.tabBarHeight + AppSpacing._4)
+            .background(AppTheme.background)
+            .sheet(isPresented: $isGameSetupPresented) {
+                GameSetupView(gameState: gameState)
+            }
+            .sheet(isPresented: $isJoinRoomPresented) {
+                JoinRoomView(gameState: gameState)
+            }
+            .onAppear {
+                loadGameHistory()
+            }
+            .refreshable {
+                loadGameHistory()
+            }
         }
-        .background(AppTheme.background)
-        .sheet(isPresented: $isGameSetupPresented) {
-            GameSetupView(gameState: gameState)
-        }
-        .sheet(isPresented: $isJoinRoomPresented) {
-            JoinRoomView(gameState: gameState)
+    }
+    
+    // MARK: - Data Loading
+    
+    private func loadGameHistory() {
+        Task {
+            isLoadingHistory = true
+            historyError = nil
+            
+            do {
+                gameHistory = try await historyService.fetchUserGameHistory(limit: 5)
+            } catch {
+                historyError = error.localizedDescription
+                print("❌ Failed to load game history: \(error.localizedDescription)")
+            }
+            
+            isLoadingHistory = false
         }
     }
 
@@ -71,7 +74,7 @@ struct HomeView: View {
             Text("Welcome Back")
                 .font(AppTypography.largeTitle())
                 .foregroundStyle(.primary)
-            Text("John")
+            Text(FirebaseConfig.getUserDisplayName())
                 .font(AppTypography.body())
                 .foregroundStyle(.secondary)
         }
@@ -111,30 +114,75 @@ struct HomeView: View {
                     .font(AppTypography.title2())
                     .foregroundStyle(.primary)
                 Spacer()
-                Button {
-                    // View all action
-                } label: {
-                    Label {
-                        Text("View All")
-                            .font(AppTypography.subheadline())
-                } icon: {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .semibold))
-                        .accessibilityHidden(true)
+                if !gameHistory.isEmpty {
+                    Button {
+                        // TODO: Navigate to full history view
+                    } label: {
+                        Label {
+                            Text("View All")
+                                .font(AppTypography.subheadline())
+                        } icon: {
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 12, weight: .semibold))
+                                .accessibilityHidden(true)
+                        }
+                    }
+                    .foregroundStyle(.tint)
                 }
-            }
-            .foregroundStyle(.tint)
             }
             .padding(.horizontal, AppSpacing._4)
             
-            // Game cards
-            VStack(spacing: AppSpacing._3) {
-                ForEach(sampleGames) { game in
-                    GameHistoryCard(game: game)
+            // Content: Loading, Empty, or Games
+            if isLoadingHistory {
+                loadingView
+            } else if gameHistory.isEmpty {
+                emptyStateView
+            } else {
+                VStack(spacing: AppSpacing._3) {
+                    ForEach(gameHistory) { game in
+                        NavigationLink {
+                            GameDetailView(game: game)
+                        } label: {
+                            GameHistoryCard(game: game)
+                        }
+                        .buttonStyle(.plain)
+                    }
                 }
+                .padding(.horizontal, AppSpacing._4)
             }
-            .padding(.horizontal, AppSpacing._4)
         }
+    }
+    
+    private var loadingView: some View {
+        VStack(spacing: AppSpacing._3) {
+            ProgressView()
+                .tint(AppTheme.primaryColor)
+            Text("Loading games...")
+                .font(AppTypography.footnote())
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(AppSpacing._8)
+    }
+    
+    private var emptyStateView: some View {
+        VStack(spacing: AppSpacing._3) {
+            Image(systemName: "tray")
+                .font(.system(size: 48))
+                .foregroundStyle(.secondary)
+            
+            Text("No Games Yet")
+                .font(AppTypography.headline())
+                .foregroundStyle(.primary)
+            
+            Text("Start by creating or joining a room")
+                .font(AppTypography.footnote())
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(AppSpacing._8)
+        .padding(.horizontal, AppSpacing._4)
     }
 }
 
@@ -213,7 +261,11 @@ private struct ActionCard: View {
 // MARK: - GameHistoryCard
 
 private struct GameHistoryCard: View {
-    let game: GameHistoryItem
+    let game: GameRoom
+    
+    private var currentUserId: String? {
+        FirebaseConfig.getCurrentUserId()
+    }
     
     var body: some View {
         VStack(alignment: .leading, spacing: AppSpacing._3) {
@@ -223,9 +275,11 @@ private struct GameHistoryCard: View {
                     Text("#\(game.id)")
                         .font(AppTypography.headline())
                         .foregroundStyle(AppTheme.primaryColor)
-                    Text(game.date, format: .dateTime.year().month().day())
-                        .font(AppTypography.footnote())
-                        .foregroundStyle(.secondary)
+                    if let endedAt = game.endedAt {
+                        Text(endedAt, format: .dateTime.year().month().day())
+                            .font(AppTypography.footnote())
+                            .foregroundStyle(.secondary)
+                    }
                 }
 
                 Spacer()
@@ -234,19 +288,27 @@ private struct GameHistoryCard: View {
                     Text("$\(game.pointValue)")
                         .font(AppTypography.headline())
                         .foregroundStyle(.primary)
-                    Text(game.winnerName)
-                        .font(AppTypography.footnote())
-                        .foregroundStyle(AppTheme.positiveColor)
+                    if let winner = game.winner {
+                        Text(winner.name)
+                            .font(AppTypography.footnote())
+                            .foregroundStyle(AppTheme.positiveColor)
+                    } else {
+                        Text("No winner")
+                            .font(AppTypography.footnote())
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
             
             // Player chips row
-            HStack(spacing: AppSpacing._2) {
-                ForEach(game.players, id: \.self) { player in
-                    PlayerChip(
-                        name: player,
-                        isHighlighted: player == game.currentUserName
-                    )
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: AppSpacing._2) {
+                    ForEach(game.players) { player in
+                        PlayerChip(
+                            name: player.name,
+                            isHighlighted: game.createdBy == currentUserId || game.winnerId == player.id.uuidString
+                        )
+                    }
                 }
             }
         }

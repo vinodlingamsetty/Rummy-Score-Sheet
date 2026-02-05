@@ -85,7 +85,12 @@ private struct GameTabContent: View {
         if let room = gameState.currentRoom {
             if room.isStarted {
                 GameView(
-                    viewModel: GameViewModel(room: room, currentUserId: gameState.currentUserId)
+                    viewModel: GameViewModel(
+                        room: room,
+                        currentUserId: gameState.currentUserId,
+                        roomService: gameState.roomService,
+                        onRoomUpdate: { gameState.updateRoom($0) }
+                    )
                 ) {
                     gameState.endGame()
                 } onLeaveGame: {
@@ -98,10 +103,14 @@ private struct GameTabContent: View {
                         currentUserId: gameState.currentUserId,
                         onRoomChange: { gameState.updateRoom($0) },
                         onSetReady: { gameState.setReady($0) }
-                    )
-                ) {
-                    gameState.startGame()
-                }
+                    ),
+                    onStartGame: {
+                        gameState.startGame()
+                    },
+                    onLeave: {
+                        gameState.leaveGame()
+                    }
+                )
             }
         } else {
             TabPlaceholderView(title: "Game")

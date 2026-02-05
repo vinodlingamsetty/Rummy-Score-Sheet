@@ -2,7 +2,7 @@
 //  GameView.swift
 //  Rummy Scorekeeper
 //
-//  Active game screen — rounds, player scores, Add Scores, Edit
+//  Active game screen — rounds, player scores, live leaderboard
 //
 
 import SwiftUI
@@ -11,195 +11,351 @@ struct GameView: View {
     @Bindable var viewModel: GameViewModel
     let onEndGame: () -> Void
     let onLeaveGame: () -> Void
-
+    
     var body: some View {
-        ScrollView {
-            VStack(spacing: AppSpacing._6) {
-                header
-                roundSelector
-                playerCards
-                actionButtons
-            }
-            .padding(.top, AppSpacing._4)
-            .padding(.horizontal, AppSpacing._4)
-            .padding(.bottom, AppComponent.Layout.tabBarHeight + AppSpacing._6)
-        }
-        .background(AppTheme.background)
-    }
-
-    private var header: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Room \(viewModel.room.id)")
-                    .font(AppTypography.headline())
-                    .foregroundStyle(.primary)
-                Text("Target: \(viewModel.room.pointLimit)")
-                    .font(AppTypography.footnote())
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Button {
-                UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                onEndGame()
-            } label: {
-                Text("End Game")
-                    .font(AppTypography.subheadline())
-                    .fontWeight(.semibold)
-                    .foregroundStyle(.white)
+        ZStack(alignment: .top) {
+            AppTheme.background
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                // Round Selector (Horizontal)
+                roundSelectorBar
                     .padding(.horizontal, AppSpacing._4)
-                    .padding(.vertical, AppSpacing._2)
-                    .background(AppTheme.controlMaterial, in: Capsule())
-                    .glassEffect(in: .capsule)
+                    .padding(.top, AppSpacing._4)
+                    .padding(.bottom, AppSpacing._3)
+                    .background(AppTheme.background)
+                
+                // Scrollable Content
+                ScrollView {
+                    VStack(spacing: AppSpacing._4) {
+                        // Round info
+                        roundInfoCard
+                        
+                        // Player Cards
+                        playersList
+                        
+                        // Action Buttons
+                        actionButtons
+                    }
+                    .padding(.horizontal, AppSpacing._4)
+                    .padding(.top, AppSpacing._2)
+                    .padding(.bottom, AppComponent.Layout.tabBarHeight + AppSpacing._6)
+                }
+            }
+        }
+        .sheet(isPresented: $viewModel.isScoreInputPresented) {
+            if let player = viewModel.selectedPlayerForScore {
+                ScoreInputView(
+                    player: player,
+                    currentRound: viewModel.room.currentRound,
+                    onSubmit: { score in
+                        viewModel.submitScore(for: player.id, score: score)
+                    },
+                    onCancel: {
+                        viewModel.isScoreInputPresented = false
+                    }
+                )
+            }
+        }
+        .alert("Error", isPresented: .constant(viewModel.errorMessage != nil)) {
+            Button("OK") {
+                viewModel.errorMessage = nil
+            }
+        } message: {
+            if let error = viewModel.errorMessage {
+                Text(error)
+            }
+        }
+    }
+    
+    // MARK: - Round Selector Bar
+    
+    private var roundSelectorBar: some View {
+        HStack(spacing: AppSpacing._3) {
+            // Horizontal scroll for rounds
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: AppSpacing._2) {
+                    ForEach(1...viewModel.roundCount, id: \.self) { round in
+                        RoundButton(
+                            round: round,
+                            isSelected: viewModel.selectedRound == round,
+                            action: {
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                                viewModel.selectRound(round)
+                            }
+                        )
+                    }
+                }
+            }
+            
+            // Totals button
+            Button {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                viewModel.showTotalsView.toggle()
+            } label: {
+                Text("T")
+                    .font(AppTypography.headline())
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+                    .frame(width: 44, height: 44)
+                    .background(
+                        Circle()
+                            .fill(viewModel.showTotalsView ? AnyShapeStyle(AppTheme.primaryColor) : AnyShapeStyle(AppTheme.controlMaterial))
+                    )
+                    .overlay(
+                        Circle()
+                            .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                    )
             }
             .buttonStyle(.plain)
         }
+        .padding(.horizontal, AppSpacing._4)
+        .padding(.vertical, AppSpacing._2)
+        .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.lg))
+        .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.lg))
     }
-
-    private var roundSelector: some View {
-        VStack(spacing: AppSpacing._2) {
-            HStack(spacing: AppSpacing._2) {
-                ForEach(1...viewModel.roundCount, id: \.self) { round in
-                    let isSelected = viewModel.room.currentRound == round
-                    Button {
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        viewModel.selectRound(round)
-                    } label: {
-                        Text("R\(round)")
-                            .font(AppTypography.subheadline())
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.white)
-                            .frame(minWidth: 44)
-                            .padding(.vertical, AppSpacing._2)
-                            .background(
-                                Capsule()
-                                    .fill(isSelected ? AppTheme.primaryColor : Color.clear)
-                                    .overlay(Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1))
-                            )
-                    }
-                    .buttonStyle(.plain)
-                }
+    
+    // MARK: - Round Info
+    
+    private var roundInfoCard: some View {
+        HStack(spacing: AppSpacing._4) {
+            VStack(alignment: .leading, spacing: AppSpacing._1) {
+                Text("Room \(viewModel.room.id)")
+                    .font(AppTypography.headline())
+                    .foregroundStyle(.primary)
+                Text("Point Limit: \(viewModel.room.pointLimit)")
+                    .font(AppTypography.footnote())
+                    .foregroundStyle(.secondary)
             }
-            GeometryReader { geo in
-                ZStack(alignment: .leading) {
-                    Capsule()
-                        .fill(Color.white.opacity(0.2))
-                        .frame(height: 4)
-                    Capsule()
-                        .fill(AppTheme.positiveColor)
-                        .frame(width: geo.size.width * CGFloat(viewModel.room.currentRound) / CGFloat(viewModel.roundCount), height: 4)
-                }
+            
+            Spacer()
+            
+            VStack(alignment: .trailing, spacing: AppSpacing._1) {
+                Text("\(viewModel.activePlayers.count) Active")
+                    .font(AppTypography.headline())
+                    .foregroundStyle(AppTheme.positiveColor)
+                Text("\(viewModel.room.players.count - viewModel.activePlayers.count) Eliminated")
+                    .font(AppTypography.footnote())
+                    .foregroundStyle(AppTheme.destructiveColor)
             }
-            .frame(height: 4)
         }
+        .padding(AppSpacing._4)
+        .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+        .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
     }
-
-    private var playerCards: some View {
+    
+    // MARK: - Players List
+    
+    private var playersList: some View {
         VStack(spacing: AppSpacing._3) {
             ForEach(viewModel.sortedPlayers) { player in
                 PlayerScoreCard(
                     player: player,
-                    roundScore: viewModel.score(for: player.id, round: viewModel.room.currentRound - 1)
+                    scoreDisplay: viewModel.showTotalsView ? player.totalScore : viewModel.score(for: player.id, round: viewModel.selectedRound - 1),
+                    isEliminated: viewModel.isEliminated(player),
+                    isModerator: player.isModerator,
+                    isTotal: viewModel.showTotalsView,
+                    onTapScore: {
+                        if !viewModel.showTotalsView {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            viewModel.presentScoreInput(for: player)
+                        }
+                    }
                 )
             }
         }
     }
-
+    
+    // MARK: - Action Buttons
+    
     private var actionButtons: some View {
         VStack(spacing: AppSpacing._3) {
             HStack(spacing: AppSpacing._3) {
+                // End Game Button
                 Button {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    // TODO: Edit scores
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    if let winner = viewModel.winner {
+                        viewModel.endGame(winnerId: winner.id)
+                        onEndGame()
+                    } else {
+                        onEndGame()
+                    }
                 } label: {
                     HStack(spacing: AppSpacing._2) {
-                        Image(systemName: "pencil")
-                        Text("Edit")
-                            .font(AppTypography.headline())
+                        Image(systemName: "flag.checkered")
+                        Text("End Game")
+                            .font(AppTypography.subheadline())
                     }
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, AppSpacing._4)
+                    .padding(.vertical, AppSpacing._3)
                     .background(AppTheme.controlMaterial, in: Capsule())
                     .glassEffect(in: .capsule)
-                    .overlay(Capsule().stroke(Color.white.opacity(0.2), lineWidth: 1))
                 }
                 .buttonStyle(.plain)
-
+                
+                // Leave Game Button
                 Button {
-                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                    // TODO: Add scores sheet
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    onLeaveGame()
                 } label: {
-                    Text("Add Scores")
-                        .font(AppTypography.headline())
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, AppSpacing._4)
-                        .background(AppTheme.controlMaterial, in: Capsule())
-                        .glassEffect(in: .capsule)
+                    HStack(spacing: AppSpacing._2) {
+                        Image(systemName: "rectangle.portrait.and.arrow.right")
+                        Text("Leave")
+                            .font(AppTypography.subheadline())
+                    }
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, AppSpacing._3)
+                    .background(AppTheme.controlMaterial, in: Capsule())
+                    .glassEffect(in: .capsule)
                 }
                 .buttonStyle(.plain)
             }
-
-            Button {
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                onLeaveGame()
-            } label: {
-                HStack(spacing: AppSpacing._2) {
-                    Image(systemName: "rectangle.portrait.and.arrow.right")
-                    Text("Leave Game")
-                        .font(AppTypography.headline())
-                }
-                .foregroundStyle(.white)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, AppSpacing._4)
-                .background(AppTheme.controlMaterial, in: Capsule())
-                .glassEffect(in: .capsule)
-            }
-            .buttonStyle(.plain)
         }
     }
 }
 
+// MARK: - Round Button
+
+private struct RoundButton: View {
+    let round: Int
+    let isSelected: Bool
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            Text("R\(round)")
+                .font(AppTypography.subheadline())
+                .fontWeight(.semibold)
+                .foregroundStyle(.white)
+                .frame(minWidth: 44)
+                .padding(.horizontal, AppSpacing._2)
+                .padding(.vertical, AppSpacing._2)
+                .background(
+                    Capsule()
+                        .fill(isSelected ? AnyShapeStyle(AppTheme.primaryColor) : AnyShapeStyle(AppTheme.controlMaterial))
+                )
+                .overlay(
+                    Capsule()
+                        .stroke(Color.white.opacity(0.3), lineWidth: 1)
+                )
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Player Score Card
+
 private struct PlayerScoreCard: View {
     let player: Player
-    let roundScore: Int
-
+    let scoreDisplay: Int
+    let isEliminated: Bool
+    let isModerator: Bool
+    let isTotal: Bool
+    let onTapScore: () -> Void
+    
     var body: some View {
         HStack(spacing: AppSpacing._4) {
+            // Avatar
             Circle()
-                .fill(AppTheme.primaryColor.opacity(0.3))
+                .fill(isEliminated ? AppTheme.destructiveColor.opacity(0.3) : AppTheme.primaryColor.opacity(0.3))
                 .frame(width: AppComponent.Avatar.sizeLg, height: AppComponent.Avatar.sizeLg)
                 .overlay(
                     Text(String(player.name.prefix(1)).uppercased())
                         .font(AppTypography.title3())
-                        .foregroundStyle(AppTheme.primaryColor)
+                        .foregroundStyle(isEliminated ? AppTheme.destructiveColor : AppTheme.primaryColor)
                 )
-
+            
+            // Player Info
             VStack(alignment: .leading, spacing: 2) {
-                Text(player.name)
-                    .font(AppTypography.headline())
-                    .foregroundStyle(.primary)
-                Text("Total: \(player.totalScore)")
+                HStack(spacing: AppSpacing._2) {
+                    Text(player.name)
+                        .font(AppTypography.headline())
+                        .foregroundStyle(isEliminated ? .secondary : .primary)
+                    
+                    if isModerator {
+                        Image(systemName: "crown.fill")
+                            .font(.system(size: 12))
+                            .foregroundStyle(.yellow)
+                    }
+                    
+                    if isEliminated {
+                        Text("ELIMINATED")
+                            .font(AppTypography.caption2())
+                            .foregroundStyle(.white)
+                            .padding(.horizontal, AppSpacing._2)
+                            .padding(.vertical, 2)
+                            .background(AppTheme.destructiveColor, in: Capsule())
+                    }
+                }
+                
+                Text(isTotal ? "Current Round Score" : "Total: \(player.totalScore)")
                     .font(AppTypography.footnote())
                     .foregroundStyle(.secondary)
             }
-
+            
             Spacer()
-
-            Text("\(roundScore)")
-                .font(AppTypography.title2())
-                .foregroundStyle(.primary)
-                .frame(minWidth: 48)
-                .padding(.vertical, AppSpacing._2)
-                .background(AppTheme.controlMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md))
-                .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.md))
+            
+            // Score Display (Tappable if not total mode)
+            Button(action: onTapScore) {
+                Text("\(scoreDisplay)")
+                    .font(AppTypography.title2())
+                    .foregroundStyle(isEliminated ? .secondary : (isTotal ? AppTheme.positiveColor : .primary))
+                    .frame(minWidth: 60)
+                    .padding(.vertical, AppSpacing._2)
+                    .padding(.horizontal, AppSpacing._3)
+                    .background(AppTheme.controlMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md))
+                    .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.md))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppRadius.md)
+                            .stroke(isTotal ? AppTheme.positiveColor.opacity(0.5) : Color.white.opacity(0.2), lineWidth: 1)
+                    )
+            }
+            .buttonStyle(.plain)
+            .disabled(isEliminated || isTotal)
         }
         .padding(AppComponent.Card.padding)
-        .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+        .background(
+            isEliminated ? AnyShapeStyle(AppTheme.destructiveColor.opacity(0.1)) : AnyShapeStyle(AppTheme.cardMaterial),
+            in: RoundedRectangle(cornerRadius: AppRadius.iosCard)
+        )
         .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         .overlay(
             RoundedRectangle(cornerRadius: AppRadius.iosCard)
-                .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                .stroke(isEliminated ? AppTheme.destructiveColor.opacity(0.3) : Color.white.opacity(0.1), lineWidth: 1)
         )
+        .opacity(isEliminated ? 0.6 : 1)
     }
+}
+
+// MARK: - Preview
+
+#Preview {
+    let mockService = MockRoomService()
+    let mockRoom = GameRoom(
+        id: "ABC123",
+        pointLimit: 201,
+        pointValue: 10,
+        players: [
+            Player(id: UUID(), name: "Alice", isReady: true, isModerator: true, scores: [15, 20]),
+            Player(id: UUID(), name: "Bob", isReady: true, isModerator: false, scores: [25, 30]),
+            Player(id: UUID(), name: "Charlie", isReady: true, isModerator: false, scores: [210, 15])
+        ],
+        currentRound: 2,
+        isStarted: true
+    )
+    
+    let viewModel = GameViewModel(
+        room: mockRoom,
+        currentUserId: UUID(),
+        roomService: mockService,
+        onRoomUpdate: { _ in }
+    )
+    
+    GameView(
+        viewModel: viewModel,
+        onEndGame: {},
+        onLeaveGame: {}
+    )
 }

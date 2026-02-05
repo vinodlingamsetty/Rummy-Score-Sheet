@@ -21,7 +21,7 @@ final class AppGameState {
 
     // MARK: - Service
 
-    private let roomService: RoomService
+    let roomService: RoomService // Internal access for GameViewModel
     private var roomObserverTask: Task<Void, Never>?
 
     // MARK: - Init

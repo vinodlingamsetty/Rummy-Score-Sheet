@@ -12,6 +12,7 @@ struct JoinRoomView: View {
     @Bindable var gameState: AppGameState
     @State private var roomCode: String = ""
     @State private var isQRScannerPresented = false
+    @FocusState private var isTextFieldFocused: Bool
 
     private let maxCodeLength = 6
     private var canJoin: Bool {
@@ -41,6 +42,10 @@ struct JoinRoomView: View {
                 isQRScannerPresented = false
                 joinRoom(with: code)
             })
+        }
+        .onAppear {
+            // Auto-focus the text field to show keyboard immediately
+            isTextFieldFocused = true
         }
     }
 
@@ -75,6 +80,7 @@ struct JoinRoomView: View {
                 .multilineTextAlignment(.center)
                 .textInputAutocapitalization(.characters)
                 .autocorrectionDisabled()
+                .focused($isTextFieldFocused)
                 .onChange(of: roomCode) { _, newValue in
                     let filtered = newValue.uppercased().filter { $0.isLetter || $0.isNumber }
                     roomCode = String(filtered.prefix(maxCodeLength))

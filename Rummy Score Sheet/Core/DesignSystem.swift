@@ -10,9 +10,9 @@ import SwiftUI
 
 // MARK: - AppTheme (Colors)
 
-/// Central theme for the app: Liquid Glass-forward materials and system-driven surfaces
+/// Central theme for the app: Liquid Glass design system
+/// Follows Apple Human Interface Guidelines for semantic colors
 struct AppTheme {
-
     // MARK: - Background
 
     /// Subtle system-gradient backdrop that preserves Liquid Glass readability
@@ -77,7 +77,7 @@ struct AppTheme {
     static let iosPink: Color = Color(hex: "FF375F")
     static let iosTeal: Color = Color(hex: "64D2FF")
 
-    // MARK: - Semantic Colors
+    // MARK: - Semantic Colors (Apple HIG compliant)
 
     /// Primary text — white for strong contrast on purple
     static let textPrimary: Color = .white
@@ -85,10 +85,13 @@ struct AppTheme {
     /// Muted text, placeholders, descriptions
     static let textSecondary: Color = Color.textMuted
 
-    /// Positive / winners / "they owe you" / success
+    /// Positive / success / winners (Apple HIG: green for positive actions)
     static let positiveColor: Color = Color.accentGreen
 
-    /// Negative / "you owe" / destructive / logout
+    /// Negative / error / eliminated (Apple HIG: red for negative/destructive)
+    static let negativeColor: Color = Color.accentRed
+    
+    /// Destructive actions alias (same as negative, Apple HIG compliant)
     static let destructiveColor: Color = Color.accentRed
 
     /// Tertiary text (60% opacity)

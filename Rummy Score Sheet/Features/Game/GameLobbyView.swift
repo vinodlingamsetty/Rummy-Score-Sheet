@@ -10,6 +10,7 @@ import SwiftUI
 struct GameLobbyView: View {
     @Bindable var viewModel: GameLobbyViewModel
     let onStartGame: () -> Void
+    let onLeave: () -> Void
 
     var body: some View {
         ScrollView {
@@ -17,7 +18,7 @@ struct GameLobbyView: View {
                 header
                 showQRCodeButton
                 playersSection
-                startGameButton
+                actionButtons
             }
             .padding(.top, AppSpacing._6)
             .padding(.horizontal, AppSpacing._4)
@@ -86,26 +87,55 @@ struct GameLobbyView: View {
         }
     }
 
-    private var startGameButton: some View {
-        Button {
-            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-            onStartGame()
-        } label: {
-            Text("Start Game")
-                .font(AppTypography.headline())
+    private var actionButtons: some View {
+        VStack(spacing: AppSpacing._3) {
+            // Start Game Button (Moderator only)
+            if viewModel.isModerator {
+                Button {
+                    UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+                    onStartGame()
+                } label: {
+                    Text("Start Game")
+                        .font(AppTypography.headline())
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: AppComponent.Button.heightLg)
+                        .background(
+                            viewModel.allPlayersReady
+                                ? AnyShapeStyle(
+                                    LinearGradient(
+                                        colors: [AppTheme.primaryColor, AppTheme.primaryColor.opacity(0.7)],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                : AnyShapeStyle(AppTheme.controlMaterial.opacity(0.3)),
+                            in: Capsule()
+                        )
+                        .glassEffect(in: .capsule)
+                }
+                .buttonStyle(.plain)
+                .disabled(!viewModel.allPlayersReady)
+            }
+            
+            // Leave Button
+            Button {
+                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                onLeave()
+            } label: {
+                HStack(spacing: AppSpacing._2) {
+                    Image(systemName: "rectangle.portrait.and.arrow.right")
+                    Text("Leave Lobby")
+                        .font(AppTypography.headline())
+                }
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity)
                 .frame(height: AppComponent.Button.heightLg)
-                .background(
-                    viewModel.allPlayersReady
-                        ? AnyShapeStyle(AppTheme.controlMaterial)
-                        : AnyShapeStyle(.clear),
-                    in: Capsule()
-                )
+                .background(AppTheme.controlMaterial, in: Capsule())
                 .glassEffect(in: .capsule)
+            }
+            .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
-        .disabled(!viewModel.allPlayersReady)
     }
 }
 

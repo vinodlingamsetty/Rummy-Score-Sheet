@@ -16,6 +16,17 @@ struct GameRoom: Identifiable, Codable {
     var isStarted: Bool
     var createdAt: Date?     // Firebase timestamp
     var createdBy: String?   // Firebase user ID
+    
+    // Game completion tracking
+    var isCompleted: Bool = false
+    var endedAt: Date?       // When the game ended
+    var winnerId: String?    // Winner's player ID (UUID as String)
+    
+    // Computed properties
+    var winner: Player? {
+        guard let winnerId = winnerId else { return nil }
+        return players.first { $0.id.uuidString == winnerId }
+    }
 }
 
 struct Player: Identifiable, Codable {
