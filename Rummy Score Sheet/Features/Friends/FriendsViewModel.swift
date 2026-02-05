@@ -23,9 +23,6 @@ class FriendsViewModel {
     
     init(friendService: FriendService = MockFriendService()) {
         self.friendService = friendService
-        Task {
-            await loadFriends()
-        }
     }
     
     // MARK: - Computed Properties

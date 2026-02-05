@@ -26,6 +26,9 @@ struct FriendsView: View {
             .refreshable {
                 await viewModel.loadFriends()
             }
+            .task {
+                await viewModel.loadFriends()
+            }
         }
     }
     

@@ -25,8 +25,8 @@ actor MockFriendService: FriendService {
     private var friends: [Friend] = Friend.mockFriends
     
     func fetchFriends() async throws -> [Friend] {
-        // Simulate network delay
-        try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+        // Simulate very brief network delay (for testing loading state)
+        try await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
         return friends
     }
     
