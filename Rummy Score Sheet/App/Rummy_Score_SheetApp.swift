@@ -18,7 +18,7 @@ struct Rummy_Score_SheetApp: App {
         
         // Choose RoomService implementation
         // Toggle useMock to switch between Mock (local) and Firebase (multi-device)
-        let useMock = false  // Set to true for offline/local testing
+        let useMock = true  // Set to true for offline/local testing
         
         let roomService: RoomService = useMock ? MockRoomService() : FirebaseRoomService()
         
