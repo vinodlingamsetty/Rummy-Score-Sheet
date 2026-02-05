@@ -348,5 +348,5 @@ private struct PlayerChip: View {
 // MARK: - Preview
 
 #Preview {
-    HomeView(gameState: AppGameState(roomService: MockRoomService()))
+    HomeView(gameState: AppGameState(roomService: MockRoomService(), friendService: MockFriendService()))
 }

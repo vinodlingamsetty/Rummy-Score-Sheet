@@ -24,7 +24,7 @@ struct Rummy_Score_SheetApp: App {
         let roomService: RoomService = useMock ? MockRoomService() : FirebaseRoomService()
         let friendServiceImpl: FriendService = useMock ? MockFriendService() : FirebaseFriendService()
         
-        _gameState = State(initialValue: AppGameState(roomService: roomService))
+        _gameState = State(initialValue: AppGameState(roomService: roomService, friendService: friendServiceImpl))
         _friendService = State(initialValue: friendServiceImpl)
         
         print("🚀 App launched with \(useMock ? "Mock" : "Firebase") Services")

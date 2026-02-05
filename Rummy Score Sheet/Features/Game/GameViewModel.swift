@@ -22,6 +22,7 @@ final class GameViewModel {
     
     private let roomService: RoomService
     private let onRoomUpdate: (GameRoom) -> Void
+    private let onGameCompleted: ((GameRoom) async -> Void)?
 
     var currentRoundScore: Int {
         selectedRound - 1
@@ -56,11 +57,18 @@ final class GameViewModel {
         return activePlayers.first
     }
 
-    init(room: GameRoom, currentUserId: UUID? = nil, roomService: RoomService, onRoomUpdate: @escaping (GameRoom) -> Void) {
+    init(
+        room: GameRoom,
+        currentUserId: UUID? = nil,
+        roomService: RoomService,
+        onRoomUpdate: @escaping (GameRoom) -> Void,
+        onGameCompleted: ((GameRoom) async -> Void)? = nil
+    ) {
         self.room = room
         self.currentUserId = currentUserId
         self.roomService = roomService
         self.onRoomUpdate = onRoomUpdate
+        self.onGameCompleted = onGameCompleted
         self.selectedRound = room.currentRound // Default to current active round
     }
 
@@ -180,6 +188,11 @@ final class GameViewModel {
             do {
                 let updatedRoom = try await roomService.endGame(roomCode: room.id, winnerId: winnerId)
                 updateRoomState(updatedRoom)
+                
+                // Create friendships after game completes
+                if let onGameCompleted = onGameCompleted {
+                    await onGameCompleted(updatedRoom)
+                }
             } catch {
                 errorMessage = error.localizedDescription
                 print("❌ Failed to end game: \(error.localizedDescription)")

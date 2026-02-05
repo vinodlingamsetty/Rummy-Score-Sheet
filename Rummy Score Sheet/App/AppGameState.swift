@@ -22,12 +22,14 @@ final class AppGameState {
     // MARK: - Service
 
     let roomService: RoomService // Internal access for GameViewModel
+    let friendService: FriendService // Internal access for creating friendships
     private var roomObserverTask: Task<Void, Never>?
 
     // MARK: - Init
 
-    init(roomService: RoomService) {
+    init(roomService: RoomService, friendService: FriendService) {
         self.roomService = roomService
+        self.friendService = friendService
     }
     
     deinit {
@@ -122,6 +124,73 @@ final class AppGameState {
 
     func endGame() {
         leaveGame()
+    }
+    
+    /// Create or update friendships between all players after a game ends
+    func createFriendshipsFromGame(_ room: GameRoom) async {
+        guard room.isCompleted, let winner = room.winner else {
+            print("⚠️ Cannot create friendships: Game not completed or no winner")
+            return
+        }
+        
+        print("🤝 Creating friendships from completed game...")
+        
+        // Only works with Firebase service
+        guard let firebaseFriendService = friendService as? FirebaseFriendService else {
+            print("⚠️ Friendships only supported with Firebase service")
+            return
+        }
+        
+        // Calculate balances: winner receives, losers pay based on their scores
+        let winnerTotalScore = winner.totalScore
+        
+        for player in room.players {
+            // Skip winner vs winner
+            if player.id == winner.id { continue }
+            
+            // Calculate how much this player owes the winner
+            // Formula: (loser's total score - winner's total score) * pointValue
+            let scoreDifference = player.totalScore - winnerTotalScore
+            let amountOwed = Double(scoreDifference) * Double(room.pointValue)
+            
+            // Create/update friendship: winner's perspective (positive balance = they owe winner)
+            do {
+                try await firebaseFriendService.createOrUpdateFriendship(
+                    userId1: winner.id.uuidString,
+                    userId2: player.id.uuidString,
+                    user1Name: winner.name,
+                    user2Name: player.name,
+                    balanceChange: amountOwed
+                )
+                print("✅ Updated friendship: \(winner.name) ↔ \(player.name), balance change: $\(amountOwed)")
+            } catch {
+                print("❌ Failed to create friendship: \(error.localizedDescription)")
+            }
+        }
+        
+        // Also create friendships between all other players (0 balance change, just tracking games played)
+        for i in 0..<room.players.count {
+            for j in (i+1)..<room.players.count {
+                let player1 = room.players[i]
+                let player2 = room.players[j]
+                
+                // Skip if one of them is the winner (already handled above)
+                if player1.id == winner.id || player2.id == winner.id { continue }
+                
+                do {
+                    try await firebaseFriendService.createOrUpdateFriendship(
+                        userId1: player1.id.uuidString,
+                        userId2: player2.id.uuidString,
+                        user1Name: player1.name,
+                        user2Name: player2.name,
+                        balanceChange: 0.0 // No money exchange between non-winners
+                    )
+                    print("✅ Updated friendship: \(player1.name) ↔ \(player2.name)")
+                } catch {
+                    print("❌ Failed to create friendship: \(error.localizedDescription)")
+                }
+            }
+        }
     }
 
     // MARK: - Room Updates

@@ -74,7 +74,10 @@ private struct GameTabContent: View {
                         room: room,
                         currentUserId: gameState.currentUserId,
                         roomService: gameState.roomService,
-                        onRoomUpdate: { gameState.updateRoom($0) }
+                        onRoomUpdate: { gameState.updateRoom($0) },
+                        onGameCompleted: { completedRoom in
+                            await gameState.createFriendshipsFromGame(completedRoom)
+                        }
                     )
                 ) {
                     gameState.endGame()
@@ -120,7 +123,7 @@ private struct TabPlaceholderView: View {
 
 #Preview {
     MainTabView(
-        gameState: AppGameState(roomService: MockRoomService()),
+        gameState: AppGameState(roomService: MockRoomService(), friendService: MockFriendService()),
         friendService: MockFriendService()
     )
 }

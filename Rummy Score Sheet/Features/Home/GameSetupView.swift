@@ -153,5 +153,5 @@ struct GameSetupView: View {
 }
 
 #Preview {
-    GameSetupView(gameState: AppGameState(roomService: MockRoomService()))
+    GameSetupView(gameState: AppGameState(roomService: MockRoomService(), friendService: MockFriendService()))
 }

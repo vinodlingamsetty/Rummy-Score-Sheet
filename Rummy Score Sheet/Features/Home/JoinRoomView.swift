@@ -135,5 +135,5 @@ struct JoinRoomView: View {
 }
 
 #Preview {
-    JoinRoomView(gameState: AppGameState(roomService: MockRoomService()))
+    JoinRoomView(gameState: AppGameState(roomService: MockRoomService(), friendService: MockFriendService()))
 }
