@@ -151,10 +151,11 @@ struct GameView: View {
             ForEach(viewModel.sortedPlayers) { player in
                 PlayerScoreCard(
                     player: player,
-                    scoreDisplay: viewModel.showTotalsView ? player.totalScore : viewModel.score(for: player.id, round: viewModel.selectedRound - 1),
+                    scoreDisplay: viewModel.showTotalsView ? "\(player.totalScore)" : (viewModel.score(for: player.id, round: viewModel.selectedRound - 1).map { "\($0)" } ?? "-"),
                     isEliminated: viewModel.isEliminated(player),
                     isModerator: player.isModerator,
                     isTotal: viewModel.showTotalsView,
+                    hasScore: viewModel.showTotalsView || viewModel.hasScore(for: player.id, round: viewModel.selectedRound - 1),
                     onTapScore: {
                         if !viewModel.showTotalsView {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -249,10 +250,11 @@ private struct RoundButton: View {
 
 private struct PlayerScoreCard: View {
     let player: Player
-    let scoreDisplay: Int
+    let scoreDisplay: String
     let isEliminated: Bool
     let isModerator: Bool
     let isTotal: Bool
+    let hasScore: Bool
     let onTapScore: () -> Void
     
     var body: some View {
@@ -290,7 +292,7 @@ private struct PlayerScoreCard: View {
                     }
                 }
                 
-                Text(isTotal ? "Current Round Score" : "Total: \(player.totalScore)")
+                Text(isTotal ? "Running Total" : "Total: \(player.totalScore)")
                     .font(AppTypography.footnote())
                     .foregroundStyle(.secondary)
             }
@@ -299,17 +301,28 @@ private struct PlayerScoreCard: View {
             
             // Score Display (Tappable if not total mode)
             Button(action: onTapScore) {
-                Text("\(scoreDisplay)")
+                Text(scoreDisplay)
                     .font(AppTypography.title2())
-                    .foregroundStyle(isEliminated ? .secondary : (isTotal ? AppTheme.positiveColor : .primary))
+                    .foregroundStyle(
+                        isEliminated ? .secondary : 
+                        isTotal ? AppTheme.positiveColor : 
+                        hasScore ? .primary : .secondary.opacity(0.5)
+                    )
                     .frame(minWidth: 60)
                     .padding(.vertical, AppSpacing._2)
                     .padding(.horizontal, AppSpacing._3)
-                    .background(AppTheme.controlMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md))
+                    .background(
+                        hasScore ? AppTheme.controlMaterial : AppTheme.controlMaterial.opacity(0.5),
+                        in: RoundedRectangle(cornerRadius: AppRadius.md)
+                    )
                     .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.md))
                     .overlay(
                         RoundedRectangle(cornerRadius: AppRadius.md)
-                            .stroke(isTotal ? AppTheme.positiveColor.opacity(0.5) : Color.white.opacity(0.2), lineWidth: 1)
+                            .stroke(
+                                isTotal ? AppTheme.positiveColor.opacity(0.5) : 
+                                hasScore ? Color.white.opacity(0.2) : Color.white.opacity(0.1), 
+                                lineWidth: 1
+                            )
                     )
             }
             .buttonStyle(.plain)

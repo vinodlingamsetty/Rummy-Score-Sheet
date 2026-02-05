@@ -43,8 +43,8 @@ final class GameViewModel {
         // Only allow advancing if we are on the latest round
         guard selectedRound == room.currentRound else { return false }
         
-        // All players must have a score entered for current round (including 0)
-        return room.players.allSatisfy { player in
+        // All active (non-eliminated) players must have a score entered for current round
+        return activePlayers.allSatisfy { player in
             let roundIndex = room.currentRound - 1
             return roundIndex < player.scores.count
         }
@@ -64,10 +64,15 @@ final class GameViewModel {
         self.selectedRound = room.currentRound // Default to current active round
     }
 
-    func score(for playerId: UUID, round: Int) -> Int {
+    func score(for playerId: UUID, round: Int) -> Int? {
         guard let player = room.players.first(where: { $0.id == playerId }),
-              round >= 0, round < player.scores.count else { return 0 }
+              round >= 0, round < player.scores.count else { return nil }
         return player.scores[round]
+    }
+    
+    func hasScore(for playerId: UUID, round: Int) -> Bool {
+        guard let player = room.players.first(where: { $0.id == playerId }) else { return false }
+        return round >= 0 && round < player.scores.count
     }
 
     func selectRound(_ round: Int) {

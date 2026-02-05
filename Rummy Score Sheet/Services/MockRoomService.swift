@@ -99,7 +99,7 @@ actor MockRoomService: @preconcurrency RoomService {
         room.isStarted = true
         room.players = room.players.map { player in
             var copy = player
-            copy.scores = [Int](repeating: 0, count: 6)
+            copy.scores = [] // Start with empty scores - user must enter explicitly
             return copy
         }
         rooms[roomCode] = room
