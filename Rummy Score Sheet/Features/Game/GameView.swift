@@ -257,6 +257,20 @@ private struct PlayerScoreCard: View {
     let hasScore: Bool
     let onTapScore: () -> Void
     
+    // Computed colors to avoid complex ternary expressions
+    private var scoreColor: Color {
+        if isEliminated { return .secondary }
+        if isTotal { return AppTheme.positiveColor }
+        if hasScore { return .primary }
+        return .secondary.opacity(0.5)
+    }
+    
+    private var scoreBorderColor: Color {
+        if isTotal { return AppTheme.positiveColor.opacity(0.5) }
+        if hasScore { return Color.white.opacity(0.2) }
+        return Color.white.opacity(0.1)
+    }
+    
     var body: some View {
         HStack(spacing: AppSpacing._4) {
             // Avatar
@@ -303,11 +317,7 @@ private struct PlayerScoreCard: View {
             Button(action: onTapScore) {
                 Text(scoreDisplay)
                     .font(AppTypography.title2())
-                    .foregroundStyle(
-                        isEliminated ? .secondary : 
-                        isTotal ? AppTheme.positiveColor : 
-                        hasScore ? .primary : .secondary.opacity(0.5)
-                    )
+                    .foregroundStyle(scoreColor)
                     .frame(minWidth: 60)
                     .padding(.vertical, AppSpacing._2)
                     .padding(.horizontal, AppSpacing._3)
@@ -318,11 +328,7 @@ private struct PlayerScoreCard: View {
                     .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.md))
                     .overlay(
                         RoundedRectangle(cornerRadius: AppRadius.md)
-                            .stroke(
-                                isTotal ? AppTheme.positiveColor.opacity(0.5) : 
-                                hasScore ? Color.white.opacity(0.2) : Color.white.opacity(0.1), 
-                                lineWidth: 1
-                            )
+                            .stroke(scoreBorderColor, lineWidth: 1)
                     )
             }
             .buttonStyle(.plain)
