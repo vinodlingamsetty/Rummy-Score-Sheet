@@ -322,7 +322,7 @@ private struct PlayerScoreCard: View {
                     .padding(.vertical, AppSpacing._2)
                     .padding(.horizontal, AppSpacing._3)
                     .background(
-                        hasScore ? AppTheme.controlMaterial : AppTheme.controlMaterial.opacity(0.5),
+                        hasScore ? AnyShapeStyle(AppTheme.controlMaterial) : AnyShapeStyle(AppTheme.controlMaterial.opacity(0.5)),
                         in: RoundedRectangle(cornerRadius: AppRadius.md)
                     )
                     .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.md))
