@@ -27,6 +27,7 @@ enum AppTab: Int, CaseIterable {
 
 struct MainTabView: View {
     @Bindable var gameState: AppGameState
+    let friendService: FriendService
 
     var body: some View {
         TabView(selection: $gameState.selectedTab) {
@@ -38,7 +39,7 @@ struct MainTabView: View {
                 .tabItem { Label("Game", systemImage: AppTab.game.icon) }
                 .tag(AppTab.game)
 
-            FriendsView()
+            FriendsView(friendService: friendService)
                 .tabItem { Label("Friends", systemImage: AppTab.friends.icon) }
                 .tag(AppTab.friends)
 
@@ -118,5 +119,8 @@ private struct TabPlaceholderView: View {
 }
 
 #Preview {
-    MainTabView(gameState: AppGameState(roomService: MockRoomService()))
+    MainTabView(
+        gameState: AppGameState(roomService: MockRoomService()),
+        friendService: MockFriendService()
+    )
 }

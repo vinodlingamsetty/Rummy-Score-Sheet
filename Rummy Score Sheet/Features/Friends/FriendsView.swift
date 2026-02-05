@@ -8,7 +8,13 @@
 import SwiftUI
 
 struct FriendsView: View {
-    @State private var viewModel = FriendsViewModel()
+    let friendService: FriendService
+    @State private var viewModel: FriendsViewModel
+    
+    init(friendService: FriendService = MockFriendService()) {
+        self.friendService = friendService
+        _viewModel = State(initialValue: FriendsViewModel(friendService: friendService))
+    }
     
     var body: some View {
         NavigationStack {
