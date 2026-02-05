@@ -38,7 +38,7 @@ struct MainTabView: View {
                 .tabItem { Label("Game", systemImage: AppTab.game.icon) }
                 .tag(AppTab.game)
 
-            TabPlaceholderView(title: "Friends")
+            FriendsView()
                 .tabItem { Label("Friends", systemImage: AppTab.friends.icon) }
                 .tag(AppTab.friends)
 
@@ -58,22 +58,6 @@ struct MainTabView: View {
             Button("OK") { gameState.errorMessage = nil }
         } message: {
             Text(gameState.errorMessage ?? "")
-        }
-    }
-
-    @ViewBuilder
-    private func tabContent(for tab: AppTab) -> some View {
-        switch tab {
-        case .home:
-            HomeView(gameState: gameState)
-        case .game:
-            GameTabContent(gameState: gameState)
-        case .friends:
-            FriendsView()
-        case .rules:
-            TabPlaceholderView(title: "Rules")
-        case .profile:
-            TabPlaceholderView(title: "Profile")
         }
     }
 }
