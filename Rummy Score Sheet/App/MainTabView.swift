@@ -69,7 +69,7 @@ struct MainTabView: View {
         case .game:
             GameTabContent(gameState: gameState)
         case .friends:
-            TabPlaceholderView(title: "Friends")
+            FriendsView()
         case .rules:
             TabPlaceholderView(title: "Rules")
         case .profile:
