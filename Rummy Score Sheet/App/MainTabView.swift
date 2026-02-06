@@ -43,7 +43,7 @@ struct MainTabView: View {
                 .tabItem { Label("Friends", systemImage: AppTab.friends.icon) }
                 .tag(AppTab.friends)
 
-            TabPlaceholderView(title: "Rules")
+            RulesView()
                 .tabItem { Label("Rules", systemImage: AppTab.rules.icon) }
                 .tag(AppTab.rules)
 
