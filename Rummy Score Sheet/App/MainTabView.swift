@@ -47,7 +47,7 @@ struct MainTabView: View {
                 .tabItem { Label("Rules", systemImage: AppTab.rules.icon) }
                 .tag(AppTab.rules)
 
-            TabPlaceholderView(title: "Profile")
+            ProfileView()
                 .tabItem { Label("Profile", systemImage: AppTab.profile.icon) }
                 .tag(AppTab.profile)
         }
