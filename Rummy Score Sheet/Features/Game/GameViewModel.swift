@@ -40,11 +40,10 @@ final class GameViewModel {
         room.players.filter { !isEliminated($0) }
     }
     
+    /// True when all active players have entered a score for the current round.
+    /// Used for auto-advance; requires being on latest round.
     var canAdvanceRound: Bool {
-        // Only allow advancing if we are on the latest round
         guard selectedRound == room.currentRound else { return false }
-        
-        // All active (non-eliminated) players must have a score entered for current round
         return activePlayers.allSatisfy { player in
             let roundIndex = room.currentRound - 1
             return roundIndex < player.scores.count
@@ -91,6 +90,7 @@ final class GameViewModel {
     
     // MARK: - Player State
     
+    /// Player is eliminated when their total score reaches or exceeds the point limit.
     func isEliminated(_ player: Player) -> Bool {
         player.totalScore >= room.pointLimit
     }
@@ -126,7 +126,7 @@ final class GameViewModel {
                 // 1. We are editing the LATEST round
                 // 2. All active players have scores
                 if canAdvanceRound {
-                    try await Task.sleep(nanoseconds: 500_000_000) // 0.5s delay for UX
+                    try await Task.sleep(nanoseconds: AppConstants.Timing.autoAdvanceRoundDelay)
                     let nextRoom = try await roomService.nextRound(roomCode: room.id)
                     updateRoomState(nextRoom)
                     selectedRound = nextRoom.currentRound // Auto-follow to new round

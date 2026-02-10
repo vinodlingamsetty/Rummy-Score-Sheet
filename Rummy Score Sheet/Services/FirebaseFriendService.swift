@@ -2,7 +2,8 @@
 //  FirebaseFriendService.swift
 //  Rummy Scorekeeper
 //
-//  Firebase Firestore implementation of FriendService
+//  Firebase Firestore implementation of FriendService.
+//  Friendship IDs use format {userId1}_{userId2} (smaller ID first) for consistency.
 //
 
 import Foundation
@@ -190,7 +191,7 @@ actor FirebaseFriendService: FriendService {
             ? (userId1, userId2, user1Name, user2Name, balanceChange)
             : (userId2, userId1, user2Name, user1Name, -balanceChange)
         
-        // Generate a consistent friendship ID based on both user IDs
+        // Consistent ID format ensures one doc per pair regardless of caller order
         let friendshipId = "\(smallerUserId)_\(largerUserId)"
         let friendshipRef = db.collection(friendsCollection).document(friendshipId)
         

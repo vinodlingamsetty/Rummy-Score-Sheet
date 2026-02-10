@@ -17,12 +17,15 @@ struct ScoreInputView: View {
     @FocusState private var isScoreFieldFocused: Bool
     @Environment(\.dismiss) private var dismiss
     
+    /// Parsed score from input (nil if invalid or empty)
     private var score: Int? {
         Int(scoreText)
     }
     
+    /// Submit allowed only when score is valid and non-negative
     private var canSubmit: Bool {
-        score != nil && score! >= 0
+        guard let s = score else { return false }
+        return s >= 0
     }
     
     var body: some View {
@@ -95,8 +98,9 @@ struct ScoreInputView: View {
                 .focused($isScoreFieldFocused)
                 .onChange(of: scoreText) { _, newValue in
                     let digitsOnly = newValue.filter { $0.isNumber }
-                    if digitsOnly.count > 3 {
-                        scoreText = String(digitsOnly.prefix(3))
+                    // Cap at max digits per round (e.g. 999 points)
+                    if digitsOnly.count > AppConstants.ScoreInput.maxDigits {
+                        scoreText = String(digitsOnly.prefix(AppConstants.ScoreInput.maxDigits))
                     } else if digitsOnly != newValue {
                         scoreText = digitsOnly
                     }

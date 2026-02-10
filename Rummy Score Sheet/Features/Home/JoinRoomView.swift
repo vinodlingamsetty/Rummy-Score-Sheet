@@ -14,7 +14,7 @@ struct JoinRoomView: View {
     @State private var isQRScannerPresented = false
     @FocusState private var isTextFieldFocused: Bool
 
-    private let maxCodeLength = 6
+    private let maxCodeLength = AppConstants.RoomCode.length
     private var canJoin: Bool {
         roomCode.count == maxCodeLength
     }
@@ -82,6 +82,7 @@ struct JoinRoomView: View {
                 .autocorrectionDisabled()
                 .focused($isTextFieldFocused)
                 .onChange(of: roomCode) { _, newValue in
+                    // Restrict to alphanumeric, uppercase, max length
                     let filtered = newValue.uppercased().filter { $0.isLetter || $0.isNumber }
                     roomCode = String(filtered.prefix(maxCodeLength))
                 }

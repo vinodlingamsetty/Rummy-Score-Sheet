@@ -2,7 +2,8 @@
 //  FirebaseConfig.swift
 //  Rummy Scorekeeper
 //
-//  Firebase initialization and configuration
+//  Firebase initialization and configuration.
+//  Uses Anonymous Auth for quick start; no user credentials stored locally.
 //
 
 import Foundation
@@ -35,7 +36,8 @@ struct FirebaseConfig {
         }
     }
     
-    /// Ensure user is authenticated (await this before any operations)
+    /// Ensures user is authenticated. Call before Firestore/Auth operations.
+    /// Signs in anonymously if not already authenticated.
     static func ensureAuthenticated() async {
         if Auth.auth().currentUser == nil {
             do {
@@ -91,7 +93,8 @@ struct FirebaseConfig {
         return "Guest"
     }
     
-    /// Update current user's display name
+    /// Updates the current user's display name in Firebase Auth.
+    /// Caller must validate/sanitize name (length, trim) before calling.
     static func updateDisplayName(_ name: String) async throws {
         guard let user = Auth.auth().currentUser else {
             throw NSError(domain: "FirebaseConfig", code: 401, userInfo: [

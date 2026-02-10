@@ -17,22 +17,22 @@ class ProfileViewModel {
     var isLoading: Bool = false
     var errorMessage: String?
     
-    // Settings
+    // Settings (persisted via UserDefaults)
     var notificationsEnabled: Bool {
         didSet {
-            UserDefaults.standard.set(notificationsEnabled, forKey: "notificationsEnabled")
+            UserDefaults.standard.set(notificationsEnabled, forKey: AppConstants.UserDefaultsKeys.notificationsEnabled)
         }
     }
     
     var hapticsEnabled: Bool {
         didSet {
-            UserDefaults.standard.set(hapticsEnabled, forKey: "hapticsEnabled")
+            UserDefaults.standard.set(hapticsEnabled, forKey: AppConstants.UserDefaultsKeys.hapticsEnabled)
         }
     }
     
     var highContrastMode: Bool {
         didSet {
-            UserDefaults.standard.set(highContrastMode, forKey: "highContrastMode")
+            UserDefaults.standard.set(highContrastMode, forKey: AppConstants.UserDefaultsKeys.highContrastMode)
         }
     }
     
@@ -43,10 +43,10 @@ class ProfileViewModel {
     // MARK: - Initialization
     
     init() {
-        // Load settings from UserDefaults
-        self.notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
-        self.hapticsEnabled = UserDefaults.standard.bool(forKey: "hapticsEnabled")
-        self.highContrastMode = UserDefaults.standard.bool(forKey: "highContrastMode")
+        // Load settings from UserDefaults (false if never set)
+        self.notificationsEnabled = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.notificationsEnabled)
+        self.hapticsEnabled = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.hapticsEnabled)
+        self.highContrastMode = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.highContrastMode)
     }
     
     // MARK: - User Profile
@@ -82,20 +82,23 @@ class ProfileViewModel {
     
     @MainActor
     func updateDisplayName() async {
-        guard !editedDisplayName.isEmpty else {
+        // Validate: trim whitespace and enforce length limits
+        let trimmed = editedDisplayName.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard trimmed.count >= AppConstants.Profile.displayNameMinLength else {
             errorMessage = "Display name cannot be empty"
             return
         }
+        let validated = String(trimmed.prefix(AppConstants.Profile.displayNameMaxLength))
         
         isLoading = true
         errorMessage = nil
         
         do {
-            // Update Firebase Auth display name
-            try await FirebaseConfig.updateDisplayName(editedDisplayName)
+            // Update Firebase Auth display name (validated length/trim applied)
+            try await FirebaseConfig.updateDisplayName(validated)
             
             // Update local profile
-            userProfile?.displayName = editedDisplayName
+            userProfile?.displayName = validated
             
             // Close edit mode
             isEditingProfile = false

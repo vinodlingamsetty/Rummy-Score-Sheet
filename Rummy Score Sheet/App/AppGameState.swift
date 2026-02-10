@@ -2,7 +2,9 @@
 //  AppGameState.swift
 //  Rummy Scorekeeper
 //
-//  App-level game session state — thin coordinator that delegates to RoomService
+//  App-level game session state — thin coordinator that delegates to RoomService.
+//  Does not perform authorization; moderator-only checks are UI-level. Firestore
+//  security rules should enforce server-side (see backend repo).
 //
 
 import Foundation
@@ -114,7 +116,7 @@ final class AppGameState {
             do {
                 try await roomService.leaveRoom(roomCode: roomCode, playerId: playerId)
             } catch {
-                // Ignore error on leave — clear local state anyway
+                // Intentionally ignore leave errors — user is leaving; clear local state regardless
             }
             currentRoom = nil
             currentUserId = nil
@@ -126,7 +128,9 @@ final class AppGameState {
         leaveGame()
     }
     
-    /// Create or update friendships between all players after a game ends
+    /// Creates or updates friendships between all players after a game ends.
+    /// Only runs with FirebaseFriendService; no-op for MockFriendService.
+    /// Balance formula: (loser_score - winner_score) * pointValue = amount owed.
     func createFriendshipsFromGame(_ room: GameRoom) async {
         guard room.isCompleted, let winner = room.winner else {
             print("⚠️ Cannot create friendships: Game not completed or no winner")

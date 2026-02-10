@@ -2,7 +2,9 @@
 //  FirebaseRoomService.swift
 //  Rummy Scorekeeper
 //
-//  Firebase Firestore implementation of RoomService with real-time sync
+//  Firebase Firestore implementation of RoomService with real-time sync.
+//  Note: Moderator-only actions (startGame, endGame, etc.) are not enforced here;
+//  Firestore security rules must enforce authorization server-side.
 //
 
 import Foundation
@@ -216,7 +218,7 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
     
     func updatePlayerScore(roomCode: String, playerId: UUID, score: Int, round: Int) async throws -> GameRoom {
         await FirebaseConfig.ensureAuthenticated()
-        
+        // Normalize room code for consistent Firestore doc lookups
         let normalizedCode = roomCode.uppercased().trimmingCharacters(in: .whitespaces)
         
         do {
@@ -359,8 +361,9 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
     
     // MARK: - Helpers
     
+    /// Generates a 6-character room code. Excludes ambiguous chars (0,O,1,I).
     private func generateRoomCode() -> String {
-        let chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-        return String((0..<6).map { _ in chars.randomElement()! })
+        let chars = AppConstants.RoomCode.characters
+        return String((0..<AppConstants.RoomCode.length).compactMap { _ in chars.randomElement() })
     }
 }
