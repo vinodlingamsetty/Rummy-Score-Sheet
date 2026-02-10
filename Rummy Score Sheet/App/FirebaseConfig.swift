@@ -3,7 +3,7 @@
 //  Rummy Scorekeeper
 //
 //  Firebase initialization and configuration.
-//  Uses Anonymous Auth for quick start; no user credentials stored locally.
+//  Auth is gated by LoginView; no auto sign-in on launch.
 //
 
 import Foundation
@@ -19,21 +19,10 @@ struct FirebaseConfig {
         // Initialize Firebase
         FirebaseApp.configure()
         
-        // Setup Anonymous Authentication
-        setupAnonymousAuth()
-        
         // Configure Crashlytics
         configureCrashlytics()
         
         print("✅ Firebase initialized successfully")
-    }
-    
-    // MARK: - Anonymous Authentication
-    
-    private static func setupAnonymousAuth() {
-        Task {
-            await ensureAuthenticated()
-        }
     }
     
     /// Ensures user is authenticated. Call before Firestore/Auth operations.
@@ -113,5 +102,53 @@ struct FirebaseConfig {
     /// Log analytics event
     static func logEvent(_ name: String, parameters: [String: Any]? = nil) {
         Analytics.logEvent(name, parameters: parameters)
+    }
+    
+    // MARK: - Sign in with Apple
+    
+    /// Signs in or links with Apple credential. If user is anonymous, links to preserve data.
+    static func signInWithApple(credential: AppleAuthCredential) async throws {
+        let oauthCredential = OAuthProvider.appleCredential(
+            withIDToken: credential.idToken,
+            rawNonce: credential.rawNonce,
+            fullName: credential.fullName
+        )
+        
+        if let user = Auth.auth().currentUser, user.isAnonymous {
+            try await linkWithApple(oauthCredential: oauthCredential, fullName: credential.fullName)
+        } else {
+            _ = try await Auth.auth().signIn(with: oauthCredential)
+            if let fullName = credential.fullName {
+                try? await saveAppleDisplayName(fullName)
+            }
+            Analytics.logEvent(AnalyticsEventLogin, parameters: [AnalyticsParameterMethod: "apple"])
+            Crashlytics.crashlytics().setUserID(Auth.auth().currentUser?.uid)
+        }
+    }
+    
+    /// Links anonymous user to Apple credential (preserves Firestore data).
+    private static func linkWithApple(oauthCredential: AuthCredential, fullName: PersonNameComponents?) async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw NSError(domain: "FirebaseConfig", code: 401, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
+        }
+        let result = try await user.link(with: oauthCredential)
+        if let fullName = fullName {
+            try? await saveAppleDisplayName(fullName)
+        }
+        Analytics.logEvent(AnalyticsEventLogin, parameters: [AnalyticsParameterMethod: "apple"])
+        Crashlytics.crashlytics().setUserID(result.user.uid)
+    }
+    
+    /// Saves Apple-provided full name to Firebase profile (Apple only sends name on first sign-in).
+    private static func saveAppleDisplayName(_ fullName: PersonNameComponents) async throws {
+        let formatter = PersonNameComponentsFormatter()
+        formatter.style = .default
+        let name = formatter.string(from: fullName).trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty else { return }
+        
+        guard let user = Auth.auth().currentUser else { return }
+        let changeRequest = user.createProfileChangeRequest()
+        changeRequest.displayName = name
+        try await changeRequest.commitChanges()
     }
 }

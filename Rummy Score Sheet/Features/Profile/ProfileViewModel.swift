@@ -40,6 +40,11 @@ class ProfileViewModel {
     var isEditingProfile: Bool = false
     var editedDisplayName: String = ""
     
+    /// True when user is signed in anonymously (Guest)
+    var isAnonymous: Bool {
+        Auth.auth().currentUser?.isAnonymous ?? true
+    }
+    
     // MARK: - Initialization
     
     init() {
@@ -109,6 +114,37 @@ class ProfileViewModel {
             }
         } catch {
             errorMessage = "Failed to update name: \(error.localizedDescription)"
+            if hapticsEnabled {
+                UINotificationFeedbackGenerator().notificationOccurred(.error)
+            }
+        }
+        
+        isLoading = false
+    }
+    
+    /// Completes Sign in with Apple using credential from SignInWithAppleButton's onCompletion.
+    @MainActor
+    func completeSignInWithApple(credential: AppleAuthCredential) async {
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            try await FirebaseConfig.signInWithApple(credential: credential)
+            await loadUserProfile()
+            if hapticsEnabled {
+                UINotificationFeedbackGenerator().notificationOccurred(.success)
+            }
+        } catch let error as NSError {
+            if error.domain == AuthErrorDomain, error.code == AuthErrorCode.credentialAlreadyInUse.rawValue {
+                errorMessage = "This Apple ID is already used with another account"
+            } else {
+                errorMessage = "Sign in failed: \(error.localizedDescription)"
+            }
+            if hapticsEnabled {
+                UINotificationFeedbackGenerator().notificationOccurred(.error)
+            }
+        } catch {
+            errorMessage = "Sign in failed: \(error.localizedDescription)"
             if hapticsEnabled {
                 UINotificationFeedbackGenerator().notificationOccurred(.error)
             }

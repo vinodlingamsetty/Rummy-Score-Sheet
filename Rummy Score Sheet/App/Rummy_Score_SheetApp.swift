@@ -32,7 +32,7 @@ struct Rummy_Score_SheetApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainTabView(gameState: gameState, friendService: friendService)
+            AuthGateView(gameState: gameState, friendService: friendService)
                 .preferredColorScheme(.dark)
         }
     }
