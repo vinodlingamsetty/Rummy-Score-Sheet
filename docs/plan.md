@@ -7,9 +7,8 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 ## Phase 1: Critical (Must Complete Before Submission)
 
 ### 1.1 Deployment Target
-- [ ] Change `IPHONEOS_DEPLOYMENT_TARGET` from 26.0 to 17.0 (or 18.0)
-- [ ] In Xcode: Project → Rummy Score Sheet target → General → Minimum Deployments
-- [ ] Verify no iOS 26–only APIs are used
+- [x] Keep `IPHONEOS_DEPLOYMENT_TARGET` at 26.0 (required for `glassEffect` Liquid Glass design)
+- [x] Verified no blocking issues: `glassEffect` is iOS 26–only; Apple does not reject for high minimum OS
 
 ### 1.2 Signing & Provisioning
 - [ ] Set `DEVELOPMENT_TEAM` to your Apple Developer account
@@ -18,9 +17,9 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 - [ ] Verify build succeeds for "Any iOS Device"
 
 ### 1.3 App Icon
-- [ ] Design and add 1024×1024 app icon
-- [ ] Add to Assets.xcassets → AppIcon
-- [ ] Ensure all required sizes are populated (Xcode can generate from 1024px)
+- [x] Design and add 1024×1024 app icon
+- [x] Add to Assets.xcassets → AppIcon
+- [x] Ensure all required sizes are populated (Xcode can generate from 1024px)
 
 ### 1.4 Sign in with Apple
 - [ ] If adding Google/Email sign-in: implement Sign in with Apple first (Guideline 2.3.8)
