@@ -62,9 +62,9 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 ## Phase 3: Medium Priority
 
 ### 3.1 Financial / Gambling Disclaimer (Optional)
-- [ ] Decide if in-app disclaimer is needed
-- [ ] If yes: add short disclaimer in Rules or before first game (e.g. "For tracking friendly games only")
-- [ ] Ensure App Store description avoids "betting" or "gambling" language
+- [x] Decide if in-app disclaimer is needed
+- [x] If yes: add short disclaimer in Rules or before first game (e.g. "For tracking friendly games only")
+- [x] Ensure App Store description avoids "betting" or "gambling" language
 
 ### 3.2 Offline Experience
 - [ ] Test app behavior when offline
@@ -111,7 +111,7 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 |---------|--------|-----------------|
 | Phase 1 | ⬜     | 3 / 4          |
 | Phase 2 | ⬜     | 1 / 3          |
-| Phase 3 | ⬜     | 0 / 3          |
+| Phase 3 | ⬜     | 1 / 3          |
 | Phase 4 | ⬜     | 0 / 3          |
 
 **How to use:** Check off each `- [ ]` item when done. Update the Completion Tracker by changing `⬜` to `✅` and updating counts when a phase is complete.
