@@ -10,6 +10,12 @@ import Foundation
 
 enum AppConstants {
 
+    // MARK: - URLs
+    enum URLs {
+        /// Privacy Policy (GitHub Pages)
+        static let privacyPolicy = "https://vinodlingamsetty.github.io/Rummy-Score-Sheet/PRIVACY_POLICY"
+    }
+
     // MARK: - UserDefaults Keys
     // Use these instead of raw strings for settings persistence
     enum UserDefaultsKeys {

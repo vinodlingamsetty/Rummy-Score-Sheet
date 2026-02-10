@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 
 struct ProfileView: View {
     @State private var viewModel = ProfileViewModel()
@@ -57,6 +58,9 @@ struct ProfileView: View {
                 
                 // Settings Section
                 settingsSection
+                
+                // Legal Section
+                legalSection
                 
                 // Account Actions
                 accountActionsSection
@@ -261,6 +265,50 @@ struct ProfileView: View {
                         viewModel.triggerHaptic()
                     }
                 }
+        }
+    }
+    
+    // MARK: - Legal Section
+    
+    private var legalSection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing._4) {
+            Text("LEGAL")
+                .font(AppTypography.caption1())
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, AppSpacing._3)
+            
+            Button {
+                viewModel.triggerHaptic()
+                if let url = URL(string: AppConstants.URLs.privacyPolicy) {
+                    UIApplication.shared.open(url)
+                }
+            } label: {
+                HStack(spacing: AppSpacing._3) {
+                    Image(systemName: "hand.raised.fill")
+                        .font(.title3)
+                        .foregroundStyle(AppTheme.primaryColor)
+                        .frame(width: 32)
+                    
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Privacy Policy")
+                            .font(AppTypography.headline())
+                            .foregroundStyle(.primary)
+                        Text("View how we handle your data")
+                            .font(AppTypography.caption1())
+                            .foregroundStyle(.secondary)
+                    }
+                    
+                    Spacer()
+                    
+                    Image(systemName: "chevron.right")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                .padding(AppSpacing._4)
+            }
+            .buttonStyle(.plain)
+            .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+            .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         }
     }
     
