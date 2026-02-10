@@ -22,20 +22,20 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 - [x] Ensure all required sizes are populated (Xcode can generate from 1024px)
 
 ### 1.4 Sign in with Apple
-- [ ] If adding Google/Email sign-in: implement Sign in with Apple first (Guideline 2.3.8)
-- [ ] If keeping Anonymous Auth only: document decision (no third‑party login = no SiwA required)
-- [ ] Add Sign in with Apple capability if implementing social login
+- [x] If adding Google/Email sign-in: implement Sign in with Apple first (Guideline 2.3.8)
+- [x] If keeping Anonymous Auth only: document decision (no third‑party login = no SiwA required)
+- [x] Add Sign in with Apple capability if implementing social login
 
 ---
 
 ## Phase 2: High Priority
 
 ### 2.1 Privacy
-- [ ] Create Privacy Policy document
-- [ ] Host Privacy Policy at a public URL
-- [ ] Add Privacy Policy URL to App Store Connect
-- [ ] Add Privacy Policy link in app (e.g. Profile or Settings)
-- [ ] Fill App Privacy nutrition labels in App Store Connect for:
+- [x] Create Privacy Policy document
+- [x] Host Privacy Policy at a public URL (GitHub Pages; merge to main for deployment)
+- [ ] Add Privacy Policy URL to App Store Connect (Phase 4)
+- [x] Add Privacy Policy link in app (e.g. Profile or Settings)
+- [ ] Fill App Privacy nutrition labels in App Store Connect (Phase 4) for:
   - [ ] User ID (Firebase)
   - [ ] Display name
   - [ ] Game data (scores, rooms)
@@ -109,8 +109,8 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 
 | Phase   | Status | Completed Items |
 |---------|--------|-----------------|
-| Phase 1 | ⬜     | 0 / 4          |
-| Phase 2 | ⬜     | 0 / 3          |
+| Phase 1 | ⬜     | 3 / 4          |
+| Phase 2 | ⬜     | 1 / 3          |
 | Phase 3 | ⬜     | 0 / 3          |
 | Phase 4 | ⬜     | 0 / 3          |
 

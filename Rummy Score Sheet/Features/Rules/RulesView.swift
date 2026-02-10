@@ -28,6 +28,9 @@ struct RulesView: View {
                         // Scoring System
                         scoringSystemSection
                         
+                        // Disclaimer
+                        disclaimerSection
+                        
                         // Point System
                         pointSystemSection
                     }
@@ -204,6 +207,16 @@ struct RulesView: View {
         }
     }
     
+    // MARK: - Disclaimer Section
+    
+    private var disclaimerSection: some View {
+        InfoBox(
+            icon: "hand.raised.fill",
+            text: "This app is for tracking friendly card games only. Dollar amounts shown are for fun and illustrative purposes. No real money is involved.",
+            color: AppTheme.iosBlue
+        )
+    }
+    
     // MARK: - Point System Section
     
     private var pointSystemSection: some View {
@@ -219,13 +232,13 @@ struct RulesView: View {
                 
                 InfoBox(
                     icon: "dollarsign.square.fill",
-                    text: "Optionally, assign a Point Value (e.g., $0.10 per point). This determines monetary settlements.",
+                    text: "Optionally, assign a Point Value (e.g., $0.10 per point) for fun tracking. Amounts shown are illustrative only; no real money is involved.",
                     color: Color.orange
                 )
                 
                 InfoBox(
                     icon: "trophy.fill",
-                    text: "The winner receives payment from each eliminated player based on their final score difference.",
+                    text: "The winner receives the game pot from each eliminated player based on their final score difference (for fun tracking only).",
                     color: AppTheme.positiveColor
                 )
             }

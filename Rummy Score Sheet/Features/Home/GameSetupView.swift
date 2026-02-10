@@ -91,6 +91,9 @@ struct GameSetupView: View {
             Text("Point Value ($)")
                 .font(AppTypography.headline())
                 .foregroundStyle(.primary)
+            Text("For fun tracking only; no real money")
+                .font(AppTypography.caption1())
+                .foregroundStyle(.secondary)
 
             TextField("10", text: $pointValueText)
                 .font(.system(size: 36, weight: .semibold, design: .rounded))
