@@ -57,7 +57,7 @@ actor MockRoomService: @preconcurrency RoomService {
             // Mock: create room for the joiner (simulates joining)
             let room = GameRoom(
                 id: normalizedCode,
-                pointLimit: 500,
+                pointLimit: 201,
                 pointValue: 10,
                 players: [player],
                 currentRound: 1,

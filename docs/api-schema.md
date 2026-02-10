@@ -17,7 +17,7 @@ Represents a game session/room.
 | Field | Type | Required | Constraints | Description |
 |-------|------|----------|-------------|-------------|
 | `id` | String | ✅ | 6 alphanumeric chars, uppercase | Unique room code (e.g., "A1B2C3") |
-| `pointLimit` | Int | ✅ | 100-900 | Target score to end game |
+| `pointLimit` | Int | ✅ | 100-350 | Target score to end game |
 | `pointValue` | Int | ✅ | > 0 | Dollar value per point (cents) |
 | `currentRound` | Int | ✅ | 1-6 | Current round number |
 | `isStarted` | Bool | ✅ | - | Whether game has started |
@@ -143,7 +143,7 @@ struct RoomServiceResult {
 
 **Input:**
 ```swift
-pointLimit: Int    // 100-900
+pointLimit: Int    // 100-350
 pointValue: Int    // > 0, in cents
 playerCount: Int   // 2-10 (stored but not enforced yet)
 ```

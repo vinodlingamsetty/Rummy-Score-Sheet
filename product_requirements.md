@@ -39,7 +39,7 @@ A premium, offline-first iOS scorekeeping app for Indian Rummy.
 
 ### C. Game Setup (Host Only)
 - **Inputs:**
-    - Point Limit (range from 100 to 900). this should be a slider bar 
+    - Point Limit (range from 100 to 350). this should be a slider bar 
     - Point Value (e.g., 0.10).
     - Player Count (Max 10).
 - **Lobby:**

@@ -10,7 +10,7 @@ import SwiftUI
 struct GameSetupView: View {
     @Environment(\.dismiss) private var dismiss
     @Bindable var gameState: AppGameState
-    @State private var pointLimit: Int = 500
+    @State private var pointLimit: Int = 201
     @State private var pointValueText: String = "10"
     @State private var playerCount: Int = 4
 
@@ -73,9 +73,9 @@ struct GameSetupView: View {
                         if rounded != pointLimit {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         }
-                        pointLimit = min(900, max(100, rounded))
+                        pointLimit = min(350, max(100, rounded))
                     }
-                ), in: 100...900, step: 1)
+                ), in: 100...350, step: 1)
                 .tint(AppTheme.primaryColor)
             }
             .padding(AppSpacing._5)

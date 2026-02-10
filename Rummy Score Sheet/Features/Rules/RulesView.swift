@@ -213,7 +213,7 @@ struct RulesView: View {
             VStack(alignment: .leading, spacing: AppSpacing._3) {
                 InfoBox(
                     icon: "chart.line.uptrend.xyaxis",
-                    text: "Set a Point Limit (e.g., 101, 201, 501 points). Players are eliminated when they reach this limit.",
+                    text: "Set a Point Limit (e.g., 101, 201, 350 points). Players are eliminated when they reach this limit.",
                     color: AppTheme.primaryColor
                 )
                 
