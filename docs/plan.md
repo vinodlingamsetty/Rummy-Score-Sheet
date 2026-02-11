@@ -62,6 +62,12 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 - [x] **Friends not showing**: Player model uses `id: UUID` (game-specific); createFriendshipsFromGame passes this as userId. Friendships expect Firebase Auth UIDs. Add `userId: String?` (Firebase UID) to Player; set when joining with `Auth.auth().currentUser?.uid`; use it in createFriendshipsFromGame.
 - [x] **Recent games empty**: GameHistoryService queries `isCompleted` + `endedAt`. Add Firestore composite index for `gameRooms` (isCompleted, endedAt desc). Verify games are marked complete and endedAt is written.
 
+### 2.5 Email OTP Login
+- [x] Implement `sendEmailOTP` Cloud Function (Nodemailer ready)
+- [x] Implement `verifyEmailOTP` Cloud Function (Custom Token generation)
+- [x] Add Email/OTP UI to `LoginView`
+- [x] Secure `otp_codes` collection in Firestore rules
+
 ---
 
 ## Phase 3: Medium Priority
