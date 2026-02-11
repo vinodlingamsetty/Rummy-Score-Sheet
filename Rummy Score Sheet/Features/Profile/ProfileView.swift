@@ -209,6 +209,18 @@ struct ProfileView: View {
                     subtitle: "Get notified about game updates",
                     isOn: $viewModel.notificationsEnabled
                 )
+                .onChange(of: viewModel.notificationsEnabled) { _, newValue in
+                    Task {
+                        if newValue {
+                            let granted = await FCMDelegate.requestPermissionAndRegister()
+                            if !granted {
+                                viewModel.notificationsEnabled = false
+                            }
+                        } else {
+                            await FCMDelegate.updateNotificationsPreference()
+                        }
+                    }
+                }
                 
                 Divider()
                     .background(Color.white.opacity(0.1))

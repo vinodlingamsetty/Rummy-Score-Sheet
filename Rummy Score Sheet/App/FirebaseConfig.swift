@@ -11,6 +11,7 @@ import FirebaseCore
 import FirebaseAuth
 import FirebaseAnalytics
 import FirebaseCrashlytics
+import FirebaseMessaging
 
 struct FirebaseConfig {
     
@@ -18,6 +19,9 @@ struct FirebaseConfig {
     static func configure() {
         // Initialize Firebase
         FirebaseApp.configure()
+        
+        // Set FCM delegate (must be set before Messaging receives token)
+        Messaging.messaging().delegate = FCMDelegate.shared
         
         // Configure Crashlytics
         configureCrashlytics()

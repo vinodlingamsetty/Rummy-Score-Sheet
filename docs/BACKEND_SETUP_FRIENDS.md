@@ -56,6 +56,14 @@ service cloud.firestore {
     }
     
     // ==========================================
+    // USERS Collection (FCM tokens for Nudge)
+    // ==========================================
+    match /users/{userId} {
+      // Users can only read/write their own document
+      allow read, write: if isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // ==========================================
     // SETTLEMENTS Collection
     // ==========================================
     match /settlements/{settlementId} {
@@ -272,18 +280,100 @@ firebase deploy --only functions
 
 ---
 
+## 7. Cloud Function: sendNudge (Push Notifications)
+
+The Nudge feature sends a push notification to a friend when you tap "Nudge". Add this callable Cloud Function:
+
+**Prerequisites:**
+- Firebase Blaze plan
+- APNs key uploaded in Firebase Console (Project Settings → Cloud Messaging)
+- `firebase-admin` and `firebase-functions` packages
+
+**Add to `functions/src/index.ts` (or equivalent):**
+
+```javascript
+import * as functions from 'firebase-functions';
+import * as admin from 'firebase-admin';
+
+admin.initializeApp();
+const db = admin.firestore();
+const messaging = admin.messaging();
+
+export const sendNudge = functions.https.onCall(async (data, context) => {
+  if (!context.auth) {
+    throw new functions.https.HttpsError('unauthenticated', 'Must be signed in');
+  }
+
+  const { friendUserId, senderName } = data;
+  if (!friendUserId || !senderName) {
+    throw new functions.https.HttpsError('invalid-argument', 'friendUserId and senderName required');
+  }
+
+  const userDoc = await db.collection('users').doc(friendUserId).get();
+  if (!userDoc.exists) {
+    return { sent: false, reason: 'User not found' };
+  }
+
+  const userData = userDoc.data();
+  const fcmToken = userData?.fcmToken;
+  const notificationsEnabled = userData?.notificationsEnabled === true;
+
+  if (!notificationsEnabled || !fcmToken) {
+    return { sent: false, reason: 'Recipient has notifications disabled' };
+  }
+
+  const message = {
+    token: fcmToken,
+    notification: {
+      title: 'Nudge from ' + senderName,
+      body: 'Reminder to check your score',
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: 'default',
+          badge: 1,
+        },
+      },
+    },
+  };
+
+  await messaging.send(message);
+  return { sent: true };
+});
+```
+
+**Deploy:**
+```bash
+firebase deploy --only functions:sendNudge
+```
+
+**Users collection document structure** (written by iOS app):
+```javascript
+users/{userId}
+  - fcmToken: string (optional, deleted when notifications disabled)
+  - notificationsEnabled: boolean
+  - updatedAt: timestamp
+```
+
+---
+
 ## Summary
 
 ✅ **What to add to your backend repo:**
-1. Update `firestore.rules` with the friends and settlements rules
+1. Update `firestore.rules` with the friends, settlements, and users rules
 2. Update `firestore.indexes.json` with the composite indexes
-3. Deploy to Firebase
-4. (Optional) Add Cloud Function for auto-friend creation
+3. Add `sendNudge` Cloud Function for push notifications (Section 7)
+4. Deploy to Firebase
+5. (Optional) Add Cloud Function for auto-friend creation
 
 ✅ **What's already done in iOS app:**
 - FirebaseFriendService implementation
 - Settlement transaction recording
 - Real-time friend updates
 - Mock/Firebase service toggle
+- FCM token registration and Firestore persistence
+- Notifications toggle (requests permission, syncs to Firestore)
+- Nudge calls `sendNudge` Cloud Function
 
 **Next step:** Let me know when you've updated the backend, then we can test with real Firebase! 🚀

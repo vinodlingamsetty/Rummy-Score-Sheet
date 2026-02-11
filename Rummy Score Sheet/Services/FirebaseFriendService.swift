@@ -9,6 +9,7 @@
 import Foundation
 import FirebaseFirestore
 import FirebaseAuth
+import FirebaseFunctions
 
 actor FirebaseFriendService: FriendService {
     
@@ -99,7 +100,7 @@ actor FirebaseFriendService: FriendService {
         // Ensure user is authenticated
         await FirebaseConfig.ensureAuthenticated()
         
-        guard let currentUserId = Auth.auth().currentUser?.uid else {
+        guard Auth.auth().currentUser != nil else {
             throw NSError(domain: "FirebaseFriendService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
@@ -109,13 +110,15 @@ actor FirebaseFriendService: FriendService {
             throw NSError(domain: "FirebaseFriendService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Friend not found"])
         }
         
-        // TODO: Send push notification to friend
-        // For now, just log it
-        print("📬 Nudge sent to friend: \(friend.name) (userId: \(friend.userId))")
+        let senderName = await FirebaseConfig.getUserDisplayName()
         
-        // In production, you would call a Cloud Function here to send a push notification
-        // Example:
-        // try await Functions.functions().httpsCallable("sendNudge").call(["friendUserId": friend.userId])
+        let data: [String: Any] = [
+            "friendUserId": friend.userId,
+            "senderName": senderName
+        ]
+        
+        let result = try await Functions.functions().httpsCallable("sendNudge").call(data)
+        _ = result.data
     }
     
     func searchFriends(query: String) async throws -> [Friend] {

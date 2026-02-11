@@ -10,6 +10,7 @@ import FirebaseCore
 
 @main
 struct Rummy_Score_SheetApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
     @State private var gameState: AppGameState
     @State private var friendService: FriendService
 

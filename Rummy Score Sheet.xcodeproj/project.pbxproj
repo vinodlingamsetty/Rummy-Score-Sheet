@@ -13,6 +13,8 @@
 		20FF83BA2F341C73005365A8 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83B92F341C73005365A8 /* FirebaseAuth */; };
 		20FF83BC2F341C73005365A8 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83BB2F341C73005365A8 /* FirebaseCrashlytics */; };
 		20FF83BE2F341C73005365A8 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83BD2F341C73005365A8 /* FirebaseFirestore */; };
+		20FF83C02F341C73005365A8 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83BF2F341C73005365A8 /* FirebaseMessaging */; };
+		20FF83C22F341C73005365A8 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83C12F341C73005365A8 /* FirebaseFunctions */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +40,8 @@
 				20FF83B82F341C73005365A8 /* FirebaseAnalyticsIdentitySupport in Frameworks */,
 				20FF83BA2F341C73005365A8 /* FirebaseAuth in Frameworks */,
 				20FF83BE2F341C73005365A8 /* FirebaseFirestore in Frameworks */,
+				20FF83C02F341C73005365A8 /* FirebaseMessaging in Frameworks */,
+				20FF83C22F341C73005365A8 /* FirebaseFunctions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -86,6 +90,8 @@
 				20FF83B92F341C73005365A8 /* FirebaseAuth */,
 				20FF83BB2F341C73005365A8 /* FirebaseCrashlytics */,
 				20FF83BD2F341C73005365A8 /* FirebaseFirestore */,
+				20FF83BF2F341C73005365A8 /* FirebaseMessaging */,
+				20FF83C12F341C73005365A8 /* FirebaseFunctions */,
 			);
 			productName = "Rummy Score Sheet";
 			productReference = 205D0AD72F2D4E55005B6CF0 /* Rummy Score Sheet.app */;
@@ -273,10 +279,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Rummy Score Sheet/Rummy Score Sheet.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4H2RJWFDST;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need camera access to scan room QR codes";
@@ -294,6 +303,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.vin.Rummy-Score-Sheet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Rummy Score Sheet Dev profile";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -309,10 +319,13 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "Rummy Score Sheet/Rummy Score Sheet.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4H2RJWFDST;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "We need camera access to scan room QR codes";
@@ -330,6 +343,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = "com.vin.Rummy-Score-Sheet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Rummy Score Sheet Dev profile";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -404,6 +418,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseFirestore;
+		};
+		20FF83BF2F341C73005365A8 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		20FF83C12F341C73005365A8 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
