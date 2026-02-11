@@ -7,12 +7,13 @@
 
 import Foundation
 
-/// Firestore document structure for friendships
+/// Firestore document structure for friendships.
+/// userId1 is ALWAYS the smaller ID alphabetically, userId2 is the larger.
 struct Friendship: Codable {
-    let userId1: String // Current user ID
-    let userId2: String // Friend's user ID
-    let user1Name: String // Current user's name
-    let user2Name: String // Friend's name
+    let userId1: String // Smaller user ID alphabetically
+    let userId2: String // Larger user ID alphabetically
+    let user1Name: String // Name of user with smaller ID
+    let user2Name: String // Name of user with larger ID
     var balance: Double // Positive = user2 owes user1, Negative = user1 owes user2
     var gamesPlayedTogether: Int
     var lastPlayedDate: Date?

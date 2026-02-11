@@ -58,9 +58,9 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 - [ ] Verify all buttons and navigation work
 
 ### 2.4 Game Flow Fixes (Discovered Issues)
-- [ ] **Auto-declare winner**: When only one active player remains (one eliminated at point limit), auto-show winner or prompt to end—user currently must tap "End Game" manually.
-- [ ] **Friends not showing**: Player model uses `id: UUID` (game-specific); createFriendshipsFromGame passes this as userId. Friendships expect Firebase Auth UIDs. Add `userId: String?` (Firebase UID) to Player; set when joining with `Auth.auth().currentUser?.uid`; use it in createFriendshipsFromGame.
-- [ ] **Recent games empty**: GameHistoryService queries `isCompleted` + `endedAt`. Add Firestore composite index for `gameRooms` (isCompleted, endedAt desc). Verify games are marked complete and endedAt is written.
+- [x] **Auto-declare winner**: When only one active player remains (one eliminated at point limit), auto-show winner or prompt to end—user currently must tap "End Game" manually.
+- [x] **Friends not showing**: Player model uses `id: UUID` (game-specific); createFriendshipsFromGame passes this as userId. Friendships expect Firebase Auth UIDs. Add `userId: String?` (Firebase UID) to Player; set when joining with `Auth.auth().currentUser?.uid`; use it in createFriendshipsFromGame.
+- [x] **Recent games empty**: GameHistoryService queries `isCompleted` + `endedAt`. Add Firestore composite index for `gameRooms` (isCompleted, endedAt desc). Verify games are marked complete and endedAt is written.
 
 ---
 
@@ -132,7 +132,7 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 | Phase   | Status | Completed Items |
 |---------|--------|-----------------|
 | Phase 1 | ⬜     | 3 / 4          |
-| Phase 2 | ⬜     | 1 / 4          |
+| Phase 2 | ✅     | 4 / 4          |
 | Phase 3 | ⬜     | 1 / 3          |
 | Phase 4 | ⬜     | 0 / 3          |
 

@@ -94,7 +94,7 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
                 name: playerName,
                 isReady: false,
                 isModerator: false,
-                scores: room.isStarted ? [Int](repeating: 0, count: 6) : [],
+                scores: [], // Initialize empty; will expand during score entry
                 userId: userId
             )
             

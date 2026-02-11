@@ -24,6 +24,9 @@ Represents a game session/room.
 | `players` | [Player] | ✅ | 2-10 players | Array of players in room |
 | `createdAt` | Timestamp | ✅ | - | Room creation time (Firebase only) |
 | `createdBy` | String | ✅ | UUID string | Moderator's user ID (Firebase only) |
+| `isCompleted` | Bool | ✅ | - | Whether game has finished |
+| `endedAt` | Timestamp | ❌ | - | When the game ended |
+| `winnerId` | String | ❌ | - | UUID of the winner |
 
 **Validation:**
 - Room code must be unique
@@ -39,6 +42,9 @@ struct GameRoom: Identifiable {
     var players: [Player]
     var currentRound: Int
     var isStarted: Bool
+    var isCompleted: Bool
+    var endedAt: Date?
+    var winnerId: String?
 }
 ```
 
@@ -53,6 +59,9 @@ interface GameRoom {
   isStarted: boolean;
   createdAt: Timestamp;
   createdBy: string;
+  isCompleted?: boolean;
+  endedAt?: Timestamp;
+  winnerId?: string;
 }
 ```
 
@@ -68,7 +77,8 @@ Represents a player in a room.
 | `name` | String | ✅ | 1-50 chars | Display name |
 | `isReady` | Bool | ✅ | - | Ready to start game |
 | `isModerator` | Bool | ✅ | - | Room creator/host |
-| `scores` | [Int] | ✅ | Empty or 6 elements | Score per round (0-indexed) |
+| `scores` | [Int] | ✅ | Variable | Score per round (0-indexed) |
+| `userId` | String | ❌ | Firebase UID | Authentication ID |
 
 **Computed:**
 - `totalScore` = sum of all scores
@@ -76,7 +86,7 @@ Represents a player in a room.
 **Validation:**
 - Only one moderator per room
 - Moderator is always ready by default
-- Scores array initialized to `[0,0,0,0,0,0]` when game starts
+- Scores array initialized to `[]` when game starts; expands as rounds progress.
 
 **iOS Type:**
 ```swift
@@ -145,7 +155,6 @@ struct RoomServiceResult {
 ```swift
 pointLimit: Int    // 100-350
 pointValue: Int    // > 0, in cents
-playerCount: Int   // 2-10 (stored but not enforced yet)
 ```
 
 **Process:**
@@ -178,7 +187,8 @@ playerName: String  // Display name
 1. Validate room exists and not full
 2. Add player to room.players array
 3. Set player as `isReady: false`, `isModerator: false`
-4. Return room + currentUserId
+4. Initialize scores to `[]`
+5. Return room + currentUserId
 
 **Output:** `RoomServiceResult`
 
@@ -232,7 +242,7 @@ roomCode: String
 2. Check all players are ready
 3. Check min 2 players
 4. Set `isStarted: true`
-5. Initialize all players' scores to `[0,0,0,0,0,0]`
+5. Initialize all players' scores to `[]`
 6. Return updated room
 
 **Output:** `GameRoom`
@@ -335,20 +345,28 @@ enum RoomServiceError: Error {
 ## Firestore Data Structure
 
 ```
-/rooms/{roomCode}
+/gameRooms/{roomCode}
   ├── id: string
   ├── pointLimit: number
   ├── pointValue: number
   ├── currentRound: number
   ├── isStarted: boolean
+  ├── isCompleted: boolean
   ├── createdAt: timestamp
   ├── createdBy: string
-  └── /players/{playerId}
-      ├── id: string
-      ├── name: string
-      ├── isReady: boolean
-      ├── isModerator: boolean
-      └── scores: number[]
+  ├── endedAt: timestamp?
+  ├── winnerId: string?
+  └── players: [
+      {
+        id: string,
+        name: string,
+        isReady: boolean,
+        isModerator: boolean,
+        scores: number[],
+        userId: string?
+      },
+      ...
+  ]
 ```
 
 **Security Rules:**

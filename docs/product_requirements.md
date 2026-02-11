@@ -40,8 +40,7 @@ A premium, offline-first iOS scorekeeping app for Indian Rummy.
 ### C. Game Setup (Host Only)
 - **Inputs:**
     - Point Limit (range from 100 to 350). this should be a slider bar 
-    - Point Value (e.g., 0.10).
-    - Player Count (Max 10).
+    - Point Value (e.g., $10).
 - **Lobby:**
     - **QR Code:** Generated locally for others to join.
     - **Roster:** List of joined players with "Ready" status indicators.
@@ -56,7 +55,8 @@ A premium, offline-first iOS scorekeeping app for Indian Rummy.
     - **Auto-Advance:** "Next Player" button on keyboard.
 - **Game Logic:**
     - **Elimination:** If Score >= Point Limit, row turns Red (Opacity 0.5), input disabled.
-    - **Winning Condition:** The last player remaining (or lowest score if game ended manually) wins the "Game Pot".
+    - **Winning Condition:** The last player remaining (or lowest score if game ended manually) wins the game.
+    - **Fixed Payments:** All eliminated/loser players pay the `Point Value` to the winner.
     - **Re-Buy:** Moderator can "Revive" a player (Score = Highest Active Score + 1).
 - **Real-Time Updates:**
     - Scores sync instantly via Firebase Firestore listeners.
