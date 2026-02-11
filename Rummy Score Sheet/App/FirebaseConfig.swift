@@ -12,6 +12,7 @@ import FirebaseAuth
 import FirebaseAnalytics
 import FirebaseCrashlytics
 import FirebaseMessaging
+import GoogleSignIn
 
 struct FirebaseConfig {
     
@@ -153,6 +154,50 @@ struct FirebaseConfig {
         guard let user = Auth.auth().currentUser else { return }
         let changeRequest = user.createProfileChangeRequest()
         changeRequest.displayName = name
+        try await changeRequest.commitChanges()
+    }
+    
+    // MARK: - Sign in with Google
+    
+    /// Signs in or links with Google credential. If user is anonymous, links to preserve data.
+    static func signInWithGoogle(idToken: String, accessToken: String, displayName: String?) async throws {
+        let credential = GoogleAuthProvider.credential(withIDToken: idToken, accessToken: accessToken)
+        
+        if let user = Auth.auth().currentUser, user.isAnonymous {
+            try await linkWithGoogle(credential: credential, displayName: displayName)
+        } else {
+            _ = try await Auth.auth().signIn(with: credential)
+            if let displayName = displayName, !displayName.isEmpty,
+               Auth.auth().currentUser?.displayName?.isEmpty ?? true {
+                try? await saveGoogleDisplayName(displayName)
+            }
+            Analytics.logEvent(AnalyticsEventLogin, parameters: [AnalyticsParameterMethod: "google"])
+            Crashlytics.crashlytics().setUserID(Auth.auth().currentUser?.uid)
+        }
+    }
+    
+    /// Links anonymous user to Google credential (preserves Firestore data).
+    private static func linkWithGoogle(credential: AuthCredential, displayName: String?) async throws {
+        guard let user = Auth.auth().currentUser else {
+            throw NSError(domain: "FirebaseConfig", code: 401, userInfo: [NSLocalizedDescriptionKey: "No authenticated user"])
+        }
+        let result = try await user.link(with: credential)
+        if let displayName = displayName, !displayName.isEmpty,
+           result.user.displayName?.isEmpty ?? true {
+            try? await saveGoogleDisplayName(displayName)
+        }
+        Analytics.logEvent(AnalyticsEventLogin, parameters: [AnalyticsParameterMethod: "google"])
+        Crashlytics.crashlytics().setUserID(result.user.uid)
+    }
+    
+    /// Saves Google-provided display name to Firebase profile (on first sign-in).
+    private static func saveGoogleDisplayName(_ name: String) async throws {
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+        
+        guard let user = Auth.auth().currentUser else { return }
+        let changeRequest = user.createProfileChangeRequest()
+        changeRequest.displayName = trimmed
         try await changeRequest.commitChanges()
     }
 }

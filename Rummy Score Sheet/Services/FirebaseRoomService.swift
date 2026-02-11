@@ -18,7 +18,7 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
     
     // MARK: - RoomService Implementation
     
-    func createRoom(pointLimit: Int, pointValue: Int, playerCount: Int) async throws -> RoomServiceResult {
+    func createRoom(pointLimit: Int, pointValue: Int) async throws -> RoomServiceResult {
         // Ensure auth is complete
         await FirebaseConfig.ensureAuthenticated()
         
@@ -30,7 +30,7 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
         let moderatorId = UUID()
         let moderator = Player(
             id: moderatorId,
-            name: "You",
+            name: FirebaseConfig.getUserDisplayName(),
             isReady: true,
             isModerator: true,
             scores: [],

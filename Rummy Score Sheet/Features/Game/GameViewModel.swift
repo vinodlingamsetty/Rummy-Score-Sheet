@@ -19,6 +19,7 @@ final class GameViewModel {
     // UI State
     var showTotalsView: Bool = false
     var selectedRound: Int // The round currently being viewed/edited
+    var showEliminationAlert: Bool = false
     
     private let roomService: RoomService
     private let onRoomUpdate: (GameRoom) -> Void
@@ -98,6 +99,13 @@ final class GameViewModel {
         player.totalScore >= room.pointLimit
     }
     
+    /// Player has the lowest score (leader) among active players.
+    func isLeader(_ player: Player) -> Bool {
+        guard !room.players.isEmpty else { return false }
+        let lowestScore = sortedPlayers.first!.totalScore
+        return player.totalScore == lowestScore && !isEliminated(player)
+    }
+    
     // MARK: - Score Entry
     
     func presentScoreInput(for player: Player) {
@@ -125,7 +133,7 @@ final class GameViewModel {
                 isScoreInputPresented = false
                 
                 // Auto-end if only one active player remains (others eliminated at point limit)
-                if checkAndAutoEndIfWinner() {
+                if await checkAndAutoEndIfWinner() {
                     isLoading = false
                     return
                 }
@@ -138,7 +146,7 @@ final class GameViewModel {
                     let nextRoom = try await roomService.nextRound(roomCode: room.id)
                     updateRoomState(nextRoom)
                     selectedRound = nextRoom.currentRound // Auto-follow to new round
-                    _ = checkAndAutoEndIfWinner()
+                    _ = await checkAndAutoEndIfWinner()
                 }
             } catch {
                 errorMessage = error.localizedDescription
@@ -152,6 +160,18 @@ final class GameViewModel {
     // MARK: - Helper
     
     private func updateRoomState(_ newRoom: GameRoom) {
+        // Check if current user was just eliminated (transition: was active, now eliminated)
+        if let cid = currentUserId,
+           let oldPlayer = room.players.first(where: { $0.id == cid }),
+           let newPlayer = newRoom.players.first(where: { $0.id == cid }),
+           !isEliminated(oldPlayer),
+           isEliminated(newPlayer) {
+            showEliminationAlert = true
+        }
+        
+        // Detect game completion transition
+        let justCompleted = !room.isCompleted && newRoom.isCompleted
+        
         // Check if we should auto-follow round updates (if user was on latest round)
         let wasOnLatestRound = selectedRound == room.currentRound
         room = newRoom
@@ -159,6 +179,15 @@ final class GameViewModel {
         
         if wasOnLatestRound {
             selectedRound = newRoom.currentRound
+        }
+        
+        // If the game just ended, create friendships
+        if justCompleted {
+            Task {
+                if let onGameCompleted = onGameCompleted {
+                    await onGameCompleted(newRoom)
+                }
+            }
         }
     }
     
@@ -178,7 +207,7 @@ final class GameViewModel {
                 let updatedRoom = try await roomService.nextRound(roomCode: room.id)
                 updateRoomState(updatedRoom)
                 selectedRound = updatedRoom.currentRound // Explicitly follow on manual advance
-                _ = checkAndAutoEndIfWinner()
+                _ = await checkAndAutoEndIfWinner()
             } catch {
                 errorMessage = error.localizedDescription
                 print("❌ Failed to advance round: \(error.localizedDescription)")
@@ -190,34 +219,38 @@ final class GameViewModel {
     
     /// When only one active player remains (others eliminated), auto-end game and exit.
     /// - Returns: true if game was auto-ended (caller should return early)
-    private func checkAndAutoEndIfWinner() -> Bool {
+    private func checkAndAutoEndIfWinner() async -> Bool {
         guard !room.isCompleted, let w = winner else { return false }
-        endGame(winnerId: w.id)
+        await endGame(winnerId: w.id)
         onGameEndAndExit?()
         return true
     }
     
     // MARK: - Game End
     
-    func endGame(winnerId: UUID) {
-        Task { @MainActor in
-            isLoading = true
-            errorMessage = nil
-            
-            do {
-                let updatedRoom = try await roomService.endGame(roomCode: room.id, winnerId: winnerId)
-                updateRoomState(updatedRoom)
-                
-                // Create friendships after game completes
-                if let onGameCompleted = onGameCompleted {
-                    await onGameCompleted(updatedRoom)
-                }
-            } catch {
-                errorMessage = error.localizedDescription
-                print("❌ Failed to end game: \(error.localizedDescription)")
-            }
-            
+    /// Ends the game, creates friendships, then completes. Callers should await before exiting.
+    func endGame(winnerId: UUID? = nil) async {
+        isLoading = true
+        errorMessage = nil
+        
+        let actualWinnerId = winnerId ?? winner?.id ?? sortedPlayers.first?.id
+        
+        guard let finalWinnerId = actualWinnerId else {
+            errorMessage = "Could not determine a winner"
             isLoading = false
+            return
         }
+        
+        do {
+            let updatedRoom = try await roomService.endGame(roomCode: room.id, winnerId: finalWinnerId)
+            updateRoomState(updatedRoom)
+            
+            // Note: createFriendshipsFromGame is now also called via updateRoomState when isCompleted transitions to true
+        } catch {
+            errorMessage = error.localizedDescription
+            print("❌ Failed to end game: \(error.localizedDescription)")
+        }
+        
+        isLoading = false
     }
 }

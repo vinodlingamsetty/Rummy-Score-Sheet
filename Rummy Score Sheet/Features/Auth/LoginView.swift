@@ -8,8 +8,10 @@
 import SwiftUI
 import AuthenticationServices
 import FirebaseAuth
+import FirebaseCore
 import FirebaseAnalytics
 import FirebaseCrashlytics
+import GoogleSignIn
 
 struct LoginView: View {
     @State private var viewModel = LoginViewModel()
@@ -55,9 +57,11 @@ struct LoginView: View {
                         .frame(height: 50)
                         .cornerRadius(AppRadius.md)
                         
-                        // Sign in with Google (placeholder)
+                        // Sign in with Google
                         Button {
-                            viewModel.showGoogleComingSoon = true
+                            Task {
+                                await viewModel.signInWithGoogle()
+                            }
                         } label: {
                             HStack(spacing: AppSpacing._2) {
                                 Image(systemName: "globe")
@@ -70,6 +74,7 @@ struct LoginView: View {
                             .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md))
                         }
                         .buttonStyle(.plain)
+                        .disabled(viewModel.isLoading)
                         
                         #if DEBUG
                         // Sign in anonymously (dev only)
@@ -117,13 +122,6 @@ struct LoginView: View {
         } message: {
             Text(viewModel.errorMessage ?? "")
         }
-        .alert("Coming Soon", isPresented: $viewModel.showGoogleComingSoon) {
-            Button("OK", role: .cancel) {
-                viewModel.showGoogleComingSoon = false
-            }
-        } message: {
-            Text("Sign in with Google will be available soon.")
-        }
     }
     
     private func handleSignInWithAppleCompletion(_ result: Result<ASAuthorization, Error>) {
@@ -159,7 +157,62 @@ struct LoginView: View {
 final class LoginViewModel {
     var isLoading = false
     var errorMessage: String?
-    var showGoogleComingSoon = false
+    
+    @MainActor
+    func signInWithGoogle() async {
+        isLoading = true
+        errorMessage = nil
+        
+        guard let clientID = FirebaseApp.app()?.options.clientID else {
+            errorMessage = "Missing Firebase client ID"
+            isLoading = false
+            return
+        }
+        
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let rootViewController = windowScene.windows.first?.rootViewController else {
+            errorMessage = "Cannot present sign-in"
+            isLoading = false
+            return
+        }
+        
+        let config = GIDConfiguration(clientID: clientID)
+        GIDSignIn.sharedInstance.configuration = config
+        
+        do {
+            let result = try await GIDSignIn.sharedInstance.signIn(withPresenting: rootViewController)
+            
+            let user = result.user
+            guard let idToken = user.idToken?.tokenString else {
+                errorMessage = "Missing ID token from Google"
+                isLoading = false
+                return
+            }
+            
+            let accessToken = user.accessToken.tokenString
+            let displayName = user.profile?.name
+            
+            try await FirebaseConfig.signInWithGoogle(
+                idToken: idToken,
+                accessToken: accessToken,
+                displayName: displayName
+            )
+        } catch let error as NSError {
+            if error.domain == "GIDSignInErrorDomain", error.code == -5 {
+                // User cancelled - ignore
+                return
+            }
+            if error.domain == AuthErrorDomain, error.code == AuthErrorCode.credentialAlreadyInUse.rawValue {
+                errorMessage = "This Google account is already used with another account"
+            } else {
+                errorMessage = "Sign in failed: \(error.localizedDescription)"
+            }
+        } catch {
+            errorMessage = "Sign in failed: \(error.localizedDescription)"
+        }
+        
+        isLoading = false
+    }
     
     @MainActor
     func signInWithApple(credential: AppleAuthCredential) async {

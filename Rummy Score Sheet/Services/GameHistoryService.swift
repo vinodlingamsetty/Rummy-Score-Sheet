@@ -27,16 +27,29 @@ final class GameHistoryService: @unchecked Sendable {
         }
         
         do {
-            // Query completed games ordered by endedAt (most recent first)
-            let snapshot = try await db.collection(collectionName)
-                .whereField("isCompleted", isEqualTo: true)
-                .order(by: "endedAt", descending: true)
-                .limit(to: limit)
-                .getDocuments()
-            
-            // Decode and filter games where user participated
-            let allGames = try snapshot.documents.compactMap { doc -> GameRoom? in
-                try doc.data(as: GameRoom.self)
+            // Query completed games ordered by endedAt (requires composite index)
+            var allGames: [GameRoom] = []
+            do {
+                let snapshot = try await db.collection(collectionName)
+                    .whereField("isCompleted", isEqualTo: true)
+                    .order(by: "endedAt", descending: true)
+                    .limit(to: limit)
+                    .getDocuments()
+                allGames = try snapshot.documents.compactMap { doc -> GameRoom? in
+                    try doc.data(as: GameRoom.self)
+                }
+            } catch let indexError {
+                // Fallback: index may not be deployed; fetch without order and sort in memory
+                print("⚠️ Indexed query failed, using fallback: \(indexError.localizedDescription)")
+                let snapshot = try await db.collection(collectionName)
+                    .whereField("isCompleted", isEqualTo: true)
+                    .limit(to: limit * 2)
+                    .getDocuments()
+                allGames = try snapshot.documents.compactMap { doc -> GameRoom? in
+                    try doc.data(as: GameRoom.self)
+                }
+                allGames.sort { ($0.endedAt ?? .distantPast) > ($1.endedAt ?? .distantPast) }
+                allGames = Array(allGames.prefix(limit))
             }
             
             // Filter to only games where current user participated (by Firebase UID)

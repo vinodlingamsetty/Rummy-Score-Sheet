@@ -39,7 +39,7 @@ struct MainTabView: View {
                 .tabItem { Label("Game", systemImage: AppTab.game.icon) }
                 .tag(AppTab.game)
 
-            FriendsView(friendService: friendService)
+            FriendsView(friendService: friendService, selectedTab: $gameState.selectedTab)
                 .tabItem { Label("Friends", systemImage: AppTab.friends.icon) }
                 .tag(AppTab.friends)
 
@@ -68,7 +68,11 @@ private struct GameTabContent: View {
 
     var body: some View {
         if let room = gameState.currentRoom {
-            if room.isStarted {
+            if room.isCompleted {
+                WinnerDeclarationView(game: room) {
+                    gameState.leaveGame()
+                }
+            } else if room.isStarted {
                 GameView(
                     viewModel: GameViewModel(
                         room: room,
@@ -78,13 +82,14 @@ private struct GameTabContent: View {
                         onGameCompleted: { completedRoom in
                             await gameState.createFriendshipsFromGame(completedRoom)
                         },
-                        onGameEndAndExit: { gameState.endGame() }
-                    )
-                ) {
-                    gameState.endGame()
-                } onLeaveGame: {
-                    gameState.leaveGame()
-                }
+                        onGameEndAndExit: { 
+                            // No-op here; we handle transition to winner view via room.isCompleted
+                        }
+                    ),
+                    onLeaveGame: {
+                        gameState.leaveGame()
+                    }
+                )
             } else {
                 GameLobbyView(
                     viewModel: GameLobbyViewModel(

@@ -130,7 +130,7 @@ struct JoinRoomView: View {
     }
 
     private func joinRoom(with code: String) {
-        gameState.joinRoom(code: code)
+        gameState.joinRoom(code: code, playerName: FirebaseConfig.getUserDisplayName())
         dismiss()
     }
 }

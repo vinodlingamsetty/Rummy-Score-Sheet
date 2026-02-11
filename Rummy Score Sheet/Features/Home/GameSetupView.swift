@@ -13,13 +13,15 @@ struct GameSetupView: View {
     @Bindable var gameState: AppGameState
     @State private var pointLimit: Int = AppConstants.GameSetup.pointLimitDefault
     @State private var pointValueText: String = "\(AppConstants.GameSetup.pointValueDefault)"
-    @State private var playerCount: Int = AppConstants.GameSetup.playerCountDefault
 
     var body: some View {
         ZStack {
             Rectangle()
                 .fill(AppTheme.background)
                 .ignoresSafeArea()
+                .onTapGesture {
+                    hideKeyboard()
+                }
 
             VStack(spacing: AppSpacing._8) {
                 header
@@ -50,7 +52,6 @@ struct GameSetupView: View {
         VStack(spacing: AppSpacing._6) {
             pointLimitSelector
             pointValueInput
-            playerCountControl
         }
         .padding(.horizontal, AppSpacing._6)
     }
@@ -106,43 +107,13 @@ struct GameSetupView: View {
         }
     }
 
-    private var playerCountControl: some View {
-        VStack(alignment: .leading, spacing: AppSpacing._3) {
-            Text("Players")
-                .font(AppTypography.headline())
-                .foregroundStyle(.primary)
-
-            HStack(spacing: AppSpacing._4) {
-                Text("\(playerCount)")
-                    .font(AppTypography.title1())
-                    .foregroundStyle(AppTheme.primaryColor)
-                    .frame(minWidth: AppComponent.Avatar.sizeMd, alignment: .center)
-
-                Slider(value: Binding(
-                    get: { Double(playerCount) },
-                    set: { newValue in
-                        let rounded = Int(newValue.rounded())
-                        if rounded != playerCount {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        }
-                        playerCount = min(AppConstants.GameSetup.playerCountMax, max(AppConstants.GameSetup.playerCountMin, rounded))
-                    }
-                ), in: Double(AppConstants.GameSetup.playerCountMin)...Double(AppConstants.GameSetup.playerCountMax), step: 1)
-                .tint(AppTheme.primaryColor)
-            }
-            .padding(AppSpacing._5)
-            .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
-            .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
-        }
-    }
-
     private var createRoomButton: some View {
         Button {
             UIImpactFeedbackGenerator(style: .medium).impactOccurred()
             // Validate point value: clamp to valid range, fallback to default if invalid
             let rawValue = Int(pointValueText) ?? AppConstants.GameSetup.pointValueDefault
             let pointValue = min(AppConstants.GameSetup.pointValueMax, max(AppConstants.GameSetup.pointValueMin, rawValue))
-            gameState.createRoom(pointLimit: pointLimit, pointValue: pointValue, playerCount: playerCount)
+            gameState.createRoom(pointLimit: pointLimit, pointValue: pointValue)
             dismiss()
         } label: {
             Text("Create Room")

@@ -50,7 +50,7 @@ struct RoomServiceResult {
 protocol RoomService: Sendable {
 
     /// Create a new room with the given settings. Returns the created room and moderator ID.
-    func createRoom(pointLimit: Int, pointValue: Int, playerCount: Int) async throws -> RoomServiceResult
+    func createRoom(pointLimit: Int, pointValue: Int) async throws -> RoomServiceResult
 
     /// Join an existing room by code. Returns the room and player ID.
     func joinRoom(code: String, playerName: String) async throws -> RoomServiceResult

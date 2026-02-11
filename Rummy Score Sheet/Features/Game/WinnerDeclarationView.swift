@@ -129,7 +129,8 @@ struct WinnerDeclarationView: View {
                         rank: index + 1,
                         player: player,
                         isWinner: game.winnerId == player.id.uuidString,
-                        pointValue: game.pointValue
+                        pointValue: game.pointValue,
+                        totalPlayers: game.players.count
                     )
                 }
             }
@@ -208,6 +209,7 @@ private struct PlayerStandingRow: View {
     let player: Player
     let isWinner: Bool
     let pointValue: Int
+    let totalPlayers: Int
     
     private var rankColor: Color {
         switch rank {
@@ -228,19 +230,14 @@ private struct PlayerStandingRow: View {
     }
     
     private var winnings: Int {
-        // Winner takes pot, others lose based on their score
-        isWinner ? calculateWinnings() : -player.totalScore * pointValue
-    }
-    
-    private func calculateWinnings() -> Int {
-        let totalLosses = game.players.filter { $0.id != player.id }
-            .reduce(0) { $0 + $1.totalScore * pointValue }
-        return totalLosses
-    }
-    
-    private var game: GameRoom {
-        // This is a hack for the preview; in real usage, pass game as parameter
-        GameRoom(id: "", pointLimit: 0, pointValue: pointValue, players: [player], currentRound: 0, isStarted: false)
+        // Winner takes pot (pointValue from each loser)
+        // Each loser pays exactly pointValue
+        if isWinner {
+            let loserCount = totalPlayers - 1
+            return loserCount * pointValue
+        } else {
+            return -pointValue
+        }
     }
     
     var body: some View {

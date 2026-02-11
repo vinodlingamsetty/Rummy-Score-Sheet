@@ -110,6 +110,23 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 
 ---
 
+## Backlog (Discovered Issues)
+
+### Game Flow & UX
+
+- [x] **Elimination alert**: When a player hits the point limit and gets eliminated, show an alert with a message that they were eliminated (instead of abruptly kicking them out).
+- [x] **Friends/Balance after game**: Friends and balance amounts are still not shown once a game is finished—investigate and fix.
+- [x] **Game history not working**: Recent games / game history is not working—investigate and fix.
+- [x] **Tab switching kicks user out**: When user creates or joins a room, then switches to Profile/Rules/other tabs and returns to Game tab, the game is empty and user is kicked out. Fix: once a player has joined, they should only leave when: (1) they tap Leave, (2) moderator removes them, or (3) they get eliminated by reaching the point limit.
+
+### Player Card UI (GameView)
+
+- [x] **Crown = lowest score (leader)**: Crown emoji should indicate the player with the *lowest* score (leader), not moderator.
+- [x] **Moderator emoji**: Add a distinct emoji for the game moderator (separate from crown). Moderator can also be leader, so both emojis can appear next to the same name.
+- [x] **Remaining points label**: Below totals, when space permits, show "Remaining: X" where X = points until that player hits the point limit and gets eliminated (e.g. pointLimit - totalScore).
+
+---
+
 ## Completion Tracker
 
 | Phase   | Status | Completed Items |

@@ -9,7 +9,6 @@ import SwiftUI
 
 struct GameView: View {
     @Bindable var viewModel: GameViewModel
-    let onEndGame: () -> Void
     let onLeaveGame: () -> Void
     
     var body: some View {
@@ -65,6 +64,13 @@ struct GameView: View {
             if let error = viewModel.errorMessage {
                 Text(error)
             }
+        }
+        .alert("You've Been Eliminated", isPresented: $viewModel.showEliminationAlert) {
+            Button("OK") {
+                viewModel.showEliminationAlert = false
+            }
+        } message: {
+            Text("You've reached the point limit. You're out of this game, but you can still watch the rest.")
         }
     }
     
@@ -146,16 +152,18 @@ struct GameView: View {
     
     // MARK: - Players List
     
-    private var playersList: some View {
+        private var playersList: some View {
         VStack(spacing: AppSpacing._3) {
             ForEach(viewModel.sortedPlayers) { player in
                 PlayerScoreCard(
                     player: player,
                     scoreDisplay: viewModel.showTotalsView ? "\(player.totalScore)" : (viewModel.score(for: player.id, round: viewModel.selectedRound - 1).map { "\($0)" } ?? "-"),
                     isEliminated: viewModel.isEliminated(player),
+                    isLeader: viewModel.isLeader(player),
                     isModerator: player.isModerator,
                     isTotal: viewModel.showTotalsView,
                     hasScore: viewModel.showTotalsView || viewModel.hasScore(for: player.id, round: viewModel.selectedRound - 1),
+                    pointLimit: viewModel.room.pointLimit,
                     onTapScore: {
                         if !viewModel.showTotalsView {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -175,11 +183,10 @@ struct GameView: View {
                 // End Game Button
                 Button {
                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                    if let winner = viewModel.winner {
-                        viewModel.endGame(winnerId: winner.id)
-                        onEndGame()
-                    } else {
-                        onEndGame()
+                    Task {
+                        await viewModel.endGame()
+                        // No onEndGame() call here; the room update listener will 
+                        // trigger the transition to WinnerDeclarationView for everyone.
                     }
                 } label: {
                     HStack(spacing: AppSpacing._2) {
@@ -252,10 +259,16 @@ private struct PlayerScoreCard: View {
     let player: Player
     let scoreDisplay: String
     let isEliminated: Bool
+    let isLeader: Bool
     let isModerator: Bool
     let isTotal: Bool
     let hasScore: Bool
+    let pointLimit: Int
     let onTapScore: () -> Void
+    
+    private var remainingPoints: Int {
+        max(0, pointLimit - player.totalScore)
+    }
     
     // Computed colors to avoid complex ternary expressions
     private var scoreColor: Color {
@@ -290,10 +303,15 @@ private struct PlayerScoreCard: View {
                         .font(AppTypography.headline())
                         .foregroundStyle(isEliminated ? .secondary : .primary)
                     
-                    if isModerator {
+                    if isLeader {
                         Image(systemName: "crown.fill")
                             .font(.system(size: 12))
                             .foregroundStyle(.yellow)
+                    }
+                    if isModerator {
+                        Image(systemName: "person.badge.key.fill")
+                            .font(.system(size: 12))
+                            .foregroundStyle(AppTheme.primaryColor)
                     }
                     
                     if isEliminated {
@@ -309,6 +327,12 @@ private struct PlayerScoreCard: View {
                 Text(isTotal ? "Running Total" : "Total: \(player.totalScore)")
                     .font(AppTypography.footnote())
                     .foregroundStyle(.secondary)
+                
+                if !isEliminated {
+                    Text("Remaining: \(remainingPoints)")
+                        .font(AppTypography.caption2())
+                        .foregroundStyle(.secondary.opacity(0.8))
+                }
             }
             
             Spacer()
@@ -374,7 +398,6 @@ private struct PlayerScoreCard: View {
     
     GameView(
         viewModel: viewModel,
-        onEndGame: {},
         onLeaveGame: {}
     )
 }

@@ -9,10 +9,12 @@ import SwiftUI
 
 struct FriendsView: View {
     let friendService: FriendService
+    @Binding var selectedTab: AppTab
     @State private var viewModel: FriendsViewModel
     
-    init(friendService: FriendService = MockFriendService()) {
+    init(friendService: FriendService = MockFriendService(), selectedTab: Binding<AppTab> = .constant(.friends)) {
         self.friendService = friendService
+        self._selectedTab = selectedTab
         _viewModel = State(initialValue: FriendsViewModel(friendService: friendService))
     }
     
@@ -34,6 +36,11 @@ struct FriendsView: View {
             }
             .task {
                 await viewModel.loadFriends()
+            }
+            .onChange(of: selectedTab) { _, newValue in
+                if newValue == .friends {
+                    Task { await viewModel.loadFriends() }
+                }
             }
         }
     }

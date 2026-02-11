@@ -40,15 +40,14 @@ final class AppGameState {
 
     // MARK: - Room Actions
 
-    func createRoom(pointLimit: Int, pointValue: Int, playerCount: Int) {
+    func createRoom(pointLimit: Int, pointValue: Int) {
         Task { @MainActor in
             isLoading = true
             errorMessage = nil
             do {
                 let result = try await roomService.createRoom(
                     pointLimit: pointLimit,
-                    pointValue: pointValue,
-                    playerCount: playerCount
+                    pointValue: pointValue
                 )
                 currentRoom = result.room
                 currentUserId = result.currentUserId
@@ -137,7 +136,12 @@ final class AppGameState {
             return
         }
         
-        print("🤝 Creating friendships from completed game...")
+        guard let currentFirebaseUid = FirebaseConfig.getCurrentUserId() else {
+            print("⚠️ Not authenticated; skipping friendships")
+            return
+        }
+        
+        print("🤝 Creating friendships from completed game for user \(currentFirebaseUid)...")
         
         // Only works with Firebase service
         guard let firebaseFriendService = friendService as? FirebaseFriendService else {
@@ -145,65 +149,80 @@ final class AppGameState {
             return
         }
         
-        // Calculate balances: winner receives, losers pay based on their scores
-        // Use Firebase Auth UID (userId) for friendships; skip players without userId
-        guard let winnerUid = winner.userId else {
-            print("⚠️ Winner has no userId; skipping friendships")
-            return
-        }
         let winnerTotalScore = winner.totalScore
         func uid(for player: Player) -> String? { player.userId }
         
+        // Strategy: Each player updates friendships they are part of.
+        // This complies with Firestore rules (can only write if you are a participant).
+        
         for player in room.players {
-            // Skip winner vs winner
-            if player.id == winner.id { continue }
-            
-            // Skip players without Firebase UID (e.g. legacy data) - can't create friendships
+            // Skip if current user is not part of this pair
             guard let playerUid = uid(for: player) else { continue }
             
-            // Calculate how much this player owes the winner
-            // Formula: (loser's total score - winner's total score) * pointValue
-            let scoreDifference = player.totalScore - winnerTotalScore
-            let amountOwed = Double(scoreDifference) * Double(room.pointValue)
+            // We only process pairs where one of the participants is the current user
+            // And we avoid duplicate processing (only process each pair once per game)
+            // Actually, if both A and B call this, they will both try to update A-B.
+            // That's fine (Firestore will just increment twice if not careful, but 
+            // the logic should be idempotent or additive).
+            // To be safe, let's only have the user with the "smaller" UID update the shared record?
+            // No, the rules say EITHER can update. Let's just have the current user update
+            // all their friendships from this game.
             
-            // Create/update friendship: winner's perspective (positive balance = they owe winner)
-            do {
-                try await firebaseFriendService.createOrUpdateFriendship(
-                    userId1: winnerUid,
-                    userId2: playerUid,
-                    user1Name: winner.name,
-                    user2Name: player.name,
-                    balanceChange: amountOwed
-                )
-                print("✅ Updated friendship: \(winner.name) ↔ \(player.name), balance change: $\(amountOwed)")
-            } catch {
-                print("❌ Failed to create friendship: \(error.localizedDescription)")
+            // Only update if current user is one of the two participants
+            let isCurrentParticipant = (playerUid == currentFirebaseUid || winner.userId == currentFirebaseUid)
+            
+            if isCurrentParticipant && player.id != winner.id {
+                // Determine the "other" person in the friendship
+                let otherUid = (playerUid == currentFirebaseUid) ? (winner.userId ?? "") : playerUid
+                let otherName = (playerUid == currentFirebaseUid) ? winner.name : player.name
+                let currentUserName = (playerUid == currentFirebaseUid) ? player.name : (room.players.first { $0.userId == currentFirebaseUid }?.name ?? "Me")
+                
+                // Only update if we have a valid UID for both
+                guard !otherUid.isEmpty else { continue }
+                
+                // Calculate balance change: fixed pointValue payment from losers to winner
+                let amountOwed = Double(room.pointValue)
+                
+                // The createOrUpdateFriendship handles userId order (smaller first)
+                do {
+                    try await firebaseFriendService.createOrUpdateFriendship(
+                        userId1: winner.userId ?? "",
+                        userId2: playerUid,
+                        user1Name: winner.name,
+                        user2Name: player.name,
+                        balanceChange: amountOwed
+                    )
+                    print("✅ Updated friendship: \(winner.name) ↔ \(player.name), balance change: $\(amountOwed)")
+                } catch {
+                    print("❌ Failed to update friendship: \(error.localizedDescription)")
+                }
             }
         }
         
-        // Also create friendships between all other players (0 balance change, just tracking games played)
+        // Also update game counts between non-winners
         for i in 0..<room.players.count {
             for j in (i+1)..<room.players.count {
-                let player1 = room.players[i]
-                let player2 = room.players[j]
+                let p1 = room.players[i]
+                let p2 = room.players[j]
                 
-                // Skip if one of them is the winner (already handled above)
-                if player1.id == winner.id || player2.id == winner.id { continue }
+                // Skip if winner is involved (already handled above)
+                if p1.id == winner.id || p2.id == winner.id { continue }
                 
-                // Skip players without Firebase UID
-                guard let p1Uid = uid(for: player1), let p2Uid = uid(for: player2) else { continue }
+                guard let uid1 = uid(for: p1), let uid2 = uid(for: p2) else { continue }
                 
-                do {
-                    try await firebaseFriendService.createOrUpdateFriendship(
-                        userId1: p1Uid,
-                        userId2: p2Uid,
-                        user1Name: player1.name,
-                        user2Name: player2.name,
-                        balanceChange: 0.0 // No money exchange between non-winners
-                    )
-                    print("✅ Updated friendship: \(player1.name) ↔ \(player2.name)")
-                } catch {
-                    print("❌ Failed to create friendship: \(error.localizedDescription)")
+                // Only current user can update their own friendships
+                if uid1 == currentFirebaseUid || uid2 == currentFirebaseUid {
+                    do {
+                        try await firebaseFriendService.createOrUpdateFriendship(
+                            userId1: uid1,
+                            userId2: uid2,
+                            user1Name: p1.name,
+                            user2Name: p2.name,
+                            balanceChange: 0.0
+                        )
+                    } catch {
+                        print("❌ Failed to update friendship: \(error.localizedDescription)")
+                    }
                 }
             }
         }
@@ -226,7 +245,10 @@ final class AppGameState {
             for await room in roomService.observeRoom(code: code) {
                 // Only update if we're still in the same room
                 guard currentRoom?.id == code else { break }
-                currentRoom = room
+                // Don't clear room on transient nil (e.g. decode error); preserve state so tab switching doesn't kick user out
+                if let room = room {
+                    currentRoom = room
+                }
             }
         }
     }

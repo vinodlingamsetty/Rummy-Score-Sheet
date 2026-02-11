@@ -16,12 +16,12 @@ actor MockRoomService: @preconcurrency RoomService {
 
     // MARK: - RoomService
 
-    func createRoom(pointLimit: Int, pointValue: Int, playerCount: Int) async throws -> RoomServiceResult {
+    func createRoom(pointLimit: Int, pointValue: Int) async throws -> RoomServiceResult {
         let code = generateRoomCode()
         let moderatorId = UUID()
         let moderator = Player(
             id: moderatorId,
-            name: "You",
+            name: FirebaseConfig.getUserDisplayName(),
             isReady: true,
             isModerator: true,
             scores: []
