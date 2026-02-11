@@ -23,6 +23,7 @@ final class GameViewModel {
     private let roomService: RoomService
     private let onRoomUpdate: (GameRoom) -> Void
     private let onGameCompleted: ((GameRoom) async -> Void)?
+    private let onGameEndAndExit: (() -> Void)?
 
     var currentRoundScore: Int {
         selectedRound - 1
@@ -61,13 +62,15 @@ final class GameViewModel {
         currentUserId: UUID? = nil,
         roomService: RoomService,
         onRoomUpdate: @escaping (GameRoom) -> Void,
-        onGameCompleted: ((GameRoom) async -> Void)? = nil
+        onGameCompleted: ((GameRoom) async -> Void)? = nil,
+        onGameEndAndExit: (() -> Void)? = nil
     ) {
         self.room = room
         self.currentUserId = currentUserId
         self.roomService = roomService
         self.onRoomUpdate = onRoomUpdate
         self.onGameCompleted = onGameCompleted
+        self.onGameEndAndExit = onGameEndAndExit
         self.selectedRound = room.currentRound // Default to current active round
     }
 
@@ -119,8 +122,13 @@ final class GameViewModel {
                 // If the update was for the latest round, update room state
                 // If it was for a past round, the room state update will handle it via observe
                 updateRoomState(updatedRoom)
-                
                 isScoreInputPresented = false
+                
+                // Auto-end if only one active player remains (others eliminated at point limit)
+                if checkAndAutoEndIfWinner() {
+                    isLoading = false
+                    return
+                }
                 
                 // Auto-advance to next round if:
                 // 1. We are editing the LATEST round
@@ -130,6 +138,7 @@ final class GameViewModel {
                     let nextRoom = try await roomService.nextRound(roomCode: room.id)
                     updateRoomState(nextRoom)
                     selectedRound = nextRoom.currentRound // Auto-follow to new round
+                    _ = checkAndAutoEndIfWinner()
                 }
             } catch {
                 errorMessage = error.localizedDescription
@@ -169,6 +178,7 @@ final class GameViewModel {
                 let updatedRoom = try await roomService.nextRound(roomCode: room.id)
                 updateRoomState(updatedRoom)
                 selectedRound = updatedRoom.currentRound // Explicitly follow on manual advance
+                _ = checkAndAutoEndIfWinner()
             } catch {
                 errorMessage = error.localizedDescription
                 print("❌ Failed to advance round: \(error.localizedDescription)")
@@ -176,6 +186,15 @@ final class GameViewModel {
             
             isLoading = false
         }
+    }
+    
+    /// When only one active player remains (others eliminated), auto-end game and exit.
+    /// - Returns: true if game was auto-ended (caller should return early)
+    private func checkAndAutoEndIfWinner() -> Bool {
+        guard !room.isCompleted, let w = winner else { return false }
+        endGame(winnerId: w.id)
+        onGameEndAndExit?()
+        return true
     }
     
     // MARK: - Game End

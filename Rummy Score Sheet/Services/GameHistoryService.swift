@@ -39,14 +39,9 @@ final class GameHistoryService: @unchecked Sendable {
                 try doc.data(as: GameRoom.self)
             }
             
-            // Filter to only games where current user participated
+            // Filter to only games where current user participated (by Firebase UID)
             let userGames = allGames.filter { room in
-                room.players.contains { player in
-                    // Check if player was created by this user
-                    // (In real app, we'd have a userId field on Player)
-                    // For now, we'll return all completed games
-                    true
-                }
+                room.players.contains { $0.userId == userId }
             }
             
             print("✅ Fetched \(userGames.count) completed games")

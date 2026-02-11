@@ -35,6 +35,7 @@ struct Player: Identifiable, Codable {
     var isReady: Bool
     var isModerator: Bool
     var scores: [Int]        // Score per round
+    var userId: String?      // Firebase Auth UID; used for Friends (nil for legacy players)
     
     var totalScore: Int {
         scores.reduce(0, +)
@@ -42,15 +43,16 @@ struct Player: Identifiable, Codable {
     
     // Custom coding keys for Firestore (UUID as String)
     enum CodingKeys: String, CodingKey {
-        case id, name, isReady, isModerator, scores
+        case id, name, isReady, isModerator, scores, userId
     }
     
-    init(id: UUID, name: String, isReady: Bool, isModerator: Bool, scores: [Int]) {
+    init(id: UUID, name: String, isReady: Bool, isModerator: Bool, scores: [Int], userId: String? = nil) {
         self.id = id
         self.name = name
         self.isReady = isReady
         self.isModerator = isModerator
         self.scores = scores
+        self.userId = userId
     }
     
     init(from decoder: Decoder) throws {
@@ -61,6 +63,7 @@ struct Player: Identifiable, Codable {
         self.isReady = try container.decode(Bool.self, forKey: .isReady)
         self.isModerator = try container.decode(Bool.self, forKey: .isModerator)
         self.scores = try container.decode([Int].self, forKey: .scores)
+        self.userId = try container.decodeIfPresent(String.self, forKey: .userId)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -70,6 +73,7 @@ struct Player: Identifiable, Codable {
         try container.encode(isReady, forKey: .isReady)
         try container.encode(isModerator, forKey: .isModerator)
         try container.encode(scores, forKey: .scores)
+        try container.encodeIfPresent(userId, forKey: .userId)
     }
 }
 

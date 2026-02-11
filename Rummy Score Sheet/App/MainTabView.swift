@@ -77,7 +77,8 @@ private struct GameTabContent: View {
                         onRoomUpdate: { gameState.updateRoom($0) },
                         onGameCompleted: { completedRoom in
                             await gameState.createFriendshipsFromGame(completedRoom)
-                        }
+                        },
+                        onGameEndAndExit: { gameState.endGame() }
                     )
                 ) {
                     gameState.endGame()

@@ -146,11 +146,20 @@ final class AppGameState {
         }
         
         // Calculate balances: winner receives, losers pay based on their scores
+        // Use Firebase Auth UID (userId) for friendships; skip players without userId
+        guard let winnerUid = winner.userId else {
+            print("⚠️ Winner has no userId; skipping friendships")
+            return
+        }
         let winnerTotalScore = winner.totalScore
+        func uid(for player: Player) -> String? { player.userId }
         
         for player in room.players {
             // Skip winner vs winner
             if player.id == winner.id { continue }
+            
+            // Skip players without Firebase UID (e.g. legacy data) - can't create friendships
+            guard let playerUid = uid(for: player) else { continue }
             
             // Calculate how much this player owes the winner
             // Formula: (loser's total score - winner's total score) * pointValue
@@ -160,8 +169,8 @@ final class AppGameState {
             // Create/update friendship: winner's perspective (positive balance = they owe winner)
             do {
                 try await firebaseFriendService.createOrUpdateFriendship(
-                    userId1: winner.id.uuidString,
-                    userId2: player.id.uuidString,
+                    userId1: winnerUid,
+                    userId2: playerUid,
                     user1Name: winner.name,
                     user2Name: player.name,
                     balanceChange: amountOwed
@@ -181,10 +190,13 @@ final class AppGameState {
                 // Skip if one of them is the winner (already handled above)
                 if player1.id == winner.id || player2.id == winner.id { continue }
                 
+                // Skip players without Firebase UID
+                guard let p1Uid = uid(for: player1), let p2Uid = uid(for: player2) else { continue }
+                
                 do {
                     try await firebaseFriendService.createOrUpdateFriendship(
-                        userId1: player1.id.uuidString,
-                        userId2: player2.id.uuidString,
+                        userId1: p1Uid,
+                        userId2: p2Uid,
                         user1Name: player1.name,
                         user2Name: player2.name,
                         balanceChange: 0.0 // No money exchange between non-winners

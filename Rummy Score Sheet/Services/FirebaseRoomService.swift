@@ -33,7 +33,8 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
             name: "You",
             isReady: true,
             isModerator: true,
-            scores: []
+            scores: [],
+            userId: userId
         )
         
         let room = GameRoom(
@@ -66,7 +67,7 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
         // Ensure auth is complete
         await FirebaseConfig.ensureAuthenticated()
         
-        guard Auth.auth().currentUser != nil else {
+        guard let userId = Auth.auth().currentUser?.uid else {
             throw RoomServiceError.networkError(NSError(domain: "Auth", code: -1, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"]))
         }
         
@@ -93,7 +94,8 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
                 name: playerName,
                 isReady: false,
                 isModerator: false,
-                scores: room.isStarted ? [Int](repeating: 0, count: 6) : []
+                scores: room.isStarted ? [Int](repeating: 0, count: 6) : [],
+                userId: userId
             )
             
             room.players.append(player)
