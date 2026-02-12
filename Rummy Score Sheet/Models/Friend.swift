@@ -8,8 +8,7 @@
 import Foundation
 
 struct Friend: Identifiable, Codable {
-    let id: UUID
-    let friendshipId: String? // Firestore document ID (for backend sync)
+    let id: String // Stable identifier (Firestore Document ID)
     let userId: String // The friend's user ID
     let name: String
     let email: String? // The friend's email address
@@ -18,9 +17,12 @@ struct Friend: Identifiable, Codable {
     var gamesPlayedTogether: Int
     var lastPlayedDate: Date?
     
+    // friendshipId is now redundant as it's used for 'id', 
+    // but we'll keep a computed property for backward compatibility if needed.
+    var friendshipId: String { id }
+    
     init(
-        id: UUID = UUID(),
-        friendshipId: String? = nil,
+        id: String = UUID().uuidString,
         userId: String = UUID().uuidString,
         name: String,
         email: String? = nil,
@@ -30,7 +32,6 @@ struct Friend: Identifiable, Codable {
         lastPlayedDate: Date? = nil
     ) {
         self.id = id
-        self.friendshipId = friendshipId
         self.userId = userId
         self.name = name
         self.email = email

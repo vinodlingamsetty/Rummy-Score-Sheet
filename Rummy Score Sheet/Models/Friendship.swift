@@ -71,7 +71,7 @@ struct Friendship: Codable {
         let userBalance = balanceFor(userId: currentUserId)
         
         return Friend(
-            friendshipId: friendshipId,
+            id: friendshipId,
             userId: friendInfo.userId,
             name: friendInfo.name,
             email: friendInfo.email,

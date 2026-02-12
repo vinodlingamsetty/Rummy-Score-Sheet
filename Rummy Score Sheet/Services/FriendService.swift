@@ -11,9 +11,10 @@ import Foundation
 
 protocol FriendService {
     func fetchFriends() async throws -> [Friend]
-    func settleFriend(id: UUID) async throws
-    func recordSettlement(id: UUID, amount: Double, note: String) async throws
-    func nudgeFriend(id: UUID) async throws
+    func settleFriend(id: String) async throws
+    func recordSettlement(id: String, amount: Double, note: String) async throws
+    func fetchSettlements(friendshipId: String) async throws -> [Settlement]
+    func nudgeFriend(id: String) async throws
     func searchFriends(query: String) async throws -> [Friend]
     func observeFriends() -> AsyncStream<[Friend]>
 }
@@ -24,6 +25,7 @@ actor MockFriendService: FriendService {
     
     // In-memory storage
     private var friends: [Friend] = Friend.mockFriends
+    private var settlements: [String: [Settlement]] = [:]
     
     func fetchFriends() async throws -> [Friend] {
         // Simulate very brief network delay (for testing loading state)
@@ -31,13 +33,13 @@ actor MockFriendService: FriendService {
         return friends
     }
     
-    func settleFriend(id: UUID) async throws {
+    func settleFriend(id: String) async throws {
         if let index = friends.firstIndex(where: { $0.id == id }) {
             friends[index].balance = 0.0
         }
     }
     
-    func recordSettlement(id: UUID, amount: Double, note: String) async throws {
+    func recordSettlement(id: String, amount: Double, note: String) async throws {
         if let index = friends.firstIndex(where: { $0.id == id }) {
             let currentBalance = friends[index].balance
             if currentBalance > 0 {
@@ -45,11 +47,26 @@ actor MockFriendService: FriendService {
             } else {
                 friends[index].balance = min(0, currentBalance + amount)
             }
+            
+            let settlement = Settlement(
+                friendshipId: id,
+                amount: amount,
+                settledBy: "mock-user",
+                note: note
+            )
+            var currentSettlements = settlements[id] ?? []
+            currentSettlements.append(settlement)
+            settlements[id] = currentSettlements
+            
             print("📝 Settlement recorded for friend: \(id), amount: $\(amount), note: \(note)")
         }
     }
     
-    func nudgeFriend(id: UUID) async throws {
+    func fetchSettlements(friendshipId: String) async throws -> [Settlement] {
+        return (settlements[friendshipId] ?? []).sorted { $0.settledAt > $1.settledAt }
+    }
+    
+    func nudgeFriend(id: String) async throws {
         // Simulate sending notification
         try await Task.sleep(nanoseconds: 200_000_000) // 0.2 seconds
         print("📬 Nudge sent to friend: \(id)")

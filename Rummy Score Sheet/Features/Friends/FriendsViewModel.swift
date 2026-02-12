@@ -15,7 +15,9 @@ class FriendsViewModel {
     var friends: [Friend] = []
     var searchQuery: String = ""
     var isLoading: Bool = false
+    var isSettlementsLoading: Bool = false
     var errorMessage: String?
+    var settlements: [Settlement] = []
     
     private let friendService: FriendService
     
@@ -101,8 +103,9 @@ class FriendsViewModel {
         do {
             try await friendService.recordSettlement(id: friend.id, amount: amount, note: note)
             
-            // Reload friends to get updated balance
+            // Reload friends and settlements to get updated state
             await loadFriends()
+            await loadSettlements(for: friend)
             
             UINotificationFeedbackGenerator().notificationOccurred(.success)
         } catch {
@@ -110,6 +113,17 @@ class FriendsViewModel {
             UINotificationFeedbackGenerator().notificationOccurred(.error)
         }
         isLoading = false
+    }
+    
+    @MainActor
+    func loadSettlements(for friend: Friend) async {
+        isSettlementsLoading = true
+        do {
+            settlements = try await friendService.fetchSettlements(friendshipId: friend.id)
+        } catch {
+            print("❌ Failed to load settlements: \(error.localizedDescription)")
+        }
+        isSettlementsLoading = false
     }
     
     @MainActor

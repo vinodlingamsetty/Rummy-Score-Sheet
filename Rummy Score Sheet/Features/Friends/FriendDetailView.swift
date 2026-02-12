@@ -12,6 +12,11 @@ struct FriendDetailView: View {
     @Environment(FriendsViewModel.self) private var viewModel
     @State private var isShowingSettlementSheet = false
     
+    /// Always use the latest data from the viewModel if available
+    private var currentFriend: Friend {
+        viewModel.friends.first(where: { $0.id == friend.id }) ?? friend
+    }
+    
     var body: some View {
         ZStack {
             AppTheme.background
@@ -26,9 +31,12 @@ struct FriendDetailView: View {
                     balanceSummaryCard
                     
                     // Actions
-                    if !friend.isSettled {
+                    if !currentFriend.isSettled {
                         settlementActions
                     }
+                    
+                    // Settlement History
+                    settlementHistorySection
                     
                     // Game History Section
                     gameHistorySection
@@ -37,15 +45,45 @@ struct FriendDetailView: View {
                 .padding(.top, AppSpacing._4)
                 .padding(.bottom, AppSpacing._8)
             }
+            
+            if viewModel.isLoading {
+                loadingOverlay
+            }
         }
-        .navigationTitle(friend.name)
+        .navigationTitle(currentFriend.name)
         .navigationBarTitleDisplayMode(.inline)
+        .task {
+            await viewModel.loadSettlements(for: currentFriend)
+        }
         .sheet(isPresented: $isShowingSettlementSheet) {
-            SettlementSheet(friend: friend) { amount, note in
+            SettlementSheet(friend: currentFriend) { amount, note in
                 Task {
-                    await viewModel.recordSettlement(friend: friend, amount: amount, note: note)
+                    await viewModel.recordSettlement(friend: currentFriend, amount: amount, note: note)
                 }
             }
+        }
+        .alert("Error", isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.errorMessage = nil } }
+        )) {
+            Button("OK") { viewModel.errorMessage = nil }
+        } message: {
+            Text(viewModel.errorMessage ?? "")
+        }
+    }
+    
+    private var loadingOverlay: some View {
+        ZStack {
+            Color.black.opacity(0.3).ignoresSafeArea()
+            VStack(spacing: AppSpacing._3) {
+                ProgressView()
+                    .tint(.white)
+                Text("Recording...")
+                    .font(AppTypography.caption1())
+                    .foregroundStyle(.white)
+            }
+            .padding(AppSpacing._6)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md))
         }
     }
     
@@ -79,18 +117,18 @@ struct FriendDetailView: View {
                 .fill(AppTheme.primaryColor.opacity(0.2))
                 .frame(width: 80, height: 80)
                 .overlay(
-                    Text(friend.initial)
+                    Text(currentFriend.initial)
                         .font(.system(size: 36, weight: .bold))
                         .foregroundStyle(AppTheme.primaryColor)
                 )
             
             // Name
-            Text(friend.name)
+            Text(currentFriend.name)
                 .font(AppTypography.title2())
                 .foregroundStyle(.primary)
             
             // Email
-            if let email = friend.email {
+            if let email = currentFriend.email {
                 Text(email)
                     .font(AppTypography.body())
                     .foregroundStyle(.secondary)
@@ -99,12 +137,12 @@ struct FriendDetailView: View {
             // Stats
             HStack(spacing: AppSpacing._6) {
                 statItem(
-                    value: "\(friend.gamesPlayedTogether)",
+                    value: "\(currentFriend.gamesPlayedTogether)",
                     label: "Games",
                     icon: "gamecontroller.fill"
                 )
                 
-                if let lastPlayed = friend.lastPlayedDate {
+                if let lastPlayed = currentFriend.lastPlayedDate {
                     statItem(
                         value: lastPlayed.timeAgoDisplay,
                         label: "Last Played",
@@ -143,7 +181,7 @@ struct FriendDetailView: View {
                 .font(AppTypography.caption1())
                 .foregroundStyle(.secondary)
             
-            Text(friend.balanceFormatted)
+            Text(currentFriend.balanceFormatted)
                 .font(.system(size: 44, weight: .bold, design: .rounded))
                 .foregroundStyle(balanceColor)
             
@@ -163,9 +201,9 @@ struct FriendDetailView: View {
     }
     
     private var balanceColor: Color {
-        if friend.isToCollect {
+        if currentFriend.isToCollect {
             return AppTheme.positiveColor
-        } else if friend.isToSettle {
+        } else if currentFriend.isToSettle {
             return Color.orange
         } else {
             return .secondary
@@ -173,12 +211,43 @@ struct FriendDetailView: View {
     }
     
     private var balanceDescription: String {
-        if friend.isToCollect {
-            return "\(friend.name) owes you"
-        } else if friend.isToSettle {
-            return "You owe \(friend.name)"
+        if currentFriend.isToCollect {
+            return "\(currentFriend.name) owes you"
+        } else if currentFriend.isToSettle {
+            return "You owe \(currentFriend.name)"
         } else {
             return "All settled up!"
+        }
+    }
+    
+    // MARK: - Settlement History
+    
+    private var settlementHistorySection: some View {
+        VStack(alignment: .leading, spacing: AppSpacing._3) {
+            Text("SETTLEMENT HISTORY")
+                .font(AppTypography.caption1())
+                .foregroundStyle(.secondary)
+                .padding(.horizontal, AppSpacing._3)
+            
+            if viewModel.isSettlementsLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            } else if viewModel.settlements.isEmpty {
+                Text("No settlement records yet.")
+                    .font(AppTypography.body())
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+                    .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+            } else {
+                VStack(spacing: AppSpacing._2) {
+                    ForEach(viewModel.settlements) { settlement in
+                        SettlementRow(settlement: settlement, friend: currentFriend)
+                    }
+                }
+            }
         }
     }
     
@@ -208,7 +277,7 @@ struct FriendDetailView: View {
                 .font(AppTypography.body())
                 .foregroundStyle(.secondary)
             
-            Text("You'll be able to see all games played with \(friend.name) here")
+            Text("You'll be able to see all games played with \(currentFriend.name) here")
                 .font(AppTypography.caption1())
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
@@ -217,6 +286,56 @@ struct FriendDetailView: View {
         .padding(AppSpacing._6)
         .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+    }
+}
+
+// MARK: - Settlement Row
+
+private struct SettlementRow: View {
+    let settlement: Settlement
+    let friend: Friend
+    
+    private var isMe: Bool {
+        settlement.settledBy == FirebaseConfig.getCurrentUserId()
+    }
+    
+    var body: some View {
+        HStack(spacing: AppSpacing._3) {
+            Circle()
+                .fill(isMe ? AppTheme.primaryColor.opacity(0.2) : AppTheme.positiveColor.opacity(0.2))
+                .frame(width: 40, height: 40)
+                .overlay(
+                    Image(systemName: isMe ? "arrow.up.circle.fill" : "arrow.down.circle.fill")
+                        .foregroundStyle(isMe ? AppTheme.primaryColor : AppTheme.positiveColor)
+                )
+            
+            VStack(alignment: .leading, spacing: 2) {
+                Text(isMe ? "You paid \(friend.name)" : "\(friend.name) paid you")
+                    .font(AppTypography.headline())
+                    .foregroundStyle(.primary)
+                
+                Text(settlement.settledAt, format: .dateTime.month().day().year().hour().minute())
+                    .font(AppTypography.caption2())
+                    .foregroundStyle(.secondary)
+                
+                if let note = settlement.note, !note.isEmpty {
+                    Text(note)
+                        .font(AppTypography.caption1())
+                        .italic()
+                        .foregroundStyle(.secondary)
+                }
+            }
+            
+            Spacer()
+            
+            Text(settlement.amountFormatted)
+                .font(AppTypography.title3())
+                .fontWeight(.bold)
+                .foregroundStyle(.primary)
+        }
+        .padding(AppSpacing._3)
+        .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md))
+        .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.md))
     }
 }
 

@@ -55,7 +55,7 @@ actor FirebaseFriendService: FriendService {
         return friends
     }
     
-    func settleFriend(id: UUID) async throws {
+    func settleFriend(id: String) async throws {
         // Ensure user is authenticated
         await FirebaseConfig.ensureAuthenticated()
         
@@ -63,17 +63,16 @@ actor FirebaseFriendService: FriendService {
             throw NSError(domain: "FirebaseFriendService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
-        // First, fetch all friends to find the one with matching UUID
-        let friends = try await fetchFriends()
-        guard let friend = friends.first(where: { $0.id == id }),
-              let friendshipId = friend.friendshipId else {
+        // The 'id' is the friendshipId
+        let friendshipId = id
+        let friendshipRef = db.collection(friendsCollection).document(friendshipId)
+        
+        // Get current friendship data to record settlement transaction
+        let document = try await friendshipRef.getDocument()
+        guard document.exists else {
             throw NSError(domain: "FirebaseFriendService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Friend not found"])
         }
         
-        let friendshipRef = db.collection(friendsCollection).document(friendshipId)
-        
-        // Get current friendship data
-        let document = try await friendshipRef.getDocument()
         let friendship = try document.data(as: Friendship.self)
         
         // Record the settlement transaction before clearing balance
@@ -96,7 +95,7 @@ actor FirebaseFriendService: FriendService {
         ])
     }
     
-    func recordSettlement(id: UUID, amount: Double, note: String) async throws {
+    func recordSettlement(id: String, amount: Double, note: String) async throws {
         // Ensure user is authenticated
         await FirebaseConfig.ensureAuthenticated()
         
@@ -104,30 +103,36 @@ actor FirebaseFriendService: FriendService {
             throw NSError(domain: "FirebaseFriendService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
-        // Find the friendship
-        let friends = try await fetchFriends()
-        guard let friend = friends.first(where: { $0.id == id }),
-              let friendshipId = friend.friendshipId else {
+        // The 'id' is the friendshipId
+        let friendshipId = id
+        let friendshipRef = db.collection(friendsCollection).document(friendshipId)
+        
+        let document = try await friendshipRef.getDocument()
+        guard document.exists else {
             throw NSError(domain: "FirebaseFriendService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Friend not found"])
         }
         
-        let friendshipRef = db.collection(friendsCollection).document(friendshipId)
-        
-        // Determine balance adjustment direction
-        // In the Friendship doc, balance is: userId2 owes userId1 (positive)
-        // If current user is userId1 and friend (userId2) owes them, a settlement reduces positive balance.
-        // If current user is userId2 and they owe friend (userId1), a settlement reduces negative balance.
-        
-        let document = try await friendshipRef.getDocument()
         let friendship = try document.data(as: Friendship.self)
+        
+        // The balance in the document is: (userId2 owes userId1)
+        // We need to move this balance TOWARDS ZERO by the settlement 'amount'.
         
         var adjustment = 0.0
         if currentUserId == friendship.userId1 {
-            // Friend is userId2. If balance > 0, they owe me.
-            adjustment = -amount // Reduce their debt
+            // I am userId1. 
+            // If balance > 0, userId2 owes me. To reduce their debt, we DECREMENT balance.
+            // If balance < 0, I owe userId2. To reduce my debt, we INCREMENT balance.
+            adjustment = (friendship.balance > 0) ? -amount : amount
         } else {
-            // I am userId2. If balance > 0, I owe them.
-            adjustment = amount // Reduce my debt (moving balance towards 0)
+            // I am userId2.
+            // If balance > 0, I owe userId1. To reduce my debt, we DECREMENT balance.
+            // If balance < 0, userId1 owes me. To reduce their debt, we INCREMENT balance.
+            adjustment = (friendship.balance > 0) ? -amount : amount
+        }
+        
+        // Safety: ensure we don't over-settle (flip the debt)
+        if amount > abs(friendship.balance) {
+            adjustment = -friendship.balance
         }
         
         // Record the transaction
@@ -148,7 +153,16 @@ actor FirebaseFriendService: FriendService {
         ])
     }
     
-    func nudgeFriend(id: UUID) async throws {
+    func fetchSettlements(friendshipId: String) async throws -> [Settlement] {
+        let snapshot = try await db.collection(settlementsCollection)
+            .whereField("friendshipId", isEqualTo: friendshipId)
+            .order(by: "settledAt", descending: true)
+            .getDocuments()
+        
+        return snapshot.documents.compactMap { try? $0.data(as: Settlement.self) }
+    }
+    
+    func nudgeFriend(id: String) async throws {
         // Ensure user is authenticated
         await FirebaseConfig.ensureAuthenticated()
         
@@ -156,16 +170,18 @@ actor FirebaseFriendService: FriendService {
             throw NSError(domain: "FirebaseFriendService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
-        // Fetch friend info
-        let friends = try await fetchFriends()
-        guard let friend = friends.first(where: { $0.id == id }) else {
-            throw NSError(domain: "FirebaseFriendService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Friend not found"])
-        }
+        // The 'id' is the friendshipId
+        let friendshipId = id
+        // We need the other user's ID for the nudge
+        let doc = try await db.collection(friendsCollection).document(friendshipId).getDocument()
+        let friendship = try doc.data(as: Friendship.self)
+        let currentUserId = Auth.auth().currentUser?.uid ?? ""
+        let friendUserId = (currentUserId == friendship.userId1) ? friendship.userId2 : friendship.userId1
         
         let senderName = await FirebaseConfig.getUserDisplayName()
         
         let data: [String: Any] = [
-            "friendUserId": friend.userId,
+            "friendUserId": friendUserId,
             "senderName": senderName
         ]
         
