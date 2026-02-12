@@ -140,31 +140,49 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
     func leaveRoom(roomCode: String, playerId: UUID) async throws {
         let docRef = db.collection(collectionName).document(roomCode)
         
-        do {
-            let document = try await docRef.getDocument()
-            
-            guard document.exists else {
-                throw RoomServiceError.roomNotFound
+        _ = try await db.runTransaction { (transaction, errorPointer) -> Any? in
+            let document: DocumentSnapshot
+            do {
+                document = try transaction.getDocument(docRef)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
             }
             
-            var room = try document.data(as: GameRoom.self)
+            guard document.exists else { return nil }
+            
+            var room: GameRoom
+            do {
+                room = try document.data(as: GameRoom.self)
+            } catch let decodeError as NSError {
+                errorPointer?.pointee = decodeError
+                return nil
+            }
+            
+            // If the game is already completed, we DON'T remove the player.
+            // This preserves the history record for everyone.
+            if room.isCompleted {
+                return nil
+            }
             
             room.players.removeAll { $0.id == playerId }
             
             if room.players.isEmpty {
-                // Delete room if no players remain
-                try await docRef.delete()
+                transaction.deleteDocument(docRef)
             } else {
                 // If moderator left, assign new moderator
                 if !room.players.contains(where: { $0.isModerator }) {
                     room.players[0].isModerator = true
                 }
-                try docRef.setData(from: room)
+                do {
+                    try transaction.setData(from: room, forDocument: docRef)
+                } catch let writeError as NSError {
+                    errorPointer?.pointee = writeError
+                    return nil
+                }
             }
-        } catch let error as RoomServiceError {
-            throw error
-        } catch {
-            throw RoomServiceError.networkError(error)
+            
+            return nil
         }
     }
     

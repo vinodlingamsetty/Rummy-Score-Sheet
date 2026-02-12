@@ -29,10 +29,9 @@ struct GameDetailView: View {
                     // Winner Card
                     if let winner = game.winner {
                         winnerCard(winner: winner)
+                    } else if game.isCompleted {
+                        voidGameCard
                     }
-                    
-                    // Final Standings
-                    finalStandingsSection
                     
                     // Round by Round Scores
                     roundScoresSection
@@ -134,26 +133,25 @@ struct GameDetailView: View {
         .padding(.horizontal, AppSpacing._4)
     }
     
-    // MARK: - Final Standings
-    
-    private var finalStandingsSection: some View {
-        VStack(alignment: .leading, spacing: AppSpacing._3) {
-            Text("Final Standings")
+    private var voidGameCard: some View {
+        VStack(spacing: AppSpacing._2) {
+            Image(systemName: "slash.circle")
+                .font(.system(size: 48))
+                .foregroundStyle(.secondary)
+            
+            Text("Game Voided")
                 .font(AppTypography.title2())
                 .foregroundStyle(.primary)
-                .padding(.horizontal, AppSpacing._4)
             
-            VStack(spacing: AppSpacing._2) {
-                ForEach(Array(sortedPlayers.enumerated()), id: \.element.id) { index, player in
-                    PlayerStandingRow(
-                        rank: index + 1,
-                        player: player,
-                        isWinner: game.winnerId == player.id.uuidString
-                    )
-                }
-            }
-            .padding(.horizontal, AppSpacing._4)
+            Text("No winner was declared for this game.")
+                .font(AppTypography.body())
+                .foregroundStyle(.secondary)
         }
+        .frame(maxWidth: .infinity)
+        .padding(AppSpacing._6)
+        .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+        .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+        .padding(.horizontal, AppSpacing._4)
     }
     
     // MARK: - Round Scores
@@ -165,66 +163,76 @@ struct GameDetailView: View {
                 .foregroundStyle(.primary)
                 .padding(.horizontal, AppSpacing._4)
             
-            ScrollView(.horizontal, showsIndicators: false) {
-                VStack(alignment: .leading, spacing: AppSpacing._2) {
+            ScrollView(.horizontal, showsIndicators: true) {
+                VStack(alignment: .leading, spacing: 0) {
                     // Header row
-                    HStack(spacing: AppSpacing._2) {
-                        // Player name column
+                    HStack(spacing: 0) {
                         Text("Player")
-                            .font(AppTypography.caption1())
+                            .font(AppTypography.caption1().bold())
                             .foregroundStyle(.secondary)
-                            .frame(width: 100, alignment: .leading)
+                            .frame(width: 120, alignment: .leading)
                         
-                        // Round columns
                         ForEach(0..<game.currentRound, id: \.self) { round in
                             Text("R\(round + 1)")
-                                .font(AppTypography.caption1())
+                                .font(AppTypography.caption1().bold())
                                 .foregroundStyle(.secondary)
                                 .frame(width: 50)
                         }
                         
-                        // Total column
                         Text("Total")
-                            .font(AppTypography.caption1())
+                            .font(AppTypography.caption1().bold())
                             .foregroundStyle(.secondary)
-                            .frame(width: 60)
+                            .frame(width: 70, alignment: .trailing)
                     }
-                    .padding(.horizontal, AppSpacing._3)
-                    .padding(.vertical, AppSpacing._2)
-                    .background(AppTheme.controlMaterial, in: RoundedRectangle(cornerRadius: AppRadius.sm))
+                    .padding(.horizontal, AppSpacing._4)
+                    .padding(.vertical, AppSpacing._3)
+                    .background(AppTheme.controlMaterial)
                     
                     // Player rows
                     ForEach(sortedPlayers) { player in
-                        HStack(spacing: AppSpacing._2) {
+                        Divider().background(Color.white.opacity(0.1))
+                        
+                        HStack(spacing: 0) {
                             // Player name
-                            Text(player.name)
-                                .font(AppTypography.footnote())
-                                .foregroundStyle(.primary)
-                                .frame(width: 100, alignment: .leading)
-                                .lineLimit(1)
+                            HStack(spacing: 4) {
+                                Text(player.name)
+                                    .font(AppTypography.body().bold())
+                                    .foregroundStyle(.primary)
+                                    .lineLimit(1)
+                                
+                                if game.winnerId == player.id.uuidString {
+                                    Image(systemName: "crown.fill")
+                                        .font(.system(size: 10))
+                                        .foregroundStyle(.yellow)
+                                }
+                            }
+                            .frame(width: 120, alignment: .leading)
                             
                             // Round scores
                             ForEach(0..<game.currentRound, id: \.self) { round in
                                 let score = round < player.scores.count ? player.scores[round] : 0
                                 Text("\(score)")
-                                    .font(AppTypography.footnote())
-                                    .foregroundStyle(.primary)
+                                    .font(AppTypography.body())
+                                    .foregroundStyle(.secondary)
                                     .frame(width: 50)
                             }
                             
                             // Total score
                             Text("\(player.totalScore)")
-                                .font(AppTypography.footnote())
-                                .fontWeight(.semibold)
+                                .font(AppTypography.body().bold())
                                 .foregroundStyle(game.winnerId == player.id.uuidString ? AppTheme.positiveColor : .primary)
-                                .frame(width: 60)
+                                .frame(width: 70, alignment: .trailing)
                         }
-                        .padding(.horizontal, AppSpacing._3)
-                        .padding(.vertical, AppSpacing._2)
-                        .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.sm))
-                        .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.sm))
+                        .padding(.horizontal, AppSpacing._4)
+                        .padding(.vertical, AppSpacing._3)
                     }
                 }
+                .background(AppTheme.cardMaterial)
+                .cornerRadius(AppRadius.md)
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppRadius.md)
+                        .stroke(Color.white.opacity(0.1), lineWidth: 1)
+                )
                 .padding(.horizontal, AppSpacing._4)
             }
         }
@@ -256,55 +264,6 @@ private struct StatBadge: View {
         .padding(AppSpacing._3)
         .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md))
         .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.md))
-    }
-}
-
-private struct PlayerStandingRow: View {
-    let rank: Int
-    let player: Player
-    let isWinner: Bool
-    
-    private var rankColor: Color {
-        switch rank {
-        case 1: return .yellow
-        case 2: return .gray
-        case 3: return Color(red: 0.8, green: 0.5, blue: 0.2) // Bronze
-        default: return .secondary
-        }
-    }
-    
-    var body: some View {
-        HStack(spacing: AppSpacing._3) {
-            // Rank badge
-            Text("\(rank)")
-                .font(AppTypography.headline())
-                .foregroundStyle(rank <= 3 ? .black : .primary)
-                .frame(width: 32, height: 32)
-                .background(
-                    Circle()
-                        .fill(rank <= 3 ? AnyShapeStyle(rankColor) : AnyShapeStyle(AppTheme.controlMaterial))
-                )
-            
-            // Player name
-            Text(player.name)
-                .font(AppTypography.body())
-                .foregroundStyle(.primary)
-            
-            Spacer()
-            
-            // Score
-            Text("\(player.totalScore)")
-                .font(AppTypography.title3())
-                .fontWeight(.semibold)
-                .foregroundStyle(isWinner ? AppTheme.positiveColor : .primary)
-        }
-        .padding(AppSpacing._3)
-        .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md))
-        .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.md))
-        .overlay(
-            RoundedRectangle(cornerRadius: AppRadius.md)
-                .stroke(isWinner ? AppTheme.primaryColor.opacity(0.5) : Color.white.opacity(0.1), lineWidth: 1)
-        )
     }
 }
 

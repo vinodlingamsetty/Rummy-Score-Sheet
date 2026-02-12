@@ -51,9 +51,11 @@ struct GameHistoryCard: View {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: AppSpacing._2) {
                     ForEach(game.players) { player in
+                        let isWinner = game.winnerId == player.id.uuidString
                         PlayerChip(
                             name: player.name,
-                            isHighlighted: game.createdBy == currentUserId || game.winnerId == player.id.uuidString
+                            isHighlighted: isWinner || game.createdBy == currentUserId,
+                            highlightColor: isWinner ? AppTheme.positiveColor : AppTheme.iosBlue
                         )
                     }
                 }
@@ -72,6 +74,7 @@ struct GameHistoryCard: View {
 struct PlayerChip: View {
     let name: String
     let isHighlighted: Bool
+    var highlightColor: Color = AppTheme.iosBlue
     
     var body: some View {
         Text(name)
@@ -81,7 +84,7 @@ struct PlayerChip: View {
             .padding(.vertical, AppSpacing._1 + 2)
             .background(
                 Capsule()
-                    .fill(isHighlighted ? AnyShapeStyle(AppTheme.iosBlue) : AnyShapeStyle(AppTheme.controlMaterial))
+                    .fill(isHighlighted ? AnyShapeStyle(highlightColor) : AnyShapeStyle(AppTheme.controlMaterial))
             )
             .overlay(
                 Capsule()
