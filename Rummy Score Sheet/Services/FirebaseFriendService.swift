@@ -255,12 +255,14 @@ actor FirebaseFriendService: FriendService {
         userId2: String,
         user1Name: String,
         user2Name: String,
+        user1Email: String? = nil,
+        user2Email: String? = nil,
         balanceChange: Double = 0.0
     ) async throws {
         // Ensure friendships are created in a consistent order (smaller userId first)
-        let (smallerUserId, largerUserId, smallerName, largerName, adjustedBalance) = userId1 < userId2
-            ? (userId1, userId2, user1Name, user2Name, balanceChange)
-            : (userId2, userId1, user2Name, user1Name, -balanceChange)
+        let (smallerUserId, largerUserId, smallerName, largerName, smallerEmail, largerEmail, adjustedBalance) = userId1 < userId2
+            ? (userId1, userId2, user1Name, user2Name, user1Email, user2Email, balanceChange)
+            : (userId2, userId1, user2Name, user1Name, user2Email, user1Email, -balanceChange)
         
         // Consistent ID format ensures one doc per pair regardless of caller order
         let friendshipId = "\(smallerUserId)_\(largerUserId)"
@@ -270,11 +272,19 @@ actor FirebaseFriendService: FriendService {
         
         if document.exists {
             // Update existing friendship
-            try await friendshipRef.updateData([
+            var updateData: [String: Any] = [
                 "balance": FieldValue.increment(adjustedBalance),
                 "gamesPlayedTogether": FieldValue.increment(Int64(1)),
                 "lastPlayedDate": FieldValue.serverTimestamp()
-            ])
+            ]
+            
+            // Sync names/emails if they were missing or changed
+            updateData["user1Name"] = smallerName
+            updateData["user2Name"] = largerName
+            if let e1 = smallerEmail { updateData["user1Email"] = e1 }
+            if let e2 = largerEmail { updateData["user2Email"] = e2 }
+            
+            try await friendshipRef.updateData(updateData)
         } else {
             // Create new friendship
             let friendship = Friendship(
@@ -282,6 +292,8 @@ actor FirebaseFriendService: FriendService {
                 userId2: largerUserId,
                 user1Name: smallerName,
                 user2Name: largerName,
+                user1Email: smallerEmail,
+                user2Email: largerEmail,
                 balance: adjustedBalance,
                 gamesPlayedTogether: 1,
                 lastPlayedDate: Date()

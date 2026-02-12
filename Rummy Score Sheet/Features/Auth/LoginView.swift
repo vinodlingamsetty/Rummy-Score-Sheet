@@ -278,6 +278,14 @@ final class LoginViewModel {
             let _ = try await functions.httpsCallable("sendEmailOTP").call(["email": email])
             isLoading = false
             return true
+        } catch let error as NSError {
+            if error.domain == "com.firebase.functions", error.code == 8 { // resource-exhausted
+                errorMessage = "Please wait a minute before requesting a new code."
+            } else {
+                errorMessage = error.localizedDescription
+            }
+            isLoading = false
+            return false
         } catch {
             errorMessage = error.localizedDescription
             isLoading = false
@@ -304,6 +312,21 @@ final class LoginViewModel {
             Analytics.logEvent(AnalyticsEventLogin, parameters: [
                 AnalyticsParameterMethod: "email_otp"
             ])
+        } catch let error as NSError {
+            if error.domain == "com.firebase.functions" {
+                switch error.code {
+                case 8: // resource-exhausted
+                    errorMessage = "Too many failed attempts. Please request a new code."
+                case 7: // permission-denied
+                    errorMessage = "Invalid code. Please check your email and try again."
+                case 4: // deadline-exceeded
+                    errorMessage = "This code has expired. Please request a new one."
+                default:
+                    errorMessage = error.localizedDescription
+                }
+            } else {
+                errorMessage = error.localizedDescription
+            }
         } catch {
             errorMessage = error.localizedDescription
         }

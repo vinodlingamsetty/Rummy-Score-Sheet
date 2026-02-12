@@ -104,10 +104,13 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
             room.players.append(player)
             
             // Update participant IDs for history queries
-            if room.participantIds == nil {
+            if var currentIds = room.participantIds {
+                if !currentIds.contains(userId) {
+                    currentIds.append(userId)
+                    room.participantIds = currentIds
+                }
+            } else {
                 room.participantIds = room.players.compactMap { $0.userId }
-            } else if !room.participantIds!.contains(userId) {
-                room.participantIds!.append(userId)
             }
             
             try docRef.setData(from: room)

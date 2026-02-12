@@ -251,7 +251,7 @@ private struct PlayerStandingRow: View {
         // Winner takes pot (pointValue from each loser)
         // Each loser pays exactly pointValue
         if isWinner {
-            let loserCount = totalPlayers - 1
+            let loserCount = max(0, totalPlayers - 1)
             return loserCount * pointValue
         } else {
             return -pointValue

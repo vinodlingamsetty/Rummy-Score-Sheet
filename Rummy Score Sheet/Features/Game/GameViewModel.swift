@@ -24,7 +24,6 @@ final class GameViewModel {
     
     private let roomService: RoomService
     private let onRoomUpdate: (GameRoom) -> Void
-    private let onGameCompleted: ((GameRoom) async -> Void)?
     private let onGameEndAndExit: (() -> Void)?
 
     var currentRoundScore: Int {
@@ -64,14 +63,12 @@ final class GameViewModel {
         currentUserId: UUID? = nil,
         roomService: RoomService,
         onRoomUpdate: @escaping (GameRoom) -> Void,
-        onGameCompleted: ((GameRoom) async -> Void)? = nil,
         onGameEndAndExit: (() -> Void)? = nil
     ) {
         self.room = room
         self.currentUserId = currentUserId
         self.roomService = roomService
         self.onRoomUpdate = onRoomUpdate
-        self.onGameCompleted = onGameCompleted
         self.onGameEndAndExit = onGameEndAndExit
         self.selectedRound = room.currentRound // Default to current active round
     }
@@ -180,15 +177,6 @@ final class GameViewModel {
         
         if wasOnLatestRound {
             selectedRound = newRoom.currentRound
-        }
-        
-        // If the game just ended, create friendships
-        if justCompleted {
-            Task {
-                if let onGameCompleted = onGameCompleted {
-                    await onGameCompleted(newRoom)
-                }
-            }
         }
     }
     

@@ -1,92 +1,75 @@
 # Product Requirements: Rummy Scorekeeper
 
 ## 1. App Overview
-A premium, offline-first iOS scorekeeping app for Indian Rummy.
+A premium iOS scorekeeping app for Indian Rummy.
 **Design Aesthetic:** "Liquid Glass" (Dark Mode, Blur Effects, Subtle System Gradient Backdrop, Neon Accents).
-**Tech Stack:** Native iOS (SwiftUI), SwiftData (Local DB), Firebase (Cloud Sync).
+**Tech Stack:** Native iOS (SwiftUI), Firebase (Auth, Firestore, Cloud Functions).
 
-## 2. Terminology (Strict Compliance)
-- **Point Value:** The value assigned to each point (e.g., $0.10). Never use "Bet".
-- **Settlement:** The final calculation of who owes whom. Never use "Debt".
-- **Game Pot:** The total value of the game.
+## 2. Terminology
+- **Point Value:** The dollar value assigned to each point (e.g., $10).
+- **Settlement:** Recording a payment to adjust the balance between two users.
 - **Moderator:** The player who created the room and controls settings.
+- **Eliminated:** A player whose total score has reached or exceeded the Point Limit.
 
-## 3. Navigation Structure (5 Tabs)
-1.  **Home:** Dashboard, Create/Join, History.
-2.  **Current Game:** The active scoreboard (Disabled if no game active).
-3.  **Friends:** Ledger of settlements.
-4.  **Rules:** Static guide for gameplay.
-5.  **Profile:** User settings and account management.
+## 3. Navigation Structure
+1.  **Home:** Dashboard, Create/Join, Recent Games history.
+2.  **Game:** The active scoreboard (Only accessible if in a room).
+3.  **Friends:** List of friends with real-time balances and settlement history.
+4.  **Rules:** Indian Rummy rules and deck guidelines.
+5.  **Profile:** User statistics, display name editing, and app settings.
 
-## 4. Core Features Detailed
+## 4. Core Features & Workflows
 
-### A. Authentication & Onboarding
-- **Sign in with Apple** (Primary) & Google (Secondary).
-- **Profile Setup:**
-    - **Display Name:** Public "Player Alias".
-    - **Avatar:** Selection from 12 pre-loaded 3D Memoji-style avatars.
-    - **Privacy:** Email/Phone hidden from other players.
+### A. Authentication
+- **Methods:** Sign in with Apple, Google, or Email OTP (One-Time Password).
+- **Anonymous:** Supports guest entry for quick setup.
+- **Workflow:** 
+    1. User enters email -> Receives 6-digit code.
+    2. User enters code -> Authenticated and profile created.
 
-### B. Home Tab & History
-- **Actions:**
-    - **Host Game:** Opens setup modal.
-    - **Join Game:** QR Code scanner or 6-digit PIN entry. 
-- **Game History:**
-    - List of all completed games (Date, Winner, My Final Score).
-    - recent games show list of players particiapated and higlights the winner name in green color 
-    - **Filters:** By Date, By Player Name, By Room Code.
-    - **Action:** Tap a past game to view the full readonly scoreboard.
+### B. Game Setup & Lobby
+- **Creation:** Moderator sets Point Limit (100-350) and Point Value.
+- **Lobby:** Shows a 6-digit Room Code and QR Code for others to join.
+- **Start Game:** Enabled only when at least 2 players are present and all are marked "Ready".
+- **Workflow:** 
+    1. Host taps "Create Room" -> Sets parameters -> enters Lobby.
+    2. Players scan QR/Enter Code -> enters Lobby -> taps "Ready".
+    3. Host taps "Start Game" -> transitions all to Scoreboard.
 
-### C. Game Setup (Host Only)
-- **Inputs:**
-    - Point Limit (range from 100 to 350). this should be a slider bar 
-    - Point Value (e.g., $10).
-- **Lobby:**
-    - **QR Code:** Generated locally for others to join.
-    - **Roster:** List of joined players with "Ready" status indicators.
-    - **Mod Action:** "Start Game" (only enabled when all players are ready).
+### C. Active Scoreboard
+- **Score Entry:** Tap a player row to enter a round score via numeric keypad.
+- **Elimination:** Players reaching the limit get an alert and their row is dimmed.
+- **End Game:** 
+    - **Automatic:** When only one player remains, game ends and winner is declared.
+    - **Manual:** Moderator can end game early via confirmation alert (Game is voided, scores zeroed).
+- **Workflow:**
+    1. Players enter scores each round.
+    2. App calculates totals and identifies leader (Crown icon).
+    3. Game reaches conclusion -> transitions to Winner Screen.
 
-### D. The Scoreboard (Active Game)
-- **View:** Vertical scrolling list (Chat style, not pagination).
-- **Sticky Header:** Live Leaderboard (Top 3) & Current Round Number.
-- **Score Entry:**
-    - Tap player row -> Expands large numeric keypad.
-    - **Haptics:** `Light` impact on keypress.
-    - **Auto-Advance:** "Next Player" button on keyboard.
-- **Game Logic:**
-    - **Elimination:** If Score >= Point Limit, row turns Red (Opacity 0.5), input disabled.
-    - **Winning Condition:** The last player remaining (or lowest score if game ended manually) wins the game.
-    - **Fixed Payments:** All eliminated/loser players pay the `Point Value` to the winner.
-    - **Re-Buy:** Moderator can "Revive" a player (Score = Highest Active Score + 1).
-- **Real-Time Updates:**
-    - Scores sync instantly via Firebase Firestore listeners.
-    - **Toasts:** Show in-app notification when a new score is submitted by another player.
+### D. Game Conclusion & Winnings
+- **Winner Screen:** Celebratory view with trophy, final standings, and winnings summary.
+- **Fixed Payment Model:** 
+    - Every eliminated/loser player pays the "Point Value" to the winner.
+    - Winner receives the total "Pot" from all losers.
+- **Workflow:**
+    1. Game ends -> Server triggers `onGameEnd` Cloud Function.
+    2. Server calculates balances and updates Friends list automatically.
 
-### E. Friends & Settlements Tab
-- **View:** Split into two sections:
-    - **"To Collect" (Green):** Positive balance.
-    - **"To Settle" (Orange):** Negative balance.
-- **Search:** Filter friends by name.
-- **Actions:**
-    - **Nudge:** Sends a push notification ("Reminder to check score").
-    - **Settle:** "Mark as Settled" button (Clear balance to $0).
-- **Logic:** Players from the same room are auto-added to Friends list.
+### E. Friends & Settlements
+- **Friends List:** Automatically populated with anyone you've played a game with.
+- **Balances:** Real-time tracking of who owes whom.
+- **Settlement History:** Vertical ledger showing every payment made or received.
+- **Workflow:**
+    1. User taps Friend -> views details and shared game history.
+    2. User taps "Record Settlement" -> enters amount and note.
+    3. Balance updates instantly across both devices.
 
-### F. Rules Tab
-- Static text/graphical display of Indian Rummy rules.
-- **Decks Guide:**
-    - 2 Players: 1-2 Decks.
-    - 2-6 Players: 2 Decks.
-    - 7+ Players: 3 Decks.
+### F. Game History
+- **Recent Games:** List of past games with date, time, winner, and point value.
+- **Shared History:** In Friend Details, view only the games played with that specific person.
 
-### G. Profile & Settings
-- **User Info:** Edit Display Name, Change Avatar.
-- **App Settings:**
-    - **Notifications:** Toggle On/Off.
-    - **Haptics:** Toggle Sound/Vibration.
-    - **Theme:** (Locked to Dark Mode, but maybe Accessibility High Contrast option).
-- **Account:** Logout button.
-
-## 5. Technical Constraints
-- **Offline First:** All game logic saves to `SwiftData` (local) first. Syncs to Firebase when online.
-- **Permissions:** Camera (for QR), Notifications (for Nudges).
+## 5. Technical Details
+- **Sync:** Real-time synchronization via Firestore snapshots.
+- **Consistency:** Balanced-updating logic centralized in Firebase Cloud Functions to prevent race conditions.
+- **Timezone:** All timestamps are synchronized to the player's local device timezone.

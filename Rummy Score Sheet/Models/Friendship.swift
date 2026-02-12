@@ -33,13 +33,24 @@ struct Friendship: Codable {
         lastPlayedDate: Date? = nil,
         createdAt: Date = Date()
     ) {
-        self.userId1 = userId1
-        self.userId2 = userId2
-        self.user1Name = user1Name
-        self.user2Name = user2Name
-        self.user1Email = user1Email
-        self.user2Email = user2Email
-        self.balance = balance
+        // Enforce alphabetical sorting logic: userId1 < userId2
+        if userId1 < userId2 {
+            self.userId1 = userId1
+            self.userId2 = userId2
+            self.user1Name = user1Name
+            self.user2Name = user2Name
+            self.user1Email = user1Email
+            self.user2Email = user2Email
+            self.balance = balance
+        } else {
+            self.userId1 = userId2
+            self.userId2 = userId1
+            self.user1Name = user2Name
+            self.user2Name = user1Name
+            self.user1Email = user2Email
+            self.user2Email = user1Email
+            self.balance = -balance // Flip balance if IDs were swapped
+        }
         self.gamesPlayedTogether = gamesPlayedTogether
         self.lastPlayedDate = lastPlayedDate
         self.createdAt = createdAt

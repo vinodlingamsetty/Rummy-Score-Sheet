@@ -64,6 +64,41 @@ final class GameHistoryService: @unchecked Sendable {
         }
     }
     
+    /// Fetch completed games played between the current user and a specific friend
+    func fetchGamesWithFriend(friendUserId: String, limit: Int = 20) async throws -> [GameRoom] {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            throw NSError(domain: "GameHistoryService", code: 401, userInfo: [
+                NSLocalizedDescriptionKey: "User not authenticated"
+            ])
+        }
+        
+        do {
+            // Strategy: Fetch the current user's games and filter for the friend.
+            // This is more reliable than searching the friend's history.
+            let snapshot = try await db.collection(collectionName)
+                .whereField("isCompleted", isEqualTo: true)
+                .whereField("participantIds", arrayContains: userId)
+                .order(by: "endedAt", descending: true)
+                .limit(to: 50) // Scan more of OUR history to find all shared matches
+                .getDocuments()
+            
+            let myGames = try snapshot.documents.compactMap { doc -> GameRoom? in
+                try doc.data(as: GameRoom.self)
+            }
+            
+            // Filter for games where the friend was ALSO a participant
+            let sharedGames = myGames.filter { game in
+                game.participantIds?.contains(friendUserId) == true
+            }
+            
+            print("✅ Found \(sharedGames.count) shared games with friend \(friendUserId)")
+            return Array(sharedGames.prefix(limit))
+        } catch {
+            print("❌ Failed to fetch shared games: \(error.localizedDescription)")
+            throw error
+        }
+    }
+    
     /// Fetch a single game by room code
     func fetchGame(code: String) async throws -> GameRoom? {
         let normalizedCode = code.uppercased().trimmingCharacters(in: .whitespaces)

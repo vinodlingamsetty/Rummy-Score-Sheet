@@ -79,9 +79,6 @@ private struct GameTabContent: View {
                         currentUserId: gameState.currentUserId,
                         roomService: gameState.roomService,
                         onRoomUpdate: { gameState.updateRoom($0) },
-                        onGameCompleted: { completedRoom in
-                            await gameState.createFriendshipsFromGame(completedRoom)
-                        },
                         onGameEndAndExit: { 
                             // No-op here; we handle transition to winner view via room.isCompleted
                         }

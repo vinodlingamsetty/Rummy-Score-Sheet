@@ -16,10 +16,13 @@ class FriendsViewModel {
     var searchQuery: String = ""
     var isLoading: Bool = false
     var isSettlementsLoading: Bool = false
+    var isSharedGamesLoading: Bool = false
     var errorMessage: String?
     var settlements: [Settlement] = []
+    var sharedGames: [GameRoom] = []
     
     private let friendService: FriendService
+    private let historyService = GameHistoryService()
     
     // MARK: - Initialization
     
@@ -124,6 +127,17 @@ class FriendsViewModel {
             print("❌ Failed to load settlements: \(error.localizedDescription)")
         }
         isSettlementsLoading = false
+    }
+    
+    @MainActor
+    func loadSharedGames(friendUserId: String) async {
+        isSharedGamesLoading = true
+        do {
+            sharedGames = try await historyService.fetchGamesWithFriend(friendUserId: friendUserId)
+        } catch {
+            print("❌ Failed to load shared games: \(error.localizedDescription)")
+        }
+        isSharedGamesLoading = false
     }
     
     @MainActor

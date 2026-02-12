@@ -54,6 +54,7 @@ struct FriendDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .task {
             await viewModel.loadSettlements(for: currentFriend)
+            await viewModel.loadSharedGames(friendUserId: currentFriend.userId)
         }
         .sheet(isPresented: $isShowingSettlementSheet) {
             SettlementSheet(friend: currentFriend) { amount, note in
@@ -260,9 +261,23 @@ struct FriendDetailView: View {
                 .foregroundStyle(.secondary)
                 .padding(.horizontal, AppSpacing._3)
             
-            VStack(spacing: AppSpacing._3) {
-                // Placeholder for future game history
+            if viewModel.isSharedGamesLoading {
+                ProgressView()
+                    .frame(maxWidth: .infinity)
+                    .padding()
+            } else if viewModel.sharedGames.isEmpty {
                 emptyGameHistoryCard
+            } else {
+                VStack(spacing: AppSpacing._3) {
+                    ForEach(viewModel.sharedGames) { game in
+                        NavigationLink {
+                            GameDetailView(game: game)
+                        } label: {
+                            GameHistoryCard(game: game)
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
             }
         }
     }
@@ -273,11 +288,11 @@ struct FriendDetailView: View {
                 .font(.system(size: 32))
                 .foregroundStyle(.secondary)
             
-            Text("Game history coming soon")
+            Text("No shared games yet")
                 .font(AppTypography.body())
                 .foregroundStyle(.secondary)
             
-            Text("You'll be able to see all games played with \(currentFriend.name) here")
+            Text("Complete a game with \(currentFriend.name) to see history here")
                 .font(AppTypography.caption1())
                 .foregroundStyle(.tertiary)
                 .multilineTextAlignment(.center)
@@ -463,6 +478,7 @@ extension Date {
 #Preview {
     NavigationStack {
         FriendDetailView(friend: Friend.mockFriends[0])
+            .environment(FriendsViewModel(friendService: MockFriendService()))
     }
     .preferredColorScheme(.dark)
 }
