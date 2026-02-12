@@ -35,7 +35,10 @@ struct FriendsView: View {
                 await viewModel.loadFriends()
             }
             .task {
-                await viewModel.loadFriends()
+                viewModel.startObservingFriends()
+            }
+            .onDisappear {
+                viewModel.stopObservingFriends()
             }
             .onChange(of: selectedTab) { _, newValue in
                 if newValue == .friends {

@@ -23,11 +23,16 @@ class FriendsViewModel {
     
     private let friendService: FriendService
     private let historyService = GameHistoryService()
+    private var friendsObserverTask: Task<Void, Never>?
     
     // MARK: - Initialization
     
     init(friendService: FriendService = MockFriendService()) {
         self.friendService = friendService
+    }
+    
+    deinit {
+        friendsObserverTask?.cancel()
     }
     
     // MARK: - Computed Properties
@@ -66,6 +71,21 @@ class FriendsViewModel {
     }
     
     // MARK: - Actions
+    
+    @MainActor
+    func startObservingFriends() {
+        friendsObserverTask?.cancel()
+        friendsObserverTask = Task { @MainActor in
+            for await updatedFriends in friendService.observeFriends() {
+                self.friends = updatedFriends
+            }
+        }
+    }
+    
+    func stopObservingFriends() {
+        friendsObserverTask?.cancel()
+        friendsObserverTask = nil
+    }
     
     @MainActor
     func loadFriends() async {
