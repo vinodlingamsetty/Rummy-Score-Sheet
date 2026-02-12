@@ -34,7 +34,8 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
             isReady: true,
             isModerator: true,
             scores: [],
-            userId: userId
+            userId: userId,
+            email: Auth.auth().currentUser?.email
         )
         
         let room = GameRoom(
@@ -45,7 +46,8 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
             currentRound: 1,
             isStarted: false,
             createdAt: Date(),
-            createdBy: userId
+            createdBy: userId,
+            participantIds: [userId]
         )
         
         do {
@@ -95,10 +97,18 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
                 isReady: false,
                 isModerator: false,
                 scores: [], // Initialize empty; will expand during score entry
-                userId: userId
+                userId: userId,
+                email: Auth.auth().currentUser?.email
             )
             
             room.players.append(player)
+            
+            // Update participant IDs for history queries
+            if room.participantIds == nil {
+                room.participantIds = room.players.compactMap { $0.userId }
+            } else if !room.participantIds!.contains(userId) {
+                room.participantIds!.append(userId)
+            }
             
             try docRef.setData(from: room)
             
@@ -312,6 +322,9 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
             room.isCompleted = true
             room.endedAt = Date()
             room.winnerId = winnerId.uuidString
+            
+            // Final safety update of participant IDs before archiving
+            room.participantIds = Array(Set((room.participantIds ?? []) + room.players.compactMap { $0.userId }))
             
             try db.collection(collectionName).document(normalizedCode).setData(from: room)
             

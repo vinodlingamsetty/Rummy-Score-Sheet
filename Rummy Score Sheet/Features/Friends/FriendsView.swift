@@ -107,6 +107,7 @@ struct FriendsView: View {
                 ForEach(friends) { friend in
                     NavigationLink {
                         FriendDetailView(friend: friend)
+                            .environment(viewModel)
                     } label: {
                         FriendCard(
                             friend: friend,

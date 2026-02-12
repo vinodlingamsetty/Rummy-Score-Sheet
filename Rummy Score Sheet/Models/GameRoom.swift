@@ -21,6 +21,7 @@ struct GameRoom: Identifiable, Codable {
     var isCompleted: Bool = false
     var endedAt: Date?       // When the game ended
     var winnerId: String?    // Winner's player ID (UUID as String)
+    var participantIds: [String]? // Firebase Auth UIDs of all participants
     
     // Computed properties
     var winner: Player? {
@@ -36,6 +37,7 @@ struct Player: Identifiable, Codable {
     var isModerator: Bool
     var scores: [Int]        // Score per round
     var userId: String?      // Firebase Auth UID; used for Friends (nil for legacy players)
+    var email: String?       // Player's email address
     
     var totalScore: Int {
         scores.reduce(0, +)
@@ -43,16 +45,17 @@ struct Player: Identifiable, Codable {
     
     // Custom coding keys for Firestore (UUID as String)
     enum CodingKeys: String, CodingKey {
-        case id, name, isReady, isModerator, scores, userId
+        case id, name, isReady, isModerator, scores, userId, email
     }
     
-    init(id: UUID, name: String, isReady: Bool, isModerator: Bool, scores: [Int], userId: String? = nil) {
+    init(id: UUID, name: String, isReady: Bool, isModerator: Bool, scores: [Int], userId: String? = nil, email: String? = nil) {
         self.id = id
         self.name = name
         self.isReady = isReady
         self.isModerator = isModerator
         self.scores = scores
         self.userId = userId
+        self.email = email
     }
     
     init(from decoder: Decoder) throws {
@@ -64,6 +67,7 @@ struct Player: Identifiable, Codable {
         self.isModerator = try container.decode(Bool.self, forKey: .isModerator)
         self.scores = try container.decode([Int].self, forKey: .scores)
         self.userId = try container.decodeIfPresent(String.self, forKey: .userId)
+        self.email = try container.decodeIfPresent(String.self, forKey: .email)
     }
     
     func encode(to encoder: Encoder) throws {
@@ -74,6 +78,7 @@ struct Player: Identifiable, Codable {
         try container.encode(isModerator, forKey: .isModerator)
         try container.encode(scores, forKey: .scores)
         try container.encodeIfPresent(userId, forKey: .userId)
+        try container.encodeIfPresent(email, forKey: .email)
     }
 }
 

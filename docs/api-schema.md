@@ -27,6 +27,7 @@ Represents a game session/room.
 | `isCompleted` | Bool | ✅ | - | Whether game has finished |
 | `endedAt` | Timestamp | ❌ | - | When the game ended |
 | `winnerId` | String | ❌ | - | UUID of the winner |
+| `participantIds` | [String] | ❌ | - | Firebase UIDs of all players (for history queries) |
 
 **Validation:**
 - Room code must be unique
@@ -45,6 +46,7 @@ struct GameRoom: Identifiable {
     var isCompleted: Bool
     var endedAt: Date?
     var winnerId: String?
+    var participantIds: [String]?
 }
 ```
 
@@ -62,6 +64,7 @@ interface GameRoom {
   isCompleted?: boolean;
   endedAt?: Timestamp;
   winnerId?: string;
+  participantIds?: string[];
 }
 ```
 
@@ -356,6 +359,7 @@ enum RoomServiceError: Error {
   ├── createdBy: string
   ├── endedAt: timestamp?
   ├── winnerId: string?
+  ├── participantIds: string[]
   └── players: [
       {
         id: string,

@@ -276,7 +276,7 @@ private struct GameHistoryCard: View {
                         .font(AppTypography.headline())
                         .foregroundStyle(AppTheme.primaryColor)
                     if let endedAt = game.endedAt {
-                        Text(endedAt, format: .dateTime.year().month().day())
+                        Text(endedAt, format: .dateTime.year().month().day().hour().minute())
                             .font(AppTypography.footnote())
                             .foregroundStyle(.secondary)
                     }

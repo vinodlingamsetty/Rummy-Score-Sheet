@@ -96,6 +96,58 @@ actor FirebaseFriendService: FriendService {
         ])
     }
     
+    func recordSettlement(id: UUID, amount: Double, note: String) async throws {
+        // Ensure user is authenticated
+        await FirebaseConfig.ensureAuthenticated()
+        
+        guard let currentUserId = Auth.auth().currentUser?.uid else {
+            throw NSError(domain: "FirebaseFriendService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
+        }
+        
+        // Find the friendship
+        let friends = try await fetchFriends()
+        guard let friend = friends.first(where: { $0.id == id }),
+              let friendshipId = friend.friendshipId else {
+            throw NSError(domain: "FirebaseFriendService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Friend not found"])
+        }
+        
+        let friendshipRef = db.collection(friendsCollection).document(friendshipId)
+        
+        // Determine balance adjustment direction
+        // In the Friendship doc, balance is: userId2 owes userId1 (positive)
+        // If current user is userId1 and friend (userId2) owes them, a settlement reduces positive balance.
+        // If current user is userId2 and they owe friend (userId1), a settlement reduces negative balance.
+        
+        let document = try await friendshipRef.getDocument()
+        let friendship = try document.data(as: Friendship.self)
+        
+        var adjustment = 0.0
+        if currentUserId == friendship.userId1 {
+            // Friend is userId2. If balance > 0, they owe me.
+            adjustment = -amount // Reduce their debt
+        } else {
+            // I am userId2. If balance > 0, I owe them.
+            adjustment = amount // Reduce my debt (moving balance towards 0)
+        }
+        
+        // Record the transaction
+        let settlement = Settlement(
+            friendshipId: friendshipId,
+            amount: amount,
+            settledBy: currentUserId,
+            note: note
+        )
+        
+        try await db.collection(settlementsCollection)
+            .document(settlement.id)
+            .setData(from: settlement)
+        
+        // Atomically update balance
+        try await friendshipRef.updateData([
+            "balance": FieldValue.increment(adjustment)
+        ])
+    }
+    
     func nudgeFriend(id: UUID) async throws {
         // Ensure user is authenticated
         await FirebaseConfig.ensureAuthenticated()

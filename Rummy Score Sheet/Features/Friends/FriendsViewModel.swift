@@ -96,6 +96,23 @@ class FriendsViewModel {
     }
     
     @MainActor
+    func recordSettlement(friend: Friend, amount: Double, note: String) async {
+        isLoading = true
+        do {
+            try await friendService.recordSettlement(id: friend.id, amount: amount, note: note)
+            
+            // Reload friends to get updated balance
+            await loadFriends()
+            
+            UINotificationFeedbackGenerator().notificationOccurred(.success)
+        } catch {
+            errorMessage = "Failed to record settlement: \(error.localizedDescription)"
+            UINotificationFeedbackGenerator().notificationOccurred(.error)
+        }
+        isLoading = false
+    }
+    
+    @MainActor
     func nudgeFriend(_ friend: Friend) async {
         do {
             try await friendService.nudgeFriend(id: friend.id)

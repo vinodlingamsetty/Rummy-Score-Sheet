@@ -9,6 +9,8 @@ import SwiftUI
 
 struct FriendDetailView: View {
     let friend: Friend
+    @Environment(FriendsViewModel.self) private var viewModel
+    @State private var isShowingSettlementSheet = false
     
     var body: some View {
         ZStack {
@@ -23,6 +25,11 @@ struct FriendDetailView: View {
                     // Balance Summary
                     balanceSummaryCard
                     
+                    // Actions
+                    if !friend.isSettled {
+                        settlementActions
+                    }
+                    
                     // Game History Section
                     gameHistorySection
                 }
@@ -33,6 +40,34 @@ struct FriendDetailView: View {
         }
         .navigationTitle(friend.name)
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $isShowingSettlementSheet) {
+            SettlementSheet(friend: friend) { amount, note in
+                Task {
+                    await viewModel.recordSettlement(friend: friend, amount: amount, note: note)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Actions
+    
+    private var settlementActions: some View {
+        Button {
+            UIImpactFeedbackGenerator(style: .medium).impactOccurred()
+            isShowingSettlementSheet = true
+        } label: {
+            HStack {
+                Image(systemName: "dollarsign.circle.fill")
+                Text("Record Settlement")
+                    .font(AppTypography.headline())
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, AppSpacing._4)
+            .background(AppTheme.gradientPrimary, in: Capsule())
+            .glassEffect(in: .capsule)
+        }
+        .buttonStyle(.plain)
     }
     
     // MARK: - Friend Header Card
@@ -53,6 +88,13 @@ struct FriendDetailView: View {
             Text(friend.name)
                 .font(AppTypography.title2())
                 .foregroundStyle(.primary)
+            
+            // Email
+            if let email = friend.email {
+                Text(email)
+                    .font(AppTypography.body())
+                    .foregroundStyle(.secondary)
+            }
             
             // Stats
             HStack(spacing: AppSpacing._6) {
@@ -175,6 +217,115 @@ struct FriendDetailView: View {
         .padding(AppSpacing._6)
         .background(AppTheme.cardMaterial, in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
         .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.iosCard))
+    }
+}
+
+// MARK: - Settlement Sheet
+
+private struct SettlementSheet: View {
+    let friend: Friend
+    let onConfirm: (Double, String) -> Void
+    
+    @Environment(\.dismiss) private var dismiss
+    @State private var amount: String = ""
+    @State private var note: String = ""
+    
+    init(friend: Friend, onConfirm: @escaping (Double, String) -> Void) {
+        self.friend = friend
+        self.onConfirm = onConfirm
+        // Set default amount to absolute balance
+        _amount = State(initialValue: String(format: "%.2f", abs(friend.balance)))
+    }
+    
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                AppTheme.background.ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: AppSpacing._6) {
+                        headerSection
+                        
+                        VStack(alignment: .leading, spacing: AppSpacing._2) {
+                            Text("Amount")
+                                .font(AppTypography.headline())
+                                .foregroundStyle(.secondary)
+                            
+                            HStack {
+                                Text("$")
+                                    .font(.system(size: 32, weight: .bold))
+                                    .foregroundStyle(AppTheme.primaryColor)
+                                
+                                TextField("0.00", text: $amount)
+                                    .font(.system(size: 44, weight: .bold, design: .rounded))
+                                    .keyboardType(.decimalPad)
+                                    .foregroundStyle(.primary)
+                            }
+                            .padding()
+                            .background(AppTheme.controlMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md))
+                            .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.md))
+                        }
+                        
+                        VStack(alignment: .leading, spacing: AppSpacing._2) {
+                            Text("Note (Optional)")
+                                .font(AppTypography.headline())
+                                .foregroundStyle(.secondary)
+                            
+                            TextField("e.g. Cash, Venmo", text: $note)
+                                .padding()
+                                .background(AppTheme.controlMaterial, in: RoundedRectangle(cornerRadius: AppRadius.md))
+                                .glassEffect(in: RoundedRectangle(cornerRadius: AppRadius.md))
+                        }
+                        
+                        Spacer()
+                        
+                        confirmButton
+                    }
+                    .padding(AppSpacing._4)
+                }
+            }
+            .navigationTitle("Record Settlement")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { dismiss() }
+                }
+            }
+            .onTapGesture {
+                hideKeyboard()
+            }
+        }
+    }
+    
+    private var headerSection: some View {
+        VStack(spacing: AppSpacing._2) {
+            Text(friend.isToCollect ? "Collect from \(friend.name)" : "Pay to \(friend.name)")
+                .font(AppTypography.title3())
+                .foregroundStyle(.secondary)
+            
+            Text("Balance: \(friend.balanceFormatted)")
+                .font(AppTypography.body())
+                .foregroundStyle(friend.isToCollect ? AppTheme.positiveColor : .orange)
+        }
+        .padding(.vertical, AppSpacing._4)
+    }
+    
+    private var confirmButton: some View {
+        Button {
+            if let value = Double(amount) {
+                onConfirm(value, note)
+                dismiss()
+            }
+        } label: {
+            Text("Confirm Settlement")
+                .font(AppTypography.headline())
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, AppSpacing._4)
+                .background(AppTheme.gradientPrimary, in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .disabled(Double(amount) == nil || Double(amount)! <= 0)
     }
 }
 

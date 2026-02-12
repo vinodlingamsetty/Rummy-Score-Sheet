@@ -32,7 +32,8 @@ actor MockRoomService: @preconcurrency RoomService {
             pointValue: pointValue,
             players: [moderator],
             currentRound: 1,
-            isStarted: false
+            isStarted: false,
+            participantIds: [moderatorId.uuidString]
         )
         rooms[code] = room
         return RoomServiceResult(room: room, currentUserId: moderatorId)
@@ -51,6 +52,11 @@ actor MockRoomService: @preconcurrency RoomService {
 
         if var existingRoom = rooms[normalizedCode] {
             existingRoom.players.append(player)
+            if existingRoom.participantIds == nil {
+                existingRoom.participantIds = [playerId.uuidString]
+            } else {
+                existingRoom.participantIds?.append(playerId.uuidString)
+            }
             rooms[normalizedCode] = existingRoom
             return RoomServiceResult(room: existingRoom, currentUserId: playerId)
         } else {
@@ -61,7 +67,8 @@ actor MockRoomService: @preconcurrency RoomService {
                 pointValue: 10,
                 players: [player],
                 currentRound: 1,
-                isStarted: false
+                isStarted: false,
+                participantIds: [playerId.uuidString]
             )
             rooms[normalizedCode] = room
             return RoomServiceResult(room: room, currentUserId: playerId)

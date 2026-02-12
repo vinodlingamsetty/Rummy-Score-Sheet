@@ -27,11 +27,13 @@ final class GameHistoryService: @unchecked Sendable {
         }
         
         do {
-            // Query completed games ordered by endedAt (requires composite index)
+            // Query completed games where current user is explicitly marked as a participant
+            // Ordered by endedAt (requires composite index: participantIds array-contains, endedAt desc)
             var allGames: [GameRoom] = []
             do {
                 let snapshot = try await db.collection(collectionName)
                     .whereField("isCompleted", isEqualTo: true)
+                    .whereField("participantIds", arrayContains: userId)
                     .order(by: "endedAt", descending: true)
                     .limit(to: limit)
                     .getDocuments()
@@ -43,6 +45,7 @@ final class GameHistoryService: @unchecked Sendable {
                 print("⚠️ Indexed query failed, using fallback: \(indexError.localizedDescription)")
                 let snapshot = try await db.collection(collectionName)
                     .whereField("isCompleted", isEqualTo: true)
+                    .whereField("participantIds", arrayContains: userId)
                     .limit(to: limit * 2)
                     .getDocuments()
                 allGames = try snapshot.documents.compactMap { doc -> GameRoom? in
@@ -52,13 +55,8 @@ final class GameHistoryService: @unchecked Sendable {
                 allGames = Array(allGames.prefix(limit))
             }
             
-            // Filter to only games where current user participated (by Firebase UID)
-            let userGames = allGames.filter { room in
-                room.players.contains { $0.userId == userId }
-            }
-            
-            print("✅ Fetched \(userGames.count) completed games")
-            return userGames
+            print("✅ Fetched \(allGames.count) completed games for user \(userId)")
+            return allGames
             
         } catch {
             print("❌ Failed to fetch game history: \(error.localizedDescription)")

@@ -12,6 +12,7 @@ struct Friend: Identifiable, Codable {
     let friendshipId: String? // Firestore document ID (for backend sync)
     let userId: String // The friend's user ID
     let name: String
+    let email: String? // The friend's email address
     let avatarEmoji: String // For future avatar support
     var balance: Double // Positive = they owe you, Negative = you owe them
     var gamesPlayedTogether: Int
@@ -22,6 +23,7 @@ struct Friend: Identifiable, Codable {
         friendshipId: String? = nil,
         userId: String = UUID().uuidString,
         name: String,
+        email: String? = nil,
         avatarEmoji: String = "👤",
         balance: Double = 0.0,
         gamesPlayedTogether: Int = 0,
@@ -31,6 +33,7 @@ struct Friend: Identifiable, Codable {
         self.friendshipId = friendshipId
         self.userId = userId
         self.name = name
+        self.email = email
         self.avatarEmoji = avatarEmoji
         self.balance = balance
         self.gamesPlayedTogether = gamesPlayedTogether

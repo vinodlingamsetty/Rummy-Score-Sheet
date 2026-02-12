@@ -12,6 +12,7 @@ import Foundation
 protocol FriendService {
     func fetchFriends() async throws -> [Friend]
     func settleFriend(id: UUID) async throws
+    func recordSettlement(id: UUID, amount: Double, note: String) async throws
     func nudgeFriend(id: UUID) async throws
     func searchFriends(query: String) async throws -> [Friend]
     func observeFriends() -> AsyncStream<[Friend]>
@@ -33,6 +34,18 @@ actor MockFriendService: FriendService {
     func settleFriend(id: UUID) async throws {
         if let index = friends.firstIndex(where: { $0.id == id }) {
             friends[index].balance = 0.0
+        }
+    }
+    
+    func recordSettlement(id: UUID, amount: Double, note: String) async throws {
+        if let index = friends.firstIndex(where: { $0.id == id }) {
+            let currentBalance = friends[index].balance
+            if currentBalance > 0 {
+                friends[index].balance = max(0, currentBalance - amount)
+            } else {
+                friends[index].balance = min(0, currentBalance + amount)
+            }
+            print("📝 Settlement recorded for friend: \(id), amount: $\(amount), note: \(note)")
         }
     }
     
