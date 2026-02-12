@@ -72,6 +72,16 @@ struct GameView: View {
         } message: {
             Text("You've reached the point limit. You're out of this game, but you can still watch the rest.")
         }
+        .alert("End Game?", isPresented: $viewModel.showEndGameConfirmation) {
+            Button("End & Void Game", role: .destructive) {
+                Task {
+                    await viewModel.endGame(isVoid: true)
+                }
+            }
+            Button("Cancel", role: .cancel) { }
+        } message: {
+            Text("Are you sure you want to end the game? If you end it now, all scores will be voided for this game and no one will receive any money.")
+        }
     }
     
     // MARK: - Round Selector Bar
@@ -183,11 +193,7 @@ struct GameView: View {
                 // End Game Button
                 Button {
                     UIImpactFeedbackGenerator(style: .medium).impactOccurred()
-                    Task {
-                        await viewModel.endGame()
-                        // No onEndGame() call here; the room update listener will 
-                        // trigger the transition to WinnerDeclarationView for everyone.
-                    }
+                    viewModel.showEndGameConfirmation = true
                 } label: {
                     HStack(spacing: AppSpacing._2) {
                         Image(systemName: "flag.checkered")

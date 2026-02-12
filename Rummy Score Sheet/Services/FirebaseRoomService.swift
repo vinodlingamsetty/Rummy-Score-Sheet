@@ -306,7 +306,7 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
         }
     }
     
-    func endGame(roomCode: String, winnerId: UUID) async throws -> GameRoom {
+    func endGame(roomCode: String, winnerId: UUID?) async throws -> GameRoom {
         await FirebaseConfig.ensureAuthenticated()
         
         let normalizedCode = roomCode.uppercased().trimmingCharacters(in: .whitespaces)
@@ -321,17 +321,26 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
             var room = try document.data(as: GameRoom.self)
             room.isCompleted = true
             room.endedAt = Date()
-            room.winnerId = winnerId.uuidString
+            room.winnerId = winnerId?.uuidString
+            
+            // If voiding (no winner), zero out all scores as requested
+            if winnerId == nil {
+                room.players = room.players.map { player in
+                    var copy = player
+                    copy.scores = [] // Effectively zeros the total score
+                    return copy
+                }
+            }
             
             // Final safety update of participant IDs before archiving
             room.participantIds = Array(Set((room.participantIds ?? []) + room.players.compactMap { $0.userId }))
             
             try db.collection(collectionName).document(normalizedCode).setData(from: room)
             
-            print("✅ Game ended in room \(normalizedCode), winner: \(winnerId)")
+            print("✅ Game ended in room \(normalizedCode), winner: \(winnerId?.uuidString ?? "None")")
             FirebaseConfig.logEvent("game_ended", parameters: [
                 "room_code": normalizedCode,
-                "winner_id": winnerId.uuidString,
+                "winner_id": winnerId?.uuidString ?? "none",
                 "rounds_played": room.currentRound
             ])
             

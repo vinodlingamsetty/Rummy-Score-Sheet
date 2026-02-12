@@ -71,7 +71,7 @@ protocol RoomService: Sendable {
     func nextRound(roomCode: String) async throws -> GameRoom
     
     /// End the game and declare winner
-    func endGame(roomCode: String, winnerId: UUID) async throws -> GameRoom
+    func endGame(roomCode: String, winnerId: UUID?) async throws -> GameRoom
 
     /// Observe room updates (real-time stream). Mock emits once; Firebase will stream.
     func observeRoom(code: String) -> AsyncStream<GameRoom?>

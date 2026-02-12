@@ -90,6 +90,19 @@ struct WinnerDeclarationView: View {
                         .foregroundStyle(AppTheme.positiveColor)
                         .opacity(animateWinner ? 1 : 0)
                 }
+            } else {
+                VStack(spacing: AppSpacing._2) {
+                    Text("Game Voided")
+                        .font(.system(size: 44, weight: .bold, design: .rounded))
+                        .foregroundStyle(.secondary)
+                        .opacity(animateWinner ? 1 : 0)
+                        .offset(y: animateWinner ? 0 : 20)
+                    
+                    Text("No winner declared")
+                        .font(AppTypography.headline())
+                        .foregroundStyle(.secondary)
+                        .opacity(animateWinner ? 1 : 0)
+                }
             }
             
             // Celebration Message
@@ -130,7 +143,8 @@ struct WinnerDeclarationView: View {
                         player: player,
                         isWinner: game.winnerId == player.id.uuidString,
                         pointValue: game.pointValue,
-                        totalPlayers: game.players.count
+                        totalPlayers: game.players.count,
+                        isVoid: game.winnerId == nil
                     )
                 }
             }
@@ -210,6 +224,7 @@ private struct PlayerStandingRow: View {
     let isWinner: Bool
     let pointValue: Int
     let totalPlayers: Int
+    let isVoid: Bool
     
     private var rankColor: Color {
         switch rank {
@@ -230,6 +245,9 @@ private struct PlayerStandingRow: View {
     }
     
     private var winnings: Int {
+        // If void, no money is exchanged
+        if isVoid { return 0 }
+        
         // Winner takes pot (pointValue from each loser)
         // Each loser pays exactly pointValue
         if isWinner {

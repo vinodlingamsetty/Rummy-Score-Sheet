@@ -20,6 +20,7 @@ final class GameViewModel {
     var showTotalsView: Bool = false
     var selectedRound: Int // The round currently being viewed/edited
     var showEliminationAlert: Bool = false
+    var showEndGameConfirmation: Bool = false
     
     private let roomService: RoomService
     private let onRoomUpdate: (GameRoom) -> Void
@@ -229,23 +230,17 @@ final class GameViewModel {
     // MARK: - Game End
     
     /// Ends the game, creates friendships, then completes. Callers should await before exiting.
-    func endGame(winnerId: UUID? = nil) async {
+    func endGame(winnerId: UUID? = nil, isVoid: Bool = false) async {
         isLoading = true
         errorMessage = nil
         
-        let actualWinnerId = winnerId ?? winner?.id ?? sortedPlayers.first?.id
-        
-        guard let finalWinnerId = actualWinnerId else {
-            errorMessage = "Could not determine a winner"
-            isLoading = false
-            return
-        }
+        // If voiding, no winner is declared. 
+        // Otherwise, use provided winnerId, or auto-detect winner, or fallback to current leader.
+        let actualWinnerId: UUID? = isVoid ? nil : (winnerId ?? winner?.id ?? sortedPlayers.first?.id)
         
         do {
-            let updatedRoom = try await roomService.endGame(roomCode: room.id, winnerId: finalWinnerId)
+            let updatedRoom = try await roomService.endGame(roomCode: room.id, winnerId: actualWinnerId)
             updateRoomState(updatedRoom)
-            
-            // Note: createFriendshipsFromGame is now also called via updateRoomState when isCompleted transitions to true
         } catch {
             errorMessage = error.localizedDescription
             print("❌ Failed to end game: \(error.localizedDescription)")

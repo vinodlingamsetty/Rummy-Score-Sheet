@@ -147,14 +147,14 @@ actor MockRoomService: @preconcurrency RoomService {
         return room
     }
     
-    func endGame(roomCode: String, winnerId: UUID) async throws -> GameRoom {
+    func endGame(roomCode: String, winnerId: UUID?) async throws -> GameRoom {
         guard var room = rooms[roomCode] else {
             throw RoomServiceError.roomNotFound
         }
         
         room.isCompleted = true
         room.endedAt = Date()
-        room.winnerId = winnerId.uuidString
+        room.winnerId = winnerId?.uuidString
         
         rooms[roomCode] = room
         return room
