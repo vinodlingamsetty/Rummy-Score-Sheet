@@ -66,7 +66,6 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
     }
     
     func joinRoom(code: String, playerName: String) async throws -> RoomServiceResult {
-        // Ensure auth is complete
         await FirebaseConfig.ensureAuthenticated()
         
         guard let userId = Auth.auth().currentUser?.uid else {
@@ -75,35 +74,49 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
         
         let normalizedCode = code.uppercased()
         let docRef = db.collection(collectionName).document(normalizedCode)
+        let playerId = UUID()
         
-        do {
-            let document = try await docRef.getDocument()
+        return try await db.runTransaction { (transaction, errorPointer) -> Any? in
+            let document: DocumentSnapshot
+            do {
+                document = try transaction.getDocument(docRef)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
             
             guard document.exists else {
-                throw RoomServiceError.roomNotFound
+                let error = RoomServiceError.roomNotFound as NSError
+                errorPointer?.pointee = error
+                return nil
             }
             
-            var room = try document.data(as: GameRoom.self)
+            var room: GameRoom
+            do {
+                room = try document.data(as: GameRoom.self)
+            } catch let decodeError as NSError {
+                errorPointer?.pointee = decodeError
+                return nil
+            }
             
-            // Check if room is full
             if room.players.count >= 10 {
-                throw RoomServiceError.roomFull
+                let error = RoomServiceError.roomFull as NSError
+                errorPointer?.pointee = error
+                return nil
             }
             
-            let playerId = UUID()
             let player = Player(
                 id: playerId,
                 name: playerName,
                 isReady: false,
                 isModerator: false,
-                scores: [], // Initialize empty; will expand during score entry
+                scores: [], 
                 userId: userId,
                 email: Auth.auth().currentUser?.email
             )
             
             room.players.append(player)
             
-            // Update participant IDs for history queries
             if var currentIds = room.participantIds {
                 if !currentIds.contains(userId) {
                     currentIds.append(userId)
@@ -113,19 +126,15 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
                 room.participantIds = room.players.compactMap { $0.userId }
             }
             
-            try docRef.setData(from: room)
-            
-            // Log analytics
-            FirebaseConfig.logEvent("room_joined", parameters: [
-                "room_code": normalizedCode
-            ])
+            do {
+                try transaction.setData(from: room, forDocument: docRef)
+            } catch let writeError as NSError {
+                errorPointer?.pointee = writeError
+                return nil
+            }
             
             return RoomServiceResult(room: room, currentUserId: playerId)
-        } catch let error as RoomServiceError {
-            throw error
-        } catch {
-            throw RoomServiceError.networkError(error)
-        }
+        } as! RoomServiceResult
     }
     
     func leaveRoom(roomCode: String, playerId: UUID) async throws {
@@ -233,126 +242,137 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
     
     func updatePlayerScore(roomCode: String, playerId: UUID, score: Int, round: Int) async throws -> GameRoom {
         await FirebaseConfig.ensureAuthenticated()
-        // Normalize room code for consistent Firestore doc lookups
         let normalizedCode = roomCode.uppercased().trimmingCharacters(in: .whitespaces)
+        let docRef = db.collection(collectionName).document(normalizedCode)
         
-        do {
-            let document = try await db.collection(collectionName).document(normalizedCode).getDocument()
+        return try await db.runTransaction { (transaction, errorPointer) -> Any? in
+            let document: DocumentSnapshot
+            do {
+                document = try transaction.getDocument(docRef)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
             
             guard document.exists else {
-                throw RoomServiceError.roomNotFound
+                let error = RoomServiceError.roomNotFound as NSError
+                errorPointer?.pointee = error
+                return nil
             }
             
-            var room = try document.data(as: GameRoom.self)
+            var room: GameRoom
+            do {
+                room = try document.data(as: GameRoom.self)
+            } catch let decodeError as NSError {
+                errorPointer?.pointee = decodeError
+                return nil
+            }
             
             guard let playerIndex = room.players.firstIndex(where: { $0.id == playerId }) else {
-                throw RoomServiceError.playerNotFound
+                let error = RoomServiceError.playerNotFound as NSError
+                errorPointer?.pointee = error
+                return nil
             }
             
-            // round is 1-based, index is 0-based
             let roundIndex = round - 1
-            guard roundIndex >= 0 else { throw RoomServiceError.networkError(NSError(domain: "InvalidRound", code: 400)) }
-            
-            // Ensure scores array is large enough
             if room.players[playerIndex].scores.count <= roundIndex {
                 room.players[playerIndex].scores.append(contentsOf: [Int](repeating: 0, count: roundIndex - room.players[playerIndex].scores.count + 1))
             }
-            
-            // Update score for the specific round
             room.players[playerIndex].scores[roundIndex] = score
             
-            try db.collection(collectionName).document(normalizedCode).setData(from: room)
-            
-            print("✅ Updated score for player \(playerId) in room \(normalizedCode) round \(round): \(score)")
-            FirebaseConfig.logEvent("score_updated", parameters: [
-                "room_code": normalizedCode,
-                "round": round,
-                "score": score
-            ])
+            do {
+                try transaction.setData(from: room, forDocument: docRef)
+            } catch let writeError as NSError {
+                errorPointer?.pointee = writeError
+                return nil
+            }
             
             return room
-        } catch let error as RoomServiceError {
-            throw error
-        } catch {
-            throw RoomServiceError.networkError(error)
-        }
+        } as! GameRoom
     }
     
     func nextRound(roomCode: String) async throws -> GameRoom {
         await FirebaseConfig.ensureAuthenticated()
-        
         let normalizedCode = roomCode.uppercased().trimmingCharacters(in: .whitespaces)
+        let docRef = db.collection(collectionName).document(normalizedCode)
         
-        do {
-            let document = try await db.collection(collectionName).document(normalizedCode).getDocument()
-            
-            guard document.exists else {
-                throw RoomServiceError.roomNotFound
+        return try await db.runTransaction { (transaction, errorPointer) -> Any? in
+            let document: DocumentSnapshot
+            do {
+                document = try transaction.getDocument(docRef)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
             }
             
-            var room = try document.data(as: GameRoom.self)
+            var room: GameRoom
+            do {
+                room = try document.data(as: GameRoom.self)
+            } catch let decodeError as NSError {
+                errorPointer?.pointee = decodeError
+                return nil
+            }
+            
             room.currentRound += 1
             
-            try db.collection(collectionName).document(normalizedCode).setData(from: room)
-            
-            print("✅ Advanced to round \(room.currentRound) in room \(normalizedCode)")
-            FirebaseConfig.logEvent("round_advanced", parameters: [
-                "room_code": normalizedCode,
-                "round": room.currentRound
-            ])
+            do {
+                try transaction.setData(from: room, forDocument: docRef)
+            } catch let writeError as NSError {
+                errorPointer?.pointee = writeError
+                return nil
+            }
             
             return room
-        } catch let error as RoomServiceError {
-            throw error
-        } catch {
-            throw RoomServiceError.networkError(error)
-        }
+        } as! GameRoom
     }
     
     func endGame(roomCode: String, winnerId: UUID?) async throws -> GameRoom {
         await FirebaseConfig.ensureAuthenticated()
-        
         let normalizedCode = roomCode.uppercased().trimmingCharacters(in: .whitespaces)
+        let docRef = db.collection(collectionName).document(normalizedCode)
         
-        do {
-            let document = try await db.collection(collectionName).document(normalizedCode).getDocument()
-            
-            guard document.exists else {
-                throw RoomServiceError.roomNotFound
+        return try await db.runTransaction { (transaction, errorPointer) -> Any? in
+            let document: DocumentSnapshot
+            do {
+                document = try transaction.getDocument(docRef)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
             }
             
-            var room = try document.data(as: GameRoom.self)
+            var room: GameRoom
+            do {
+                room = try document.data(as: GameRoom.self)
+            } catch let decodeError as NSError {
+                errorPointer?.pointee = decodeError
+                return nil
+            }
+            
             room.isCompleted = true
             room.endedAt = Date()
             room.winnerId = winnerId?.uuidString
             
-            // If voiding (no winner), zero out all scores as requested
+            // If voiding (no winner), zero out all scores
             if winnerId == nil {
                 room.players = room.players.map { player in
                     var copy = player
-                    copy.scores = [] // Effectively zeros the total score
+                    copy.scores = []
                     return copy
                 }
             }
             
-            // Final safety update of participant IDs before archiving
+            // Final safety update of participant IDs
             room.participantIds = Array(Set((room.participantIds ?? []) + room.players.compactMap { $0.userId }))
             
-            try db.collection(collectionName).document(normalizedCode).setData(from: room)
-            
-            print("✅ Game ended in room \(normalizedCode), winner: \(winnerId?.uuidString ?? "None")")
-            FirebaseConfig.logEvent("game_ended", parameters: [
-                "room_code": normalizedCode,
-                "winner_id": winnerId?.uuidString ?? "none",
-                "rounds_played": room.currentRound
-            ])
+            do {
+                try transaction.setData(from: room, forDocument: docRef)
+            } catch let writeError as NSError {
+                errorPointer?.pointee = writeError
+                return nil
+            }
             
             return room
-        } catch let error as RoomServiceError {
-            throw error
-        } catch {
-            throw RoomServiceError.networkError(error)
-        }
+        } as! GameRoom
     }
     
     func observeRoom(code: String) -> AsyncStream<GameRoom?> {

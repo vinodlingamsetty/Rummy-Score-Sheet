@@ -15,11 +15,18 @@ final class AppGameState {
 
     // MARK: - State
 
-    var currentRoom: GameRoom?
+    var currentRoom: GameRoom? {
+        didSet {
+            updateActiveViewModel()
+        }
+    }
     var selectedTab: AppTab = .home
     var currentUserId: UUID?
     var isLoading = false
     var errorMessage: String?
+    
+    /// Stable view model for the active game session
+    var activeGameViewModel: GameViewModel?
 
     // MARK: - Service
 
@@ -36,6 +43,31 @@ final class AppGameState {
     
     deinit {
         roomObserverTask?.cancel()
+    }
+
+    private func updateActiveViewModel() {
+        guard let room = currentRoom, room.isStarted else {
+            activeGameViewModel = nil
+            return
+        }
+        
+        // Only create if we don't have one, or if it's for a different room
+        if activeGameViewModel?.room.id != room.id {
+            activeGameViewModel = GameViewModel(
+                room: room,
+                currentUserId: currentUserId,
+                roomService: roomService,
+                onRoomUpdate: { [weak self] updatedRoom in
+                    self?.updateRoom(updatedRoom)
+                },
+                onGameEndAndExit: { [weak self] in
+                    self?.endGame()
+                }
+            )
+        } else {
+            // Just update the existing VM's room data
+            activeGameViewModel?.room = room
+        }
     }
 
     // MARK: - Room Actions

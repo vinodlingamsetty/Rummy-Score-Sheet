@@ -72,17 +72,9 @@ private struct GameTabContent: View {
                 WinnerDeclarationView(game: room) {
                     gameState.leaveGame()
                 }
-            } else if room.isStarted {
+            } else if let viewModel = gameState.activeGameViewModel {
                 GameView(
-                    viewModel: GameViewModel(
-                        room: room,
-                        currentUserId: gameState.currentUserId,
-                        roomService: gameState.roomService,
-                        onRoomUpdate: { gameState.updateRoom($0) },
-                        onGameEndAndExit: { 
-                            // No-op here; we handle transition to winner view via room.isCompleted
-                        }
-                    ),
+                    viewModel: viewModel,
                     onLeaveGame: {
                         gameState.leaveGame()
                     }
