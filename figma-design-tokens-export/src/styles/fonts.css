@@ -1,0 +1,7 @@
+/* SF Pro Font - iOS System Font */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Fallback to system fonts that closely match SF Pro */
+:root {
+  --font-sf-pro: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", "Inter", system-ui, sans-serif;
+}

@@ -1,0 +1,244 @@
+//
+//  DesignSystem.swift
+//  Rummy Scorekeeper
+//
+//  Liquid Glass design system — iOS 26 aesthetic
+//  Aligned with figma-design-tokens-export/design-tokens.json
+//
+
+import SwiftUI
+
+// MARK: - AppTheme (Colors)
+
+/// Central theme for the app: Liquid Glass design system
+/// Follows Apple Human Interface Guidelines for semantic colors
+struct AppTheme {
+    // MARK: - Background
+
+    /// Subtle system-gradient backdrop that preserves Liquid Glass readability
+    static let background: LinearGradient = LinearGradient(
+        colors: [
+            Color(.systemBackground),
+            Color(.secondarySystemBackground).opacity(0.6),
+            Color(.systemBackground)
+        ],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
+
+    // MARK: - Gradients
+
+    /// Purple gradient for primary actions (#8B5CF6 → #6366F1)
+    static let gradientPrimary: LinearGradient = LinearGradient(
+        colors: [Color(hex: "8B5CF6"), Color(hex: "6366F1")],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+
+    /// Blue gradient for secondary actions (#3B82F6 → #1D4ED8)
+    static let gradientSecondary: LinearGradient = LinearGradient(
+        colors: [Color(hex: "3B82F6"), Color(hex: "1D4ED8")],
+        startPoint: .leading,
+        endPoint: .trailing
+    )
+
+    // MARK: - Materials
+
+    /// Ultra-thin glass material for subtle overlays
+    static var glassMaterial: Material { .ultraThin }
+
+    /// Thin material
+    static var glassMaterialThin: Material { .thin }
+
+    /// Regular material
+    static var glassMaterialRegular: Material { .regular }
+
+    /// Thick material
+    static var glassMaterialThick: Material { .thick }
+
+    /// Standard surfaces tuned for Liquid Glass
+    static var cardMaterial: Material { .thin }
+    static var controlMaterial: Material { .ultraThin }
+
+    // MARK: - Primary Accent
+
+    /// Neon purple — selected tabs, icons, highlights, toggles
+    static let primaryColor: Color = Color.neonPurple
+
+    // MARK: - iOS System Colors (Dark Mode)
+
+    static let iosBlue: Color = Color(hex: "0A84FF")
+    static let iosPurple: Color = Color(hex: "BF5AF2")
+    static let iosIndigo: Color = Color(hex: "5E5CE6")
+    static let iosGreen: Color = Color(hex: "30D158")
+    static let iosRed: Color = Color(hex: "FF453A")
+    static let iosOrange: Color = Color(hex: "FF9F0A")
+    static let iosYellow: Color = Color(hex: "FFD60A")
+    static let iosPink: Color = Color(hex: "FF375F")
+    static let iosTeal: Color = Color(hex: "64D2FF")
+
+    // MARK: - Semantic Colors (Apple HIG compliant)
+
+    /// Primary text — white for strong contrast on purple
+    static let textPrimary: Color = .white
+
+    /// Muted text, placeholders, descriptions
+    static let textSecondary: Color = Color.textMuted
+
+    /// Positive / success / winners (Apple HIG: green for positive actions)
+    static let positiveColor: Color = Color.accentGreen
+
+    /// Negative / error / eliminated (Apple HIG: red for negative/destructive)
+    static let negativeColor: Color = Color.accentRed
+    
+    /// Destructive actions alias (same as negative, Apple HIG compliant)
+    static let destructiveColor: Color = Color.accentRed
+
+    /// Tertiary text (60% opacity)
+    static let textTertiary: Color = Color.white.opacity(0.6)
+
+    /// Quaternary text (30% opacity)
+    static let textQuaternary: Color = Color.white.opacity(0.3)
+}
+
+// MARK: - Theme Colors (Figma design-tokens.json)
+
+private extension Color {
+    // Primary accent — iOS purple (vibrant)
+    static let neonPurple = Color(hex: "BF5AF2")         // Figma: color.ios.system.purple.dark
+    
+    // Semantic colors
+    static let accentGreen = Color(hex: "30D158")        // Figma: color.semantic.success.dark
+    static let accentRed = Color(hex: "FF453A")          // Figma: color.semantic.error.dark
+    
+    // Text colors
+    static let textMuted = Color(hex: "EBEBF5")          // Figma: color.text.secondary.dark
+}
+
+extension Color {
+    init(hex: String) {
+        let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+        var int: UInt64 = 0
+        Scanner(string: hex).scanHexInt64(&int)
+        let r, g, b: Double
+        switch hex.count {
+        case 6:
+            r = Double((int >> 16) & 0xFF) / 255
+            g = Double((int >> 8) & 0xFF) / 255
+            b = Double(int & 0xFF) / 255
+        case 8:
+            r = Double((int >> 16) & 0xFF) / 255
+            g = Double((int >> 8) & 0xFF) / 255
+            b = Double(int & 0xFF) / 255
+        default:
+            r = 0; g = 0; b = 0
+        }
+        self.init(red: r, green: g, blue: b)
+    }
+}
+
+// MARK: - AppTypography
+
+/// iOS typography scale — SF Pro Rounded
+struct AppTypography {
+    static func largeTitle() -> Font { .system(.largeTitle, design: .rounded).weight(.bold) }
+    static func title1() -> Font { .system(.title, design: .rounded).weight(.bold) }
+    static func title2() -> Font { .system(.title2, design: .rounded).weight(.semibold) }
+    static func title3() -> Font { .system(.title3, design: .rounded).weight(.semibold) }
+    static func headline() -> Font { .system(.headline, design: .rounded).weight(.semibold) }
+    static func body() -> Font { .system(.body, design: .rounded) }
+    static func callout() -> Font { .system(.callout, design: .rounded) }
+    static func subheadline() -> Font { .system(.subheadline, design: .rounded) }
+    static func footnote() -> Font { .system(.footnote, design: .rounded) }
+    static func caption1() -> Font { .system(.caption, design: .rounded) }
+    static func caption2() -> Font { .system(.caption2, design: .rounded) }
+}
+
+// MARK: - AppSpacing (8pt grid)
+
+struct AppSpacing {
+    static let _0: CGFloat = 0
+    static let _1: CGFloat = 4
+    static let _2: CGFloat = 8
+    static let _3: CGFloat = 12
+    static let _4: CGFloat = 16
+    static let _5: CGFloat = 20
+    static let _6: CGFloat = 24
+    static let _8: CGFloat = 32
+    static let _10: CGFloat = 40
+    static let _12: CGFloat = 48
+    static let _16: CGFloat = 64
+    static let _20: CGFloat = 80
+    static let _24: CGFloat = 96
+
+    static let tight: CGFloat = _2
+    static let small: CGFloat = _3
+    static let medium: CGFloat = _4
+    static let large: CGFloat = _6
+    static let xLarge: CGFloat = _8
+}
+
+// MARK: - AppRadius
+
+struct AppRadius {
+    static let sm: CGFloat = 8
+    static let md: CGFloat = 12
+    static let lg: CGFloat = 16
+    static let xl: CGFloat = 20
+    static let xxl: CGFloat = 24
+    static let full: CGFloat = 9999
+
+    static let iosDefault: CGFloat = 10
+    static let iosLarge: CGFloat = 14
+    static let iosCard: CGFloat = 16
+}
+
+// MARK: - AppAnimation
+
+struct AppAnimation {
+    /// Bouncy — tab switches, modals (stiffness 400, damping 25)
+    static var springBouncy: Animation { .spring(response: 0.35, dampingFraction: 0.65) }
+
+    /// Smooth — general interactions (stiffness 300, damping 30)
+    static var springSmooth: Animation { .spring(response: 0.4, dampingFraction: 0.75) }
+
+    /// Snappy — quick feedback (stiffness 500, damping 30)
+    static var springSnappy: Animation { .spring(response: 0.28, dampingFraction: 0.7) }
+
+    static let durationFast: Double = 0.15
+    static let durationNormal: Double = 0.3
+    static let durationSlow: Double = 0.5
+}
+
+// MARK: - AppComponent (Component tokens)
+
+struct AppComponent {
+    struct Button {
+        static let heightSm: CGFloat = 32
+        static let heightMd: CGFloat = 44
+        static let heightLg: CGFloat = 50
+        static let paddingX: CGFloat = 16
+        static let paddingY: CGFloat = 12
+    }
+    struct Input {
+        static let height: CGFloat = 44
+        static let paddingX: CGFloat = 16
+        static let paddingY: CGFloat = 12
+    }
+    struct Card {
+        static let padding: CGFloat = 16
+        static let gap: CGFloat = 12
+    }
+    struct Avatar {
+        static let sizeSm: CGFloat = 32
+        static let sizeMd: CGFloat = 40
+        static let sizeLg: CGFloat = 56
+        static let sizeXl: CGFloat = 80
+    }
+    struct Layout {
+        static let statusBarHeight: CGFloat = 44
+        static let tabBarHeight: CGFloat = 80
+        static let navBarHeight: CGFloat = 44
+        static let maxContentWidth: CGFloat = 896
+    }
+}

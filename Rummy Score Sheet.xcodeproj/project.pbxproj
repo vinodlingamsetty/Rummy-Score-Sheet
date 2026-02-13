@@ -6,13 +6,38 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		20FF83B42F341C73005365A8 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83B32F341C73005365A8 /* FirebaseAnalytics */; };
+		20FF83B62F341C73005365A8 /* FirebaseAnalyticsCore in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83B52F341C73005365A8 /* FirebaseAnalyticsCore */; };
+		20FF83B82F341C73005365A8 /* FirebaseAnalyticsIdentitySupport in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83B72F341C73005365A8 /* FirebaseAnalyticsIdentitySupport */; };
+		20FF83BA2F341C73005365A8 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83B92F341C73005365A8 /* FirebaseAuth */; };
+		20FF83BC2F341C73005365A8 /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83BB2F341C73005365A8 /* FirebaseCrashlytics */; };
+		20FF83BE2F341C73005365A8 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83BD2F341C73005365A8 /* FirebaseFirestore */; };
+		20FF83C02F341C73005365A8 /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83BF2F341C73005365A8 /* FirebaseMessaging */; };
+		20FF83C22F341C73005365A8 /* FirebaseFunctions in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83C12F341C73005365A8 /* FirebaseFunctions */; };
+		20FF83D02F341C73005365A9 /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 20FF83CF2F341C73005365A9 /* GoogleSignIn */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		205D0AD72F2D4E55005B6CF0 /* Rummy Score Sheet.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Rummy Score Sheet.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		206701AD2F3D26AD00666A74 /* Exceptions for "Rummy Score Sheet" folder in "Rummy Score Sheet" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 205D0AD62F2D4E55005B6CF0 /* Rummy Score Sheet */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		205D0AD92F2D4E55005B6CF0 /* Rummy Score Sheet */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				206701AD2F3D26AD00666A74 /* Exceptions for "Rummy Score Sheet" folder in "Rummy Score Sheet" target */,
+			);
 			path = "Rummy Score Sheet";
 			sourceTree = "<group>";
 		};
@@ -23,6 +48,15 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				20FF83B42F341C73005365A8 /* FirebaseAnalytics in Frameworks */,
+				20FF83B62F341C73005365A8 /* FirebaseAnalyticsCore in Frameworks */,
+				20FF83BC2F341C73005365A8 /* FirebaseCrashlytics in Frameworks */,
+				20FF83B82F341C73005365A8 /* FirebaseAnalyticsIdentitySupport in Frameworks */,
+				20FF83BA2F341C73005365A8 /* FirebaseAuth in Frameworks */,
+				20FF83BE2F341C73005365A8 /* FirebaseFirestore in Frameworks */,
+				20FF83C02F341C73005365A8 /* FirebaseMessaging in Frameworks */,
+				20FF83C22F341C73005365A8 /* FirebaseFunctions in Frameworks */,
+				20FF83D02F341C73005365A9 /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +99,15 @@
 			);
 			name = "Rummy Score Sheet";
 			packageProductDependencies = (
+				20FF83B32F341C73005365A8 /* FirebaseAnalytics */,
+				20FF83B52F341C73005365A8 /* FirebaseAnalyticsCore */,
+				20FF83B72F341C73005365A8 /* FirebaseAnalyticsIdentitySupport */,
+				20FF83B92F341C73005365A8 /* FirebaseAuth */,
+				20FF83BB2F341C73005365A8 /* FirebaseCrashlytics */,
+				20FF83BD2F341C73005365A8 /* FirebaseFirestore */,
+				20FF83BF2F341C73005365A8 /* FirebaseMessaging */,
+				20FF83C12F341C73005365A8 /* FirebaseFunctions */,
+				20FF83CF2F341C73005365A9 /* GoogleSignIn */,
 			);
 			productName = "Rummy Score Sheet";
 			productReference = 205D0AD72F2D4E55005B6CF0 /* Rummy Score Sheet.app */;
@@ -78,7 +121,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 2600;
-				LastUpgradeCheck = 2600;
+				LastUpgradeCheck = 2630;
 				TargetAttributes = {
 					205D0AD62F2D4E55005B6CF0 = {
 						CreatedOnToolsVersion = 26.0.1;
@@ -94,6 +137,10 @@
 			);
 			mainGroup = 205D0ACE2F2D4E55005B6CF0;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				20FF83CE2F341C73005365A9 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 205D0AD82F2D4E55005B6CF0 /* Products */;
 			projectDirPath = "";
@@ -183,6 +230,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
@@ -239,6 +287,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;
 			};
@@ -249,22 +298,28 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = "Rummy Score Sheet/Rummy Score Sheet.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4H2RJWFDST;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				EXCLUDED_RESOURCE_FILE_NAMES = Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Rummy Score Sheet/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.vin.Rummy-Score-Sheet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Rummy Score Sheet Dev profile";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -280,22 +335,28 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_ENTITLEMENTS = "Rummy Score Sheet/Rummy Score Sheet.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = 4H2RJWFDST;
 				ENABLE_PREVIEWS = YES;
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
-				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				EXCLUDED_RESOURCE_FILE_NAMES = Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "Rummy Score Sheet/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = "com.vin.Rummy-Score-Sheet";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "Rummy Score Sheet Dev profile";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
@@ -328,6 +389,73 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.9.0;
+			};
+		};
+		20FF83CE2F341C73005365A9 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		20FF83B32F341C73005365A8 /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		20FF83B52F341C73005365A8 /* FirebaseAnalyticsCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsCore;
+		};
+		20FF83B72F341C73005365A8 /* FirebaseAnalyticsIdentitySupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsIdentitySupport;
+		};
+		20FF83B92F341C73005365A8 /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		20FF83BB2F341C73005365A8 /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		20FF83BD2F341C73005365A8 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		20FF83BF2F341C73005365A8 /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		20FF83C12F341C73005365A8 /* FirebaseFunctions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 20FF83B22F341C73005365A8 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFunctions;
+		};
+		20FF83CF2F341C73005365A9 /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 20FF83CE2F341C73005365A9 /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 205D0ACF2F2D4E55005B6CF0 /* Project object */;
 }

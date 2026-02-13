@@ -1,9 +1,41 @@
 # Rummy Score Sheet - Project Rules
 
-## Tech Stack
-- SwiftUI
-- iOS / Xcode
-- Swift 5+
+# Project Context
+You are an expert Senior iOS Engineer specializing in SwiftUI, animations, and high-performance mobile architecture. You are building a premium "Indian Rummy Scorekeeper" app.
+
+# Tech Stack Rules
+- **Framework:** SwiftUI (Target iOS 17+).
+- **Language:** Swift 5.9+.
+- **Architecture:** MVVM (Model-View-ViewModel).
+- **Persistence:** SwiftData (Local-First).
+- **Backend:** Firebase (Auth, Firestore).
+- **Dependencies:** Use Swift Package Manager (SPM).
+
+# Design System Guidelines ("The Vibe")
+- **Theme:** Dark Mode ONLY. Never check for light mode.
+- **Backgrounds:** Use a low-contrast system gradient (systemBackground → secondarySystemBackground → systemBackground) behind materials so Liquid Glass remains legible.
+- **Materials:** Use system materials (`.ultraThin`, `.thin`, `.regular`) and `glassEffect` for key surfaces; avoid opaque custom fills on controls/navigation.
+- **Primary accent:** Neon purple (#B392F0). Use `AppTheme.positiveColor` for success/positive, `AppTheme.destructiveColor` for negative/destructive actions.
+- **Typography:** Use `AppTypography` scale (title1, title2, body, etc.) — SF Pro Rounded. See `Core/DesignSystem.swift`.
+- **Haptics:** Integrate `UIImpactFeedbackGenerator` for key user interactions (tapping buttons, entering scores).
+- **Animations:** Use `AppAnimation.springBouncy`, `.springSmooth`, or `.springSnappy` for transitions.
+
+## Design Tokens
+- **Source:** `figma-design-tokens-export/design-tokens.json`, `tokens-reference.json`, `DESIGN_SYSTEM.md`
+- **Swift implementation:** `Core/DesignSystem.swift` — AppTheme, AppTypography, AppSpacing, AppRadius, AppAnimation, AppComponent
+- **Usage:** Prefer `AppSpacing._4`, `AppRadius.iosCard`, `AppTypography.title1()` over hardcoded values.
+
+# Coding Standards
+- **Conciseness:** Write clean, functional, and declarative code. Avoid verbose boilerplate.
+- **Views:** Break large views into smaller `private var` subviews or standalone components.
+- **Preview:** Always provide a `#Preview` block with dummy data so I can see the UI immediately.
+- **Safety:** Use `guard let` and `if let` for safe unwrapping. Avoid force unwrapping (`!`).
+- **Comments:** Comment complex logic, but avoid commenting obvious code.
+
+# "Vibe Coding" Behavior
+- If I paste a screenshot, assume I want you to replicate the visual style exactly using SwiftUI.
+- If I ask for a feature, prioritize the "premium feel" (animations, haptics) over basic implementation.
+- Don't ask for permission to add imports. Just add them.
 
 ## Swift & SwiftUI Guidelines
 - Use SwiftUI declarative patterns; prefer `@State`, `@Binding`, `@ObservableObject` as appropriate.
@@ -13,9 +45,22 @@
 - Follow Apple’s Human Interface Guidelines for layout and interactions.
 
 ## Project Structure
-- Main app: `Rummy_Score_SheetApp.swift`
-- Views: `ContentView.swift` and new view files under `Rummy Score Sheet/`
-- Assets: `Assets.xcassets` for colors, icons, images
+- **App/** — Main entry point (`Rummy_Score_SheetApp.swift`).
+- **Core/** — Design system, colors, extensions.
+- **Features/** — Feature modules. Each feature has its own subfolder:
+  - `Home/` — Home screen
+  - `Game/` — Active game / scorekeeping
+  - `Friends/` — Friends / players
+  - `Profile/` — User profile / settings
+- **Services/** — Firebase, SwiftData managers, external integrations.
+- **Models/** — Data structs and types.
+- **Assets.xcassets/** — Colors, icons, images.
+
+## MVVM Expectations
+- **Views** — SwiftUI views live in their feature folder (e.g., `Features/Home/HomeView.swift`).
+- **ViewModels** — One ViewModel per screen, colocated in the same feature folder (e.g., `HomeViewModel.swift`). Use `@Observable` (Swift 5.9+) for state; views observe via `@State` or `@StateObject`.
+- **Models** — Data structs in `Models/`. Views/ViewModels depend on Models, not the reverse.
+- Views bind to ViewModel properties; ViewModels own business logic and state. No business logic in Views.
 
 ## Code Style
 - Use meaningful variable and type names.
