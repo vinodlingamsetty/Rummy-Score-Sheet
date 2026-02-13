@@ -16,6 +16,12 @@ struct GameDetailView: View {
         game.players.sorted { $0.totalScore < $1.totalScore }
     }
     
+    /// The actual number of rounds to display, based on data present in player scores
+    private var actualRoundCount: Int {
+        let maxScoreCount = game.players.map { $0.scores.count }.max() ?? 0
+        return max(game.currentRound, maxScoreCount)
+    }
+    
     var body: some View {
         ZStack {
             AppTheme.background
@@ -172,7 +178,7 @@ struct GameDetailView: View {
                             .foregroundStyle(.secondary)
                             .frame(width: 120, alignment: .leading)
                         
-                        ForEach(0..<game.currentRound, id: \.self) { round in
+                        ForEach(0..<actualRoundCount, id: \.self) { round in
                             Text("R\(round + 1)")
                                 .font(AppTypography.caption1().bold())
                                 .foregroundStyle(.secondary)
@@ -209,7 +215,7 @@ struct GameDetailView: View {
                             .frame(width: 120, alignment: .leading)
                             
                             // Round scores
-                            ForEach(0..<game.currentRound, id: \.self) { round in
+                            ForEach(0..<actualRoundCount, id: \.self) { round in
                                 let score = round < player.scores.count ? player.scores[round] : 0
                                 Text("\(score)")
                                     .font(AppTypography.body())
@@ -277,11 +283,11 @@ private struct StatBadge: View {
                 pointLimit: 201,
                 pointValue: 10,
                 players: [
-                    Player(id: UUID(), name: "Alice", isReady: true, isModerator: true, scores: [15, 20, 10]),
-                    Player(id: UUID(), name: "Bob", isReady: true, isModerator: false, scores: [25, 30, 20]),
-                    Player(id: UUID(), name: "Charlie", isReady: true, isModerator: false, scores: [10, 15, 25])
+                    Player(id: UUID(), name: "Alice", isReady: true, isModerator: true, scores: [15, 20, 10, 5, 5, 5, 5, 5, 5, 5, 5]),
+                    Player(id: UUID(), name: "Bob", isReady: true, isModerator: false, scores: [25, 30, 20, 10, 10, 10, 10, 10, 10, 10, 10]),
+                    Player(id: UUID(), name: "Charlie", isReady: true, isModerator: false, scores: [10, 15, 25, 20, 20, 20, 20, 20, 20, 20, 20])
                 ],
-                currentRound: 3,
+                currentRound: 11,
                 isStarted: true,
                 createdAt: Date(),
                 createdBy: "user123",

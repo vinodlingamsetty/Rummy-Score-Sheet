@@ -28,6 +28,40 @@ final class AppGameState {
     /// Stable view model for the active game session
     var activeGameViewModel: GameViewModel?
 
+    // MARK: - Game Screen State
+    
+    enum GameScreenState {
+        case lobby(GameLobbyViewModel)
+        case playing(GameViewModel)
+        case summary(GameRoom)
+        case none
+    }
+    
+    var activeGameScreen: GameScreenState {
+        guard let room = currentRoom else { return .none }
+        
+        if room.isCompleted {
+            return .summary(room)
+        } else if room.isStarted {
+            // Should have an active VM if started, or we're waiting for sync
+            if let vm = activeGameViewModel {
+                return .playing(vm)
+            } else {
+                // Fallback/loading state - shouldn't happen often if updateActiveViewModel works
+                // Could return none or a loading state, but for now let's just create a temporary one if needed or wait
+                // Ideally activeGameViewModel is already set by didSet of currentRoom
+                 return .none
+            }
+        } else {
+            return .lobby(GameLobbyViewModel(
+                room: room,
+                currentUserId: currentUserId,
+                onRoomChange: { [weak self] in self?.updateRoom($0) },
+                onSetReady: { [weak self] in self?.setReady($0) }
+            ))
+        }
+    }
+
     // MARK: - Service
 
     let roomService: RoomService // Internal access for GameViewModel

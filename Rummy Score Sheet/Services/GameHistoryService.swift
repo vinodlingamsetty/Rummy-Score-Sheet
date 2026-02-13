@@ -11,7 +11,7 @@ import FirebaseAuth
 
 final class GameHistoryService: @unchecked Sendable {
     private let db = Firestore.firestore()
-    private let collectionName = "gameRooms"
+    private let collectionName = AppConstants.Firestore.gameRooms
     
     // MARK: - Fetch Game History
     
@@ -42,7 +42,9 @@ final class GameHistoryService: @unchecked Sendable {
                 }
             } catch let indexError {
                 // Fallback: index may not be deployed; fetch without order and sort in memory
+                #if DEBUG
                 print("⚠️ Indexed query failed, using fallback: \(indexError.localizedDescription)")
+                #endif
                 let snapshot = try await db.collection(collectionName)
                     .whereField("isCompleted", isEqualTo: true)
                     .whereField("participantIds", arrayContains: userId)
@@ -55,11 +57,15 @@ final class GameHistoryService: @unchecked Sendable {
                 allGames = Array(allGames.prefix(limit))
             }
             
+            #if DEBUG
             print("✅ Fetched \(allGames.count) completed games for user \(userId)")
+            #endif
             return allGames
             
         } catch {
+            #if DEBUG
             print("❌ Failed to fetch game history: \(error.localizedDescription)")
+            #endif
             throw error
         }
     }
@@ -91,10 +97,14 @@ final class GameHistoryService: @unchecked Sendable {
                 game.participantIds?.contains(friendUserId) == true
             }
             
+            #if DEBUG
             print("✅ Found \(sharedGames.count) shared games with friend \(friendUserId)")
+            #endif
             return Array(sharedGames.prefix(limit))
         } catch {
+            #if DEBUG
             print("❌ Failed to fetch shared games: \(error.localizedDescription)")
+            #endif
             throw error
         }
     }
@@ -112,7 +122,9 @@ final class GameHistoryService: @unchecked Sendable {
             
             return try document.data(as: GameRoom.self)
         } catch {
+            #if DEBUG
             print("❌ Failed to fetch game \(normalizedCode): \(error.localizedDescription)")
+            #endif
             throw error
         }
     }
@@ -153,7 +165,9 @@ final class GameHistoryService: @unchecked Sendable {
             
             return games
         } catch {
+            #if DEBUG
             print("❌ Failed to filter games: \(error.localizedDescription)")
+            #endif
             throw error
         }
     }

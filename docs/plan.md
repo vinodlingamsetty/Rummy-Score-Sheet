@@ -44,14 +44,14 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
   - [ ] Analytics (Firebase)
 
 ### 2.2 Push Notifications (for Nudge)
-- [ ] Add Push Notifications capability in Xcode
-- [ ] Configure Firebase Cloud Messaging (or equivalent)
-- [ ] Only send nudges after user enables Notifications in Profile
+- [x] Add Push Notifications capability in Xcode
+- [x] Configure Firebase Cloud Messaging (or equivalent)
+- [x] Only send nudges after user enables Notifications in Profile
 - [ ] Test notification flow end-to-end
 
 ### 2.3 App Completeness
-- [ ] Verify no broken or placeholder features
-- [ ] Remove or implement any "Coming soon" sections
+- [x] Verify no broken or placeholder features
+- [x] Remove or implement any "Coming soon" sections
 - [ ] Test full flow: Create room → Join room → Play rounds → End game
 - [ ] Test Friends tab: settle, nudge
 - [ ] Test Profile tab: edit name, settings, logout
@@ -78,13 +78,13 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 - [x] Ensure App Store description avoids "betting" or "gambling" language
 
 ### 3.2 Offline Experience
-- [ ] Test app behavior when offline
-- [ ] Add user-facing message when network is unavailable (if applicable)
+- [x] Test app behavior when offline
+- [x] Add user-facing message when network is unavailable (if applicable)
 - [ ] Ensure Mock mode or graceful degradation works
 
 ### 3.3 Production Logging
-- [ ] Wrap or remove `print()` statements in production
-- [ ] Use `#if DEBUG` for debug logs
+- [x] Wrap or remove `print()` statements in production
+- [x] Use `#if DEBUG` for debug logs
 - [ ] Ensure no user IDs or sensitive data in production logs
 - [ ] Review Crashlytics configuration
 

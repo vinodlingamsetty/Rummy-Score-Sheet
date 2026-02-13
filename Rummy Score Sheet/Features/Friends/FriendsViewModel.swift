@@ -22,13 +22,14 @@ class FriendsViewModel {
     var sharedGames: [GameRoom] = []
     
     private let friendService: FriendService
-    private let historyService = GameHistoryService()
+    private let historyService: GameHistoryService
     private var friendsObserverTask: Task<Void, Never>?
     
     // MARK: - Initialization
     
-    init(friendService: FriendService = MockFriendService()) {
+    init(friendService: FriendService = MockFriendService(), historyService: GameHistoryService = GameHistoryService()) {
         self.friendService = friendService
+        self.historyService = historyService
     }
     
     deinit {
@@ -144,7 +145,9 @@ class FriendsViewModel {
         do {
             settlements = try await friendService.fetchSettlements(friendshipId: friend.id)
         } catch {
+            #if DEBUG
             print("❌ Failed to load settlements: \(error.localizedDescription)")
+            #endif
         }
         isSettlementsLoading = false
     }
@@ -155,7 +158,9 @@ class FriendsViewModel {
         do {
             sharedGames = try await historyService.fetchGamesWithFriend(friendUserId: friendUserId)
         } catch {
+            #if DEBUG
             print("❌ Failed to load shared games: \(error.localizedDescription)")
+            #endif
         }
         isSharedGamesLoading = false
     }

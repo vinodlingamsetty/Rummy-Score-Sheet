@@ -16,6 +16,14 @@ enum AppConstants {
         static let privacyPolicy = "https://vinodlingamsetty.github.io/Rummy-Score-Sheet/PRIVACY_POLICY"
     }
 
+    // MARK: - Firestore Collections
+    enum Firestore {
+        static let users = "users"
+        static let gameRooms = "gameRooms"
+        static let friends = "friends"
+        static let settlements = "settlements"
+    }
+
     // MARK: - UserDefaults Keys
     // Use these instead of raw strings for settings persistence
     enum UserDefaultsKeys {

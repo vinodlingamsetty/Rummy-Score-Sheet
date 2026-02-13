@@ -27,7 +27,9 @@ struct FirebaseConfig {
         // Configure Crashlytics
         configureCrashlytics()
         
+        #if DEBUG
         print("✅ Firebase initialized successfully")
+        #endif
     }
     
     /// Ensures user is authenticated. Call before Firestore/Auth operations.
@@ -36,17 +38,23 @@ struct FirebaseConfig {
         if Auth.auth().currentUser == nil {
             do {
                 let result = try await Auth.auth().signInAnonymously()
+                #if DEBUG
                 print("✅ Anonymous auth successful: \(result.user.uid)")
+                #endif
                 Analytics.logEvent(AnalyticsEventLogin, parameters: [
                     AnalyticsParameterMethod: "anonymous"
                 ])
                 Crashlytics.crashlytics().setUserID(result.user.uid)
             } catch {
+                #if DEBUG
                 print("❌ Anonymous auth failed: \(error.localizedDescription)")
+                #endif
                 Crashlytics.crashlytics().record(error: error)
             }
         } else {
+            #if DEBUG
             print("✅ User already authenticated: \(Auth.auth().currentUser?.uid ?? "unknown")")
+            #endif
         }
     }
     
@@ -100,7 +108,9 @@ struct FirebaseConfig {
         changeRequest.displayName = name
         try await changeRequest.commitChanges()
         
+        #if DEBUG
         print("✅ Display name updated to: \(name)")
+        #endif
         Analytics.logEvent("profile_updated", parameters: ["field": "display_name"])
     }
     

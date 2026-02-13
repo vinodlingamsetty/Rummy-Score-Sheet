@@ -60,7 +60,9 @@ struct HomeView: View {
                 gameHistory = try await historyService.fetchUserGameHistory(limit: 5)
             } catch {
                 historyError = error.localizedDescription
+                #if DEBUG
                 print("❌ Failed to load game history: \(error.localizedDescription)")
+                #endif
             }
             
             isLoadingHistory = false
@@ -115,19 +117,18 @@ struct HomeView: View {
                     .foregroundStyle(.primary)
                 Spacer()
                 if !gameHistory.isEmpty {
-                    Button {
-                        // TODO: Navigate to full history view
+                    NavigationLink {
+                        GameHistoryView()
                     } label: {
-                        Label {
+                        HStack {
                             Text("View All")
                                 .font(AppTypography.subheadline())
-                        } icon: {
                             Image(systemName: "chevron.right")
                                 .font(.system(size: 12, weight: .semibold))
-                                .accessibilityHidden(true)
                         }
+                        .foregroundStyle(.tint)
                     }
-                    .foregroundStyle(.tint)
+                    .buttonStyle(.plain)
                 }
             }
             .padding(.horizontal, AppSpacing._4)

@@ -16,7 +16,7 @@ final class FCMDelegate: NSObject, MessagingDelegate {
     
     static let shared = FCMDelegate()
     
-    private let usersCollection = "users"
+    private let usersCollection = AppConstants.Firestore.users
     private let db = Firestore.firestore()
     
     private override init() {

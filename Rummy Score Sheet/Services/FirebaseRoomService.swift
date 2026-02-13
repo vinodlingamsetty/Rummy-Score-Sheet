@@ -14,7 +14,7 @@ import FirebaseAuth
 final class FirebaseRoomService: RoomService, @unchecked Sendable {
     
     private let db = Firestore.firestore()
-    private let collectionName = "gameRooms"
+    private let collectionName = AppConstants.Firestore.gameRooms
     
     // MARK: - RoomService Implementation
     
@@ -399,7 +399,9 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
             
             let listener = docRef.addSnapshotListener { documentSnapshot, error in
                 if let error = error {
+                    #if DEBUG
                     print("❌ Firestore listener error: \(error.localizedDescription)")
+                    #endif
                     continuation.yield(nil)
                     return
                 }
@@ -413,7 +415,9 @@ final class FirebaseRoomService: RoomService, @unchecked Sendable {
                     let room = try document.data(as: GameRoom.self)
                     continuation.yield(room)
                 } catch {
+                    #if DEBUG
                     print("❌ Failed to decode GameRoom: \(error.localizedDescription)")
+                    #endif
                     continuation.yield(nil)
                 }
             }

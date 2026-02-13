@@ -57,6 +57,16 @@ final class GameViewModel {
         guard activePlayers.count == 1 else { return nil }
         return activePlayers.first
     }
+    
+    var isCurrentUserModerator: Bool {
+        room.players.first { $0.id == currentUserId }?.isModerator ?? false
+    }
+    
+    var isCurrentUserEliminated: Bool {
+        guard let currentUserId = currentUserId,
+              let player = room.players.first(where: { $0.id == currentUserId }) else { return false }
+        return isEliminated(player)
+    }
 
     init(
         room: GameRoom,
@@ -148,7 +158,9 @@ final class GameViewModel {
                 }
             } catch {
                 errorMessage = error.localizedDescription
+                #if DEBUG
                 print("❌ Failed to update score: \(error.localizedDescription)")
+                #endif
             }
             
             isLoading = false
@@ -199,7 +211,9 @@ final class GameViewModel {
                 _ = await checkAndAutoEndIfWinner()
             } catch {
                 errorMessage = error.localizedDescription
+                #if DEBUG
                 print("❌ Failed to advance round: \(error.localizedDescription)")
+                #endif
             }
             
             isLoading = false
@@ -231,7 +245,9 @@ final class GameViewModel {
             updateRoomState(updatedRoom)
         } catch {
             errorMessage = error.localizedDescription
+            #if DEBUG
             print("❌ Failed to end game: \(error.localizedDescription)")
+            #endif
         }
         
         isLoading = false

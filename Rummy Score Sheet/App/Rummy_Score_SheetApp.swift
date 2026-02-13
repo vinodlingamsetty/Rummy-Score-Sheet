@@ -28,13 +28,19 @@ struct Rummy_Score_SheetApp: App {
         _gameState = State(initialValue: AppGameState(roomService: roomService, friendService: friendServiceImpl))
         _friendService = State(initialValue: friendServiceImpl)
         
+        #if DEBUG
         print("🚀 App launched with \(useMock ? "Mock" : "Firebase") Services")
+        #endif
     }
 
     var body: some Scene {
         WindowGroup {
-            AuthGateView(gameState: gameState, friendService: friendService)
-                .preferredColorScheme(.dark)
+            ZStack(alignment: .top) {
+                AuthGateView(gameState: gameState, friendService: friendService)
+                    .preferredColorScheme(.dark)
+                
+                OfflineBannerView()
+            }
         }
     }
 }

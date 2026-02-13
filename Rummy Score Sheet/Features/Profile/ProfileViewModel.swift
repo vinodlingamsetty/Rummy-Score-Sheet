@@ -45,9 +45,15 @@ class ProfileViewModel {
         Auth.auth().currentUser?.isAnonymous ?? true
     }
     
+    private let friendService: FriendService
+    private let historyService: GameHistoryService
+    
     // MARK: - Initialization
     
-    init() {
+    init(friendService: FriendService = MockFriendService(), historyService: GameHistoryService = GameHistoryService()) {
+        self.friendService = friendService
+        self.historyService = historyService
+        
         // Load settings from UserDefaults (false if never set)
         self.notificationsEnabled = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.notificationsEnabled)
         self.hapticsEnabled = UserDefaults.standard.bool(forKey: AppConstants.UserDefaultsKeys.hapticsEnabled)
@@ -70,18 +76,46 @@ class ProfileViewModel {
         }
         
         // Create profile from Firebase Auth
-        let displayName = await FirebaseConfig.getUserDisplayName()
+        let displayName = FirebaseConfig.getUserDisplayName()
         
-        userProfile = UserProfile(
+        var profile = UserProfile(
             userId: currentUser.uid,
             displayName: displayName,
             email: currentUser.email,
             phoneNumber: currentUser.phoneNumber
         )
         
-        // TODO: Load game statistics from Firestore
-        // For now, use default values (0)
+        // Load statistics
+        do {
+            // 1. Fetch recent games to estimate win rate
+            let games = try await historyService.fetchUserGameHistory(limit: 50)
+            let played = games.count
+            let won = games.filter { $0.winnerId == currentUser.uid }.count
+            
+            profile.totalGamesPlayed = played
+            profile.totalGamesWon = won
+            
+            // 2. Fetch friends to calculate net balance
+            let friends = try await friendService.fetchFriends()
+            // Net balance is the sum of all friend balances (positive = they owe me, negative = I owe them)
+            // UserProfile.netBalance is calculated as (earned - lost).
+            // To make netBalance match sum(friends.balance), we can set:
+            // earned = sum(positive balances)
+            // lost = sum(negative balances)
+            
+            let positiveBalance = friends.filter { $0.balance > 0 }.reduce(0) { $0 + $1.balance }
+            let negativeBalance = friends.filter { $0.balance < 0 }.reduce(0) { $0 + abs($1.balance) }
+            
+            profile.totalPointsEarned = positiveBalance
+            profile.totalPointsLost = negativeBalance
+            
+        } catch {
+            #if DEBUG
+            print("⚠️ Failed to load stats: \(error.localizedDescription)")
+            #endif
+        }
         
+        userProfile = profile
         isLoading = false
     }
     

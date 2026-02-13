@@ -47,7 +47,7 @@ struct MainTabView: View {
                 .tabItem { Label("Rules", systemImage: AppTab.rules.icon) }
                 .tag(AppTab.rules)
 
-            ProfileView()
+            ProfileView(friendService: friendService)
                 .tabItem { Label("Profile", systemImage: AppTab.profile.icon) }
                 .tag(AppTab.profile)
         }
@@ -67,35 +67,29 @@ private struct GameTabContent: View {
     @Bindable var gameState: AppGameState
 
     var body: some View {
-        if let room = gameState.currentRoom {
-            if room.isCompleted {
-                WinnerDeclarationView(game: room) {
+        switch gameState.activeGameScreen {
+        case .summary(let room):
+            WinnerDeclarationView(game: room) {
+                gameState.leaveGame()
+            }
+        case .playing(let viewModel):
+            GameView(
+                viewModel: viewModel,
+                onLeaveGame: {
                     gameState.leaveGame()
                 }
-            } else if let viewModel = gameState.activeGameViewModel {
-                GameView(
-                    viewModel: viewModel,
-                    onLeaveGame: {
-                        gameState.leaveGame()
-                    }
-                )
-            } else {
-                GameLobbyView(
-                    viewModel: GameLobbyViewModel(
-                        room: room,
-                        currentUserId: gameState.currentUserId,
-                        onRoomChange: { gameState.updateRoom($0) },
-                        onSetReady: { gameState.setReady($0) }
-                    ),
-                    onStartGame: {
-                        gameState.startGame()
-                    },
-                    onLeave: {
-                        gameState.leaveGame()
-                    }
-                )
-            }
-        } else {
+            )
+        case .lobby(let viewModel):
+            GameLobbyView(
+                viewModel: viewModel,
+                onStartGame: {
+                    gameState.startGame()
+                },
+                onLeave: {
+                    gameState.leaveGame()
+                }
+            )
+        case .none:
             TabPlaceholderView(title: "Game")
         }
     }

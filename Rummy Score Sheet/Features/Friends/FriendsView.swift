@@ -15,7 +15,7 @@ struct FriendsView: View {
     init(friendService: FriendService = MockFriendService(), selectedTab: Binding<AppTab> = .constant(.friends)) {
         self.friendService = friendService
         self._selectedTab = selectedTab
-        _viewModel = State(initialValue: FriendsViewModel(friendService: friendService))
+        _viewModel = State(initialValue: FriendsViewModel(friendService: friendService, historyService: GameHistoryService()))
     }
     
     var body: some View {

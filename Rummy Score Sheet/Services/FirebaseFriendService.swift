@@ -14,8 +14,8 @@ import FirebaseFunctions
 actor FirebaseFriendService: FriendService {
     
     private let db = Firestore.firestore()
-    private let friendsCollection = "friends"
-    private let settlementsCollection = "settlements"
+    private let friendsCollection = AppConstants.Firestore.friends
+    private let settlementsCollection = AppConstants.Firestore.settlements
     
     // MARK: - FriendService Protocol
     
@@ -166,7 +166,7 @@ actor FirebaseFriendService: FriendService {
         // Ensure user is authenticated
         await FirebaseConfig.ensureAuthenticated()
         
-        guard Auth.auth().currentUser != nil else {
+        guard let currentUser = Auth.auth().currentUser else {
             throw NSError(domain: "FirebaseFriendService", code: 401, userInfo: [NSLocalizedDescriptionKey: "Not authenticated"])
         }
         
@@ -174,19 +174,31 @@ actor FirebaseFriendService: FriendService {
         let friendshipId = id
         // We need the other user's ID for the nudge
         let doc = try await db.collection(friendsCollection).document(friendshipId).getDocument()
-        let friendship = try doc.data(as: Friendship.self)
-        let currentUserId = Auth.auth().currentUser?.uid ?? ""
-        let friendUserId = (currentUserId == friendship.userId1) ? friendship.userId2 : friendship.userId1
         
-        let senderName = await FirebaseConfig.getUserDisplayName()
+        guard doc.exists, let friendship = try? doc.data(as: Friendship.self) else {
+             throw NSError(domain: "FirebaseFriendService", code: 404, userInfo: [NSLocalizedDescriptionKey: "Friendship not found"])
+        }
+        
+        let friendUserId = (currentUser.uid == friendship.userId1) ? friendship.userId2 : friendship.userId1
+        
+        // Get sender's display name (synchronous call)
+        let senderName = FirebaseConfig.getUserDisplayName()
         
         let data: [String: Any] = [
             "friendUserId": friendUserId,
             "senderName": senderName
         ]
         
+        // Call Cloud Function
         let result = try await Functions.functions().httpsCallable("sendNudge").call(data)
-        _ = result.data
+        
+        // Check result
+        if let response = result.data as? [String: Any],
+           let sent = response["sent"] as? Bool,
+           sent == false {
+            let reason = response["reason"] as? String ?? "Unknown error"
+            throw NSError(domain: "FirebaseFriendService", code: 500, userInfo: [NSLocalizedDescriptionKey: "Failed to send nudge: \(reason)"])
+        }
     }
     
     func searchFriends(query: String) async throws -> [Friend] {
@@ -217,7 +229,9 @@ actor FirebaseFriendService: FriendService {
                             let friends = try await self.fetchFriends()
                             continuation.yield(friends)
                         } catch {
+                            #if DEBUG
                             print("Error fetching friends: \(error)")
+                            #endif
                         }
                     }
                 }
@@ -235,7 +249,9 @@ actor FirebaseFriendService: FriendService {
                             let friends = try await self.fetchFriends()
                             continuation.yield(friends)
                         } catch {
+                            #if DEBUG
                             print("Error fetching friends: \(error)")
+                            #endif
                         }
                     }
                 }

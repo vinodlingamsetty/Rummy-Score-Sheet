@@ -9,7 +9,11 @@ import SwiftUI
 import UIKit
 
 struct ProfileView: View {
-    @State private var viewModel = ProfileViewModel()
+    @State private var viewModel: ProfileViewModel
+    
+    init(friendService: FriendService = MockFriendService()) {
+        _viewModel = State(initialValue: ProfileViewModel(friendService: friendService))
+    }
     
     var body: some View {
         NavigationStack {
