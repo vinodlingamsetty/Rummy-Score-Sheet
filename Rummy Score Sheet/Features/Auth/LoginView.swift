@@ -52,6 +52,8 @@ struct LoginView: View {
                     }
                     .padding(.bottom, AppSpacing._4)
                     
+                    // Email/OTP Disabled for v1.0
+                    /*
                     if !isOtpSent {
                         emailEntrySection
                     } else {
@@ -62,6 +64,10 @@ struct LoginView: View {
                         divider
                         socialSignInSection
                     }
+                    */
+                    
+                    // Only show social sign-in
+                    socialSignInSection
                     
                     Spacer(minLength: AppSpacing._12)
                 }

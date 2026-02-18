@@ -118,6 +118,9 @@ Plan for addressing Apple Developer and App Store guidelines before submission. 
 
 ## Backlog (Discovered Issues)
 
+### Features to Implement
+- [ ] **Email OTP Login Backend**: Implement `sendEmailOTP` and `verifyEmailOTP` Cloud Functions using a provider like SendGrid or Gmail (Nodemailer). Re-enable the UI in `LoginView.swift`.
+
 ### Game Flow & UX
 
 - [x] **Elimination alert**: When a player hits the point limit and gets eliminated, show an alert with a message that they were eliminated (instead of abruptly kicking them out).

@@ -90,7 +90,15 @@ class ProfileViewModel {
             // 1. Fetch recent games to estimate win rate
             let games = try await historyService.fetchUserGameHistory(limit: 50)
             let played = games.count
-            let won = games.filter { $0.winnerId == currentUser.uid }.count
+            
+            // Calculate wins by checking if the winner's Firebase UID matches the current user
+            let won = games.filter { game in
+                guard let winnerId = game.winnerId,
+                      let winner = game.players.first(where: { $0.id.uuidString == winnerId }) else {
+                    return false
+                }
+                return winner.userId == currentUser.uid
+            }.count
             
             profile.totalGamesPlayed = played
             profile.totalGamesWon = won
